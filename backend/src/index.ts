@@ -1,0 +1,59 @@
+import express from "express";
+import cors from "cors";
+import mongoose from "mongoose";
+import cookieParser from "cookie-parser";
+import path from "path";
+import { v2 as cloudinary } from "cloudinary";
+import userRoutes from "./routes/users";
+import authRoutes from "./routes/auth";
+import petRoutes from "./routes/pet";
+import ownerRoutes from "./routes/owner";
+import hotelRoutes from "./routes/hotels";
+import bookingRoutes from "./routes/my-bookings";
+import breedRoutes from "./routes/breed";
+import breedTypeRoutes from "./routes/breedType";
+import medicalRecordRoutes from "./routes/medicrecord";
+
+import vetRoutes from "./routes/vet";
+import Stripe from "stripe";
+import "dotenv/config";
+
+const stripe = new Stripe(process.env.STRIPE_API_KEY as string);
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+mongoose.connect(process.env.MONGODB_CONNECTION_STRING as string);
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  credentials: true,
+}));
+
+app.use(cookieParser());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Handle OPTIONS requests
+app.options('*', cors());
+
+// Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/hotels", hotelRoutes);
+app.use("/api/my-bookings", bookingRoutes);
+app.use("/api/owner", ownerRoutes);
+app.use("/api/pet", petRoutes);
+app.use("/api/breed", breedRoutes);
+app.use("/api/breedType", breedTypeRoutes);
+app.use("/api/vet", vetRoutes);
+app.use('/api/medical-records', medicalRecordRoutes);
+
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
