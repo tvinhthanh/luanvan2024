@@ -15,8 +15,7 @@ const ManagerPet: React.FC = () => {
 
   // Fetching the list of breed types
   const { data: breedTypes, error: breedTypesError, isLoading: breedTypesLoading } = useQuery<BreedType[], Error>("fetchBreedTypes", apiClient.fetchBreedType);
-console.log(owners)
-console.log(breedTypes)
+
   // Mutation for deleting a pet
   const deletePetMutation = useMutation(apiClient.deletePet, {
     onSuccess: () => {
