@@ -522,12 +522,21 @@ export const fetchBreeds = async () => {
   return response.json();
 };
 
-export const addBreed = async (breedData: FormData) => {
-  const response = await fetch(`${API_BASE_URL}/api/breed`, {
+export const addBreed = async (breedData: string, img: string, id_type:string) => {
+  let breed = {
+    name : breedData,
+    img :img,
+    id_type : id_type
+  }
+  const response = await fetch(`${API_BASE_URL}/api/breed`,
+   {
     method: 'POST',
     credentials: 'include',
-    body: breedData,
-  });
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(breed)
+  }, );
 
   if (!response.ok) {
     throw new Error('Failed to add breed');
@@ -536,11 +545,21 @@ export const addBreed = async (breedData: FormData) => {
   return response.json();
 };
 
-export const updateBreed = async (breedId: string, breedData: FormData) => {
+export const updateBreed = async (breedId: string, breedData: string, img: string, id_type:string) => {
+  let breed = 
+  {
+    id : breedId,
+    name:breedData,
+    img : img,
+    id_type : id_type   
+  }
     const response = await fetch(`${API_BASE_URL}/api/breed/${breedId}`, {
       method: 'PUT',
       credentials: 'include',
-      body: breedData,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(breed),
     });
 
     if (!response.ok) {
@@ -550,6 +569,21 @@ export const updateBreed = async (breedId: string, breedData: FormData) => {
   return response.json();
 };
 
+export const fetchBreedById = async (breedId: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/breed/${breedId}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch breed');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching breed by id:', error);
+    throw error; // Rethrow the error for the caller to handle
+  }
+};
 export const deleteBreed = async (breedId: string) => {
   const response = await fetch(`${API_BASE_URL}/api/breed/${breedId}`, {
     method: 'DELETE',
@@ -576,7 +610,6 @@ export const fetchBreedType = async () => {
   const data = await response.json();
   return data; // The response should already contain the mapped breed types with their breeds
 };
-
 export const addBreedType = async (breedData: string) => {
   alert("Add "+breedData+" to DB success");
   let breedType = {

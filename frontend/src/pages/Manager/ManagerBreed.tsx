@@ -1,52 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import * as apiClient from '../../api-client';
-import { Breed } from '../../../../backend/src/shared/types';
-
-interface FormDataState {
-  name: string;
-  img: string;
-}
+import { Breed, BreedType } from '../../../../backend/src/shared/types';
 
 const ManagerBreed: React.FC = () => {
   const [breeds, setBreeds] = useState<Breed[]>([]);
-  const [formDataState, setFormDataState] = useState<FormDataState>({ name: '', img: '' });
-  const [mode, setMode] = useState<'add' | 'update' | 'view'>('view');
-  const [selectedBreedId, setSelectedBreedId] = useState<string | null>(null);
+  const [breedTypes, setBreedTypes] = useState<BreedType[]>([]);
   const [filterText, setFilterText] = useState<string>('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchBreeds();
+    fetchBreedTypes();
   }, []);
 
   const fetchBreeds = async () => {
     try {
-      const breedTypes: Breed[] = await apiClient.fetchBreeds();
-      setBreeds(breedTypes);
+      const breedData: Breed[] = await apiClient.fetchBreeds();
+      setBreeds(breedData);
     } catch (error) {
-      console.error('Error fetching breed names:', error);
+      console.error('Error fetching breeds:', error);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const fetchBreedTypes = async () => {
     try {
-      const formData = new FormData();
-      formData.append('name', formDataState.name);
-      formData.append('imageUrl', formDataState.img);
-
-      if (mode === 'add') {
-        await apiClient.addBreed(formData);
-      } else if (mode === 'update' && selectedBreedId) {
-        await apiClient.updateBreed(selectedBreedId, formData);
-        setMode('view');
-        setSelectedBreedId(null);
-      }
-
-      fetchBreeds();
-      setFormDataState({ name: '', img: '' });
+      const breedTypesData: BreedType[] = await apiClient.fetchBreedType();
+      setBreedTypes(breedTypesData);
     } catch (error) {
-      console.error('Error adding/updating breed:', error);
+      console.error('Error fetching breed types:', error);
     }
   };
 
@@ -59,23 +41,15 @@ const ManagerBreed: React.FC = () => {
     }
   };
 
-  const handleUpdate = (breedId: string, breedName: string, breedImg: string) => {
-    setMode('update');
-    setSelectedBreedId(breedId);
-    setFormDataState({ name: breedName, img: breedImg });
-  };
-
-  const handleViewDetails = (breedId: string) => {
-    setMode('view');
-    setSelectedBreedId(breedId);
-    // Fetch breed details and setFormDataState based on the breedId if needed
-  };
-
   const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFilterText(e.target.value);
   };
 
-  // Filter breeds based on filterText
+  const getBreedTypeName = (id_type: string | undefined): string => {
+    const breedType = breedTypes.find(type => type._id === id_type);
+    return breedType ? breedType.name : '';
+  };
+
   const filteredBreeds = breeds.filter(breed =>
     breed.name.toLowerCase().includes(filterText.toLowerCase())
   );
@@ -91,7 +65,7 @@ const ManagerBreed: React.FC = () => {
           Quay lại Trang Chính
         </Link>
       </div>
-      <form onSubmit={handleSubmit} className="flex items-center mb-4">
+      <div className="flex justify-between items-center mb-4">
         <input
           type="text"
           placeholder="Tìm kiếm giống..."
@@ -99,53 +73,25 @@ const ManagerBreed: React.FC = () => {
           onChange={handleFilterChange}
           className="border border-gray-300 rounded-md p-2 mr-2"
         />
-        {mode === 'add' && (
-          <>
-            <input
-              type="text"
-              placeholder="Tên giống"
-              value={formDataState.name}
-              onChange={(e) => setFormDataState({ ...formDataState, name: e.target.value })}
-              className="border border-gray-300 rounded-md p-2 mr-2"
-            />
-            <input
-              type="text"
-              placeholder="Link ảnh"
-              value={formDataState.img}
-              onChange={(e) => setFormDataState({ ...formDataState, img: e.target.value })}
-              className="border border-gray-300 rounded-md p-2 mr-2"
-            />
-          </>
-        )}
-        <button type="submit" className="py-2 px-4 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 focus:outline-none focus:bg-blue-600">
-          {mode === 'add' ? 'Thêm Giống' : 'Cập nhật Giống'}
+        <button
+          onClick={() => navigate('/breed-form')}
+          className="py-2 px-4 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+        >
+          + Thêm Giống
         </button>
-      </form>
+      </div>
       <ul>
         {filteredBreeds.map((breed) => (
           <li key={breed._id} className="py-2 px-4 border-b border-gray-300 flex justify-between items-center">
             <span>{breed.name}</span>
             <div>
-              {selectedBreedId === breed._id ? (
-                <>
-                  <img src={breed.img} alt={breed.name} className="w-20 h-20 object-cover full" />
-                </>
-              ) : (
-                <>
-                  <button
-                    onClick={() => handleViewDetails(breed._id)}
-                    className="mr-2 py-1 px-2 bg-yellow-500 text-white rounded-lg text-sm font-semibold hover:bg-yellow-600 focus:outline-none focus:bg-yellow-600"
-                  >
-                    Chi tiết
-                  </button>
-                  <button
-                    onClick={() => handleUpdate(breed._id, breed.name, breed.img)}
-                    className="mr-2 py-1 px-2 bg-yellow-500 text-white rounded-lg text-sm font-semibold hover:bg-yellow-600 focus:outline-none focus:bg-yellow-600"
-                  >
-                    Sửa
-                  </button>
-                </>
-              )}
+              <span className="mr-2">{getBreedTypeName(breed.id_type)}</span>
+              <button
+                onClick={() => navigate(`/breed-form/${breed._id}`)}
+                className="mr-2 py-1 px-2 bg-yellow-500 text-white rounded-lg text-sm font-semibold hover:bg-yellow-600 focus:outline-none focus:bg-yellow-600"
+              >
+                Sửa
+              </button>
               <button
                 onClick={() => handleDelete(breed._id)}
                 className="py-1 px-2 bg-red-500 text-white rounded-lg text-sm font-semibold hover:bg-red-600 focus:outline-none focus:bg-red-600"

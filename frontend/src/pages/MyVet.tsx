@@ -7,7 +7,7 @@ const Vet: React.FC = () => {
       <div className="max-w-4xl w-full space-y-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           <Link
-            to="/manager-vet"
+            to="/my-vet2"
             className="block p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
           >
             <div className="flex items-center space-x-4">
@@ -24,7 +24,7 @@ const Vet: React.FC = () => {
           </Link>
 
           <Link
-            to="/manager-breed"
+            to="/manager-record"
             className="block p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
           >
             <div className="flex items-center space-x-4">

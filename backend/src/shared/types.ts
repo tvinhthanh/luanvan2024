@@ -113,6 +113,7 @@ export interface Breed{
   _id: string;
   name:  string;
   img: string;
+  id_type: string;
 }
 
 export interface MedicalRecord {

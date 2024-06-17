@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import * as apiClient from "../../api-client";
-import { PetType, OwnerType, BreedType } from "../../../../backend/src/shared/types"; // Ensure these types are defined properly
+import { PetType, OwnerType, BreedType } from "../../../../backend/src/shared/types";
 
 const ManagerPet: React.FC = () => {
   const queryClient = useQueryClient();
+  const [selectedOwner, setSelectedOwner] = useState<string | null>(null);
 
   // Fetching the list of pets
   const { data: pets, error: petsError, isLoading: petsLoading } = useQuery<PetType[], Error>("fetchPets", apiClient.fetchpet);
@@ -14,7 +15,8 @@ const ManagerPet: React.FC = () => {
 
   // Fetching the list of breed types
   const { data: breedTypes, error: breedTypesError, isLoading: breedTypesLoading } = useQuery<BreedType[], Error>("fetchBreedTypes", apiClient.fetchBreedType);
-
+console.log(owners)
+console.log(breedTypes)
   // Mutation for deleting a pet
   const deletePetMutation = useMutation(apiClient.deletePet, {
     onSuccess: () => {
@@ -25,6 +27,12 @@ const ManagerPet: React.FC = () => {
   // Handling pet delete
   const handleDelete = (petId: string) => {
     deletePetMutation.mutate(petId);
+  };
+
+  // Handle owner selection change
+  const handleOwnerChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const ownerId = event.target.value;
+    setSelectedOwner(ownerId !== "" ? ownerId : null);
   };
 
   // Display loading state
@@ -56,27 +64,54 @@ const ManagerPet: React.FC = () => {
   breedTypes?.forEach((breed) => {
     breedMap.set(breed._id, breed.name);
   });
+  console.log(breedMap)
+  console.log(ownerMap)
+  
+  // Filter pets by selected owner
+  const filteredPets = selectedOwner ? pets?.filter((pet) => pet.owner_id === selectedOwner) : pets;
 
   // Display the form and list of pets
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Pet Management</h1>
+      {/* Owner dropdown */}
+      <div className="mb-4">
+        <label htmlFor="ownerSelect" className="block text-sm font-medium text-gray-700">
+          Select Owner:
+        </label>
+        <select
+          id="ownerSelect"
+          name="ownerSelect"
+          className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          onChange={handleOwnerChange}
+          value={selectedOwner || ""}
+        >
+          <option value="">-- Select an Owner --</option>
+          {owners?.map((owner) => (
+            <option key={owner._id} value={owner._id}>
+              {owner._id} - {owner.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* Table displaying pets */}
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Age</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Weigh</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Breed</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Weight</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Breed Type</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sex</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Breed Type</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Breed</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Image</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {pets?.map((pet: PetType) => (
+          {filteredPets?.map((pet: PetType) => (
             <tr key={pet._id}>
               <td className="px-6 py-4 whitespace-nowrap">{pet.name}</td>
               <td className="px-6 py-4 whitespace-nowrap">{pet.age}</td>

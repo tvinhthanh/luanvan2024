@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import MedicalRecord from "../models/MedicalRecord";
+import MedicalRecord from "../models/medicalRecord";
 
 export const getAllMedicalRecords = async (req: Request, res: Response) => {
   try {

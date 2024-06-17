@@ -6,8 +6,8 @@ const petSchema = new mongoose.Schema({
   name: { type: String, required: true },
   age: { type: String, required: true },
   weigh: { type: String, required: true },
-  breed_id: { type: mongoose.Schema.Types.ObjectId, ref: 'BreedType', required: true },
-  owner_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Owner', required: true },
+  breed_id: { type: String, ref: 'BreedType', required: true },
+  owner_id: { type: String, ref: 'Owner', required: true },
   sex: { type: String, required: true },
   breed_type: { type: String, required: true },
   img: { type: String, required: true }

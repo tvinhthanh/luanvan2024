@@ -1,76 +1,85 @@
 import express from "express";
 import Breed from "../models/breed";
-import { addBreed, deleteBreed, getAllBreeds, updateBreed } from "../controller/breedController";
 
 const router = express.Router();
+
 router.get("/", async (req, res) => {
-    try {
-      const allBreeds = await Breed.find({});
-      res.status(200).json(allBreeds);
-    } catch (error) {
-      console.error("Error fetching breeds:", error);
-      res.status(500).json({ error: "Internal server error" });
+  try {
+      const breeds = await Breed.find();
+      res.status(200).json(breeds);
+  } catch (error) {
+      console.error('Error fetching breeds:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+});
+router.get('/:id', async (req, res) => {
+  try {
+    const breed = await Breed.findById(req.params.id);
+    if (!breed) {
+      return res.status(404).json({ error: 'Breed not found' });
     }
-  });
+    res.status(200).json(breed);
+  } catch (error) {
+    console.error('Error fetching breed by ID:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
-  router.post("/add", async (req, res) => {
-    const { _id, name, img } = req.body;
-    try {
-      const existingBreed = await Breed.findOne({ _id });
-      if (existingBreed) {
-        return res.status(400).json({ error: "Breed already exists" });
-      }
-  
-      const newBreed = new Breed({ _id, name, img });
-      await newBreed.save();
-  
-      res.status(201).json({ message: "Adding breed successful" });
-    } catch (error) {
-      console.error("Error adding breed:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  });
-  // Endpoint xóa loại thú cưng
-router.delete("/delete/:id", async (req, res) => {
-    const breedId = req.params.id;
-    try {
-      const existingBreed = await Breed.findById(breedId);
+router.post("/", async (req, res) => {
+  // try {
+  //   const { name, img, id_type } = req.body;
+  //   if (!name || !img || !id_type) {
+  //     return res.status(400).json({ error: 'Name, img, and id_type are required fields' });
+  //   }
+  //   const newBreed = new Breed({
+  //     name,
+  //     img,
+  //     id_type,
+  //   });
+  //   const savedBreed = await newBreed.save();
+  //   res.status(201).json(savedBreed);
+  // } catch (error) {
+  //   console.error('Error adding breed:', error);
+  //   res.status(500).json({ error: 'Error adding breed' });
+  // }
+  try {
+    const { name, img, id_type } = req.body;
+    const maxBreed = await Breed.findOne().sort({ _id: -1 });
+    const newId = maxBreed?._id ? maxBreed._id + 1 : 1;
+    const newBreedType = new Breed({ _id: newId, name, img, id_type });
+    await newBreedType.save(); 
+    res.status(201).json(JSON.stringify(newBreedType));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  } 
+});
+router.put("/:id", async (req, res) => {
+  try {
+      const { name, img } = req.body;
+      const breedId = req.params.id;
+      const existingBreed = await Breed.findByIdAndUpdate(breedId, { name, img }, { new: true });
       if (!existingBreed) {
-        return res.status(404).json({ error: "Breed not found" });
+          return res.status(404).json({ error: 'Breed not found' });
       }
-  
-      await Breed.deleteOne({ _id: breedId });
-  
-      res.status(200).json({ message: "Deleting breed successful" });
-    } catch (error) {
-      console.error("Error deleting breed:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  });
-  
-  // Endpoint cập nhật loại thú cưng
-  router.put("/update/:id", async (req, res) => {
-    const { name, img } = req.body;
-    const breedId = req.params.id;
-    try {
-      const existingBreed = await Breed.findById(breedId);
+      res.status(200).json({ message: 'Breed updated successfully', breed: existingBreed });
+  } catch (error) {
+      console.error('Error updating breed:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+});
+router.delete("/:id", async (req, res) => {
+  try {
+      const breedId = req.params.id;
+      const existingBreed = await Breed.findByIdAndDelete(breedId);
       if (!existingBreed) {
-        return res.status(404).json({ error: "Breed not found" });
+          return res.status(404).json({ error: 'Breed not found' });
       }
-  
-      existingBreed.name = name;
-      existingBreed.img = img;
-      await existingBreed.save();
-  
-      res.status(200).json({ message: "Updating breed successful" });
-    } catch (error) {
-      console.error("Error updating breed:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  });
+      res.status(200).json({ message: 'Breed deleted successfully' });
+  } catch (error) {
+      console.error('Error deleting breed:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
-  router.get("/", getAllBreeds);
-  router.post("/", addBreed);
-  router.put("/:id", updateBreed);
-  router.delete("/:id", deleteBreed);  
-  export default router;
+export default router;
