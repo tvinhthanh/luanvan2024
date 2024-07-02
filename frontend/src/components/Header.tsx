@@ -4,7 +4,6 @@ import SignOutButton from "./SignOutButton";
 
 const Header = () => {
   const { isLoggedIn, userRole } = useAppContext(); // Sử dụng userRole từ AppContext
-
   return (
     <div className="bg-blue-800 py-6">
       <div className="container mx-auto flex justify-between">
@@ -26,6 +25,7 @@ const Header = () => {
                 <></>
               )
             }
+            <span></span>
                 <Link
                   className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
                   to="/my-vet"

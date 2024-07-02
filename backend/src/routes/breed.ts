@@ -1,5 +1,6 @@
 import express from "express";
 import Breed from "../models/breed";
+import BreedType from "../models/breedType";
 
 const router = express.Router();
 
@@ -26,48 +27,65 @@ router.get('/:id', async (req, res) => {
 });
 
 router.post("/", async (req, res) => {
-  // try {
-  //   const { name, img, id_type } = req.body;
-  //   if (!name || !img || !id_type) {
-  //     return res.status(400).json({ error: 'Name, img, and id_type are required fields' });
-  //   }
-  //   const newBreed = new Breed({
-  //     name,
-  //     img,
-  //     id_type,
-  //   });
-  //   const savedBreed = await newBreed.save();
-  //   res.status(201).json(savedBreed);
-  // } catch (error) {
-  //   console.error('Error adding breed:', error);
-  //   res.status(500).json({ error: 'Error adding breed' });
-  // }
   try {
     const { name, img, id_type } = req.body;
     const maxBreed = await Breed.findOne().sort({ _id: -1 });
     const newId = maxBreed?._id ? maxBreed._id + 1 : 1;
     const newBreedType = new Breed({ _id: newId, name, img, id_type });
-    await newBreedType.save(); 
+    const savedBreed = await newBreedType.save();
+    await BreedType.findByIdAndUpdate(id_type, { $push: { array: savedBreed._id } });
+
     res.status(201).json(JSON.stringify(newBreedType));
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Internal server error" });
   } 
 });
+
 router.put("/:id", async (req, res) => {
+  const breedId = req.params.id;
+  const { name, img, id_type } = req.body;
+
   try {
-      const { name, img } = req.body;
-      const breedId = req.params.id;
-      const existingBreed = await Breed.findByIdAndUpdate(breedId, { name, img }, { new: true });
-      if (!existingBreed) {
-          return res.status(404).json({ error: 'Breed not found' });
-      }
-      res.status(200).json({ message: 'Breed updated successfully', breed: existingBreed });
+    // Tìm thông tin Breed cũ
+    const existingBreed = await Breed.findById(breedId);
+    if (!existingBreed) {
+      return res.status(404).json({ error: 'Breed not found' });
+    }
+
+    // Xoá breedId khỏi array của BreedType cũ (nếu có)
+    if (existingBreed.id_type !== id_type) {
+      await BreedType.updateOne(
+        { _id: existingBreed.id_type },
+        { $pull: { array: breedId } }
+      );
+    }
+
+    // Cập nhật hoặc tạo mới Breed mới
+    const updatedBreed = await Breed.findByIdAndUpdate(
+      breedId,
+      { name, img, id_type },
+      { new: true }
+    );
+
+    if (!updatedBreed) {
+      return res.status(404).json({ error: 'Breed not found' });
+    }
+
+    // Thêm breedId vào array của BreedType mới
+    await BreedType.updateOne(
+      { _id: id_type },
+      { $addToSet: { array: breedId } }
+    );
+
+    // Trả về kết quả
+    res.status(200).json({ message: 'Breed updated successfully', breed: updatedBreed });
   } catch (error) {
-      console.error('Error updating breed:', error);
-      res.status(500).json({ error: 'Internal server error' });
+    console.error('Error updating breed:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 router.delete("/:id", async (req, res) => {
   try {
       const breedId = req.params.id;

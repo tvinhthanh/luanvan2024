@@ -39,7 +39,6 @@ router.post(
           expiresIn: "1d",
         }
       );
-
       res.cookie("auth_token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -56,7 +55,8 @@ router.post(
 router.get("/validate-token", verifyToken, (req: Request, res: Response) => {
   const token = req.cookies["auth_token"];
   let decode = jwt.verify(token, process.env.JWT_SECRET_KEY as string) as JwtPayload;
-  res.status(200).send({ userId: req.userId, isAdmin: decode.isAdmin });
+  res.status(200).send({ userId: req.userId, isAdmin: decode.isAdmin ,token});
+  // console.log(token);
 });
 
 router.post("/logout", (req: Request, res: Response) => {

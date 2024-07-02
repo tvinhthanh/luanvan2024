@@ -1,14 +1,17 @@
 import mongoose from "mongoose";
 
-const bookingSchema = new mongoose.Schema({
-  hotelId: { type: String, ref: "Hotel", required: true },
-  userId: { type: String, ref: "User", required: true },
-  customerName: { type: String, required: true },
-  checkIn: { type: Date, required: true },
-  checkOut: { type: Date, required: true },
-  status: { type: String, required: true },
-}, { timestamps: true });
+const bookingSchema = new mongoose.Schema(
+  {
+    vetId: { type: String, ref: "Vet", required: true },
+    ownerId: { type: String, ref: "Owner", required: true },
+    petId: { type: String, ref: "Pet", required: false },
+    phoneOwner: { type: String, required: true },
+    date: { type: Date, required: true },
+    status: { type: Number, required: true },
+  },
+  { timestamps: true }
+);
 
-const Booking = mongoose.model("Booking", bookingSchema);
+const Booking = mongoose.model("bookings", bookingSchema);
 
 export default Booking;

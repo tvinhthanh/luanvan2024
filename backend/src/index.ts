@@ -8,13 +8,16 @@ import userRoutes from "./routes/users";
 import authRoutes from "./routes/auth";
 import petRoutes from "./routes/pet";
 import ownerRoutes from "./routes/owner";
-import hotelRoutes from "./routes/hotels";
 import bookingRoutes from "./routes/my-bookings";
+import myVetRoutes from "./routes/my-vet";
 import breedRoutes from "./routes/breed";
 import breedTypeRoutes from "./routes/breedType";
 import medicalRecordRoutes from "./routes/medicrecord";
+import serviceRoutes from "./routes/service";
+import vetRoutes from "./routes/vet"
 
-import vetRoutes from "./routes/vet";
+
+// import vetRoutes from "./routes/vet";
 import Stripe from "stripe";
 import "dotenv/config";
 
@@ -45,14 +48,17 @@ app.options('*', cors());
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/hotels", hotelRoutes);
 app.use("/api/my-bookings", bookingRoutes);
+app.use("/api/my-vet", myVetRoutes);
 app.use("/api/owner", ownerRoutes);
 app.use("/api/pet", petRoutes);
 app.use("/api/breed", breedRoutes);
 app.use("/api/breedType", breedTypeRoutes);
 app.use("/api/vet", vetRoutes);
 app.use('/api/medical-records', medicalRecordRoutes);
+app.use('/api/service', serviceRoutes);
+// app.use('/api/medics', medicalRecordRoutes);
+// app.use('/api/service',serviceRoutes)
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

@@ -1,15 +1,15 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import * as apiClient from "../../api-client";
-import { VetType } from "../../../../backend/src/shared/types";
-import VetDetails from "../../../src/components/detail/vetDetail"; // Import VetDetails component
+import { VetCType } from "../../../../backend/src/shared/types";
+import VetDetails from "../../../src/components/detail/vetDetail"; // Adjust path as needed
 
 const ManagerVet: React.FC = () => {
   const queryClient = useQueryClient();
-  const [selectedVet, setSelectedVet] = useState<VetType | null>(null);
+  const [selectedVet, setSelectedVet] = useState<VetCType | null>(null);
 
   // Fetching the list of vets
-  const { data: vets, error, isLoading } = useQuery<VetType[], Error>("fetchVets", apiClient.fetchVet);
+  const { data: vets, error, isLoading } = useQuery<VetCType[], Error>("fetchVets", apiClient.fetchVet);
 
   // Mutation for deleting a vet
   const deleteVetMutation = useMutation(apiClient.deleteVet, {
@@ -20,7 +20,9 @@ const ManagerVet: React.FC = () => {
 
   // Handling vet delete
   const handleDelete = (vetId: string) => {
-    deleteVetMutation.mutate(vetId);
+    if (window.confirm("Are you sure you want to delete this vet?")) {
+      deleteVetMutation.mutate(vetId);
+    }
   };
 
   // Display loading state
@@ -42,14 +44,16 @@ const ManagerVet: React.FC = () => {
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specialty</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {vets?.map((vet: VetType) => (
-            <tr key={vet._id} onClick={() => setSelectedVet(vet)}>
+          {vets?.map((vet: VetCType) => (
+            <tr key={vet._id} onClick={() => setSelectedVet(vet)} className="cursor-pointer">
               <td className="px-6 py-4 whitespace-nowrap">{vet.name}</td>
-              <td className="px-6 py-4 whitespace-nowrap">{vet.service}</td>
+              <td className="px-6 py-4 whitespace-nowrap">{vet.specialty}</td>
+              <td className="px-6 py-4 whitespace-nowrap">{vet.lastUpdated ? new Date(vet.lastUpdated).toLocaleDateString() : 'N/A'}</td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <button
                   onClick={(e) => {

@@ -1,9 +1,8 @@
-import Vet from "../MyVet";
+import Vet from "../Vet-Manager/Vet/MyVet";
 
 const VetDash = () => {
   return (
     <div>
-      <h2>Vet Dashboard</h2>
         <Vet/>
     </div>
   );

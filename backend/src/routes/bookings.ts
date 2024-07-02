@@ -17,7 +17,7 @@ router.delete("/:id", verifyToken, deleteBooking);
 
 
 // Endpoint hiển thị sự kiện trong calendar
-router.get("/api/booking/showSchedule/:id", async (req, res) => {
+router.get("/booking/showSchedule/:id", async (req, res) => {
   const ownerId = req.params.id;
 
   try {
@@ -64,7 +64,7 @@ const getNextIdSchedule = async () => {
 };
 
 // Endpoint booking lịch hẹn
-router.post("/api/booking/addSchedule/", async (req, res) => {
+router.post("/booking/addSchedule/", async (req, res) => {
   try {
     const { owner_id, vet_id, pet_id, note, datetime } = req.body;
 
@@ -91,7 +91,7 @@ router.post("/api/booking/addSchedule/", async (req, res) => {
 });
 
 // Endpoint thêm một lịch hẹn từ vet_id
-router.post("/api/booking/addSchedule/:vet_id", async (req, res) => {
+router.post("/booking/addSchedule/:vet_id", async (req, res) => {
   try {
     const vet_id = req.params.vet_id; // Lấy vet_id từ URL params
     const { owner_id, pet_id, note, datetime } = req.body;
@@ -118,7 +118,7 @@ router.post("/api/booking/addSchedule/:vet_id", async (req, res) => {
 
 
 // Endpoint hiển thị toàn bộ lịch hẹn
-router.get("/api/booking/showAllSchedules", async (req, res) => {
+router.get("/booking/showAllSchedules", async (req, res) => {
   try {
     const allSchedules = await Schedule.find({}).lean(); // Sử dụng lean để chuyển kết quả sang đối tượng JavaScript đơn giản
 
@@ -146,7 +146,7 @@ router.get("/api/booking/showAllSchedules", async (req, res) => {
 });
 
 // Endpoint hiển thị toàn bộ lịch hẹn dựa trên vet_id
-router.get("/api/booking/showAllSchedules/:vet_id", async (req, res) => {
+router.get("/booking/showAllSchedules/:vet_id", async (req, res) => {
   const vetId = req.params.vet_id;
   try {
     const allSchedules = await Schedule.find({ vet_id: vetId }).lean();
@@ -174,7 +174,7 @@ router.get("/api/booking/showAllSchedules/:vet_id", async (req, res) => {
 
 
 // Endpoint hiển thị chi tiết thông tin pet dựa trên vet_id, pet_id, schedule_id
-router.get("/api/booking/showPetDetail/:vet_id/:pet_id/:schedule_id", async (req, res) => {
+router.get("/booking/showPetDetail/:vet_id/:pet_id/:schedule_id", async (req, res) => {
   const { vet_id, pet_id, schedule_id } = req.params;
 
   try {
@@ -223,7 +223,7 @@ router.get("/api/booking/showPetDetail/:vet_id/:pet_id/:schedule_id", async (req
 
 
 // Endpoint hiển thị chi tiết thông tin pet dựa trên vet_id, pet_id
-router.get("/api/booking/showPetDetail/:vet_id/:pet_id", async (req, res) => {
+router.get("/booking/showPetDetail/:vet_id/:pet_id", async (req, res) => {
   const { vet_id, pet_id } = req.params;
 
   try {
@@ -271,7 +271,7 @@ router.get("/api/booking/showPetDetail/:vet_id/:pet_id", async (req, res) => {
 });
 
 // Endpoint cập nhật status và note lịch dựa vào scheduleId
-router.put("/api/booking/updateSchedule/:scheduleId", async (req, res) => {
+router.put("/booking/updateSchedule/:scheduleId", async (req, res) => {
   const { scheduleId } = req.params;
   const { note, status } = req.body;
 

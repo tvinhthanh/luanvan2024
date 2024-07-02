@@ -7,27 +7,29 @@ import {
 import Layout from "./layouts/Layout";
 import Register from "./pages/Register";
 import SignIn from "./pages/SignIn";
-import AddHotel from "./pages/AddHotel";
 import { useAppContext } from "./contexts/AppContext";
-import MyHotels from "./pages/MyHotels";
-import EditHotel from "./pages/EditHotel";
-import Detail from "./pages/Detail";
-import Booking from "./pages/Booking";
-import MyBookings from "./pages/MyBookings";
+import MyBookings from "./pages/Vet-Manager/Booking/MyBookings";
 import Home from "./pages/Home";
 import ManagerUser from "./pages/Manager/ManagerUser";
-import ManagerBookingOfMyHotel from "./pages/Manager/ManagerBookingOfMyHotel";
+// import ManagerBookingOfMyHotel from "./pages/Vet-Manager/Booking/ManagerBooking";
 import ManagerOwner from "./pages/Manager/ManagerOwner";
 import ManagerPet from "./pages/Manager/ManagerPet";
 import Pet from "./pages/Pet";
 import ManagerBreed from "./pages/Manager/ManagerBreed";
 import ManagerBreedType from "./pages/Manager/ManagerBreedTypes";
-import MyVets from "./pages/MyVet";
+import MyVets from "./pages/Vet-Manager/Vet/MyVet";
 import ManagerStatistics from "./pages/Manager/ManagerStatistics";
 import ManagerVet from "./pages/Manager/ManagerVet";
 import VetDash from "./pages/Manager/VetDash";
 import BreedForm from "./forms/BreedForm";
-
+import AddVet from "./pages/Vet-Manager/Vet/AddVet";
+import ManagerService from "./pages/Vet-Manager/Service/ManagerService";
+import MyVetInfo from "./pages/Vet-Manager/Vet/VetInform";
+import EditVet from "./pages/Vet-Manager/Vet/EditVet";
+// import ManagerBookingOfMyVet from "./pages/Vet-Manager/Booking/ManagerBooking";
+import ManagerMedic from "./pages/Vet-Manager/MedicalRecord/ManagerMedic";
+import ServicesList from "./pages/Vet-Manager/Service/ManagerService";
+import AddService from "./pages/Vet-Manager/Service/AddService";
 const App = () => {
   const { isLoggedIn, userRole } = useAppContext();
   return (
@@ -39,15 +41,6 @@ const App = () => {
             <Layout>
               {" "}
               <Home />{" "}
-            </Layout>
-          }
-        />
-        <Route
-          path="/detail/:hotelId"
-          element={
-            <Layout>
-              {" "}
-              <Detail />{" "}
             </Layout>
           }
         />
@@ -71,35 +64,35 @@ const App = () => {
         {isLoggedIn && (
           <>
             <Route
-              path="/hotel/:hotelId/booking"
+              path="/my-booking"
               element={
                 <Layout>
-                  <Booking />
+                  <MyBookings />
                 </Layout>
               }
             />
 
             <Route
-              path="/add-hotel"
+              path="/add-vet"
               element={
                 <Layout>
-                  <AddHotel />
+                  <AddVet />
                 </Layout>
               }
             />
             <Route
-              path="/edit-hotel/:hotelId"
+              path="/edit-vet/:vetId"
               element={
                 <Layout>
-                  <EditHotel />
+                  <EditVet />
                 </Layout>
               }
             />
-            <Route
-              path="/my-vet2"
+             <Route
+              path="/medical-record"
               element={
                 <Layout>
-                  <MyHotels />
+                  <ManagerMedic />
                 </Layout>
               }
             />
@@ -107,7 +100,23 @@ const App = () => {
               path="/my-vet"
               element={
                 <Layout>
-                  <MyVets />
+                 <MyVets /> 
+                </Layout>
+              }
+            />
+            <Route
+              path="/my-vet-info"
+              element={
+                <Layout>
+                  <MyVetInfo/>
+                </Layout>
+              }
+            />
+            <Route
+              path="/my-vet/service"
+              element={
+                <Layout>
+                  <ServicesList/>
                 </Layout>
               }
             />
@@ -194,7 +203,7 @@ const App = () => {
         ) : (
           <>
             <Route
-              path="/vet/dashboard"
+              path="/my-vet"
               element={
                 <Layout>
                   {" "}
@@ -202,15 +211,22 @@ const App = () => {
                 </Layout>
               }
             />
-
-            <Route
-              path="/manager-my-hotel-booking"
+             <Route
+              path="/manager-service"
               element={
                 <Layout>
-                  <ManagerBookingOfMyHotel />
+                  <ManagerService />
                 </Layout>
               }
             />
+            <Route
+            path="/add-service"
+            element={
+              <Layout>
+                <AddService />
+              </Layout>
+            }
+          />
             <Route
               path="/manager-statistics"
               element={

@@ -1,33 +1,5 @@
 import mongoose from "mongoose";
 
-
-export type HotelType = {
-  _id: string;
-  userId: string;
-  name: string;
-  city: string;
-  country: string;
-  description: string;
-  type: string;
-  adultCount: number;
-  childCount: number;
-  facilities: string[];
-  pricePerNight: number;
-  starRating: number;
-  imageUrls: string[];
-  lastUpdated: Date;
-  bookings: BookingType[];
-};
-
-export type HotelSearchResponse = {
-  data: HotelType[];
-  pagination: {
-    total: number;
-    page: number;
-    pages: number;
-  };
-};
-
 export type PaymentIntentResponse = {
   paymentIntentId: string;
   clientSecret: string;
@@ -61,24 +33,22 @@ export interface VetType {
   name: string;
   address: string;
   phone: string;
-  service: string;
+  service: string[];
   user_id: string;
-  createdAt?: Date;
-  imageUrls: string;
+  createdAt: Date;
+  imageUrls: string[];
   lastUpdated : Date;
+  description: string;
 }
 
 export interface BookingType {
   _id: string;
-  userId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  adultCount: number;
-  childCount: number;
-  checkIn: Date;
-  checkOut: Date;
-  totalCost: number;
+  ownerId: string;
+  petId: string;
+  vetId:string;
+  phoneOwner: string;
+  date: Date;
+  status: number;
 }
 
 export interface OwnerType {
@@ -116,11 +86,70 @@ export interface Breed{
   id_type: string;
 }
 
-export interface MedicalRecord {
+// export interface MedicalRecord {
+//   _id: string;
+//   petId: string;
+//   ownerId: string;
+//   vetId: string;
+//   visitDate: string;
+//   reasonForVisit: string;
+//   symptoms: string;
+//   diagnosis: string;
+//   treatmentPlan: string;
+//   medications: Medication[];
+//   notes: string;
+// }
+
+// interface Medication {
+//   name: string;
+//   dosage: string;
+//   instructions: string;
+// }
+
+
+export interface ServiceType {
   _id: string;
-  userID: string;
-  pet: string;
-  date: string;
-  description: string;
-  status: 'open' | 'closed' | 'pending';
+  name: string;
+  price: number;
+  duration: number;
+  available: boolean;
+  id_vet: string;
+}
+// export type VetCType = {
+//   _id: string;
+//   name: string;
+//   address: string;
+//   phone: string;
+//   service?: string[];
+//   description: string;
+//   user_id: string;
+//   createdAt: Date;
+//   imageUrls?: string[];
+//   lastUpdated: Date;
+//   booking?: any[];
+// };
+export interface VetCType {
+  _id: string;
+  name: string;
+  address: string;
+  phone: string;
+  service: string[];
+  user_id: string;
+  createdAt: Date;
+  imageUrls: string[];
+  lastUpdated: Date;
+  description?: string;
+  booking?: BookingType[];
+} 
+export interface MedicType {
+  _id:string;
+  petId: string; // Reference to pet document in the `pets` collection
+  ownerId: string; // Reference to owner document in the `owners` collection
+  vetId: string; // Reference to vet document in the `vets` collection
+  visitDate: Date; // Date of the medical record entry
+  reasonForVisit: string; // Reason for the pet's visit
+  symptoms: string; // Description of the pet's symptoms
+  diagnosis: string; // Diagnosis made by the veterinarian
+  treatmentPlan: string; // Outline of the treatment plan
+  notes?: string; // Additional notes from the veterinarian
 }

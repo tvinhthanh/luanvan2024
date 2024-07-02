@@ -1,14 +1,13 @@
 import { RegisterFormData } from "./pages/Register";
 import { SignInFormData } from "./pages/SignIn";
 import {
-  HotelSearchResponse,
-  HotelType,
-  PaymentIntentResponse,
+  BookingType,
+  MedicType,
   Pet,
+  ServiceType,
   UserType,
+  VetCType,
 } from "../../backend/src/shared/types";
-import { BookingFormData } from "./forms/BookingForm/BookingForm";
-import { BiBookReader } from "react-icons/bi";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 export const fetchCurrentUser = async (): Promise<UserType> => {
@@ -37,22 +36,30 @@ export const register = async (formData: RegisterFormData) => {
     throw new Error(responseBody.message);
   }
 };
-
 export const signIn = async (formData: SignInFormData) => {
-  const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(formData),
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    });
 
-  const body = await response.json();
-  if (!response.ok) {
-    throw new Error(body.message);
+    if (!response.ok) {
+      const errorBody = await response.json();
+      throw new Error(errorBody.message);
+    }
+
+    const body = await response.json();
+    localStorage.setItem('token', body.token); // Store the token upon successful login
+    console.log('Stored token:', body.token); // Log the stored token for verification
+    return body; // Return the response body if needed
+  } catch (error) {
+    console.error('Error signing in:', error);
+    throw new Error('Failed to sign in');
   }
-  return body;
 };
 
 export const validateToken = async () => {
@@ -63,7 +70,6 @@ export const validateToken = async () => {
   if (!response.ok) {
     throw new Error("Token invalid");
   }
-
   return response.json();
 };
 
@@ -78,176 +84,6 @@ export const signOut = async () => {
   }
 };
 
-export const addMyHotel = async (hotelFormData: FormData) => {
-  const response = await fetch(`${API_BASE_URL}/api/my-hotels/create-hotel`, {
-    method: "POST",
-    credentials: "include",
-    body: hotelFormData,
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to add hotel");
-  }
-
-  return response.json();
-};
-
-export const fetchMyHotels = async (): Promise<HotelType[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/my-hotels`, {
-    credentials: "include",
-  });
-
-  if (!response.ok) {
-    throw new Error("Error fetching hotels");
-  }
-
-  return response.json();
-};
-
-export const fetchMyHotelById = async (hotelId: string): Promise<HotelType> => {
-  const response = await fetch(`${API_BASE_URL}/api/my-hotels/${hotelId}`, {
-    credentials: "include",
-  });
-
-  if (!response.ok) {
-    throw new Error("Error fetching Hotels");
-  }
-
-  return response.json();
-};
-
-export const updateMyHotelById = async (hotelFormData: FormData) => {
-  const response = await fetch(
-    `${API_BASE_URL}/api/my-hotels/${hotelFormData.get("hotelId")}`,
-    {
-      method: "PUT",
-      body: hotelFormData,
-      credentials: "include",
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Failed to update Hotel");
-  }
-
-  return response.json();
-};
-
-export type SearchParams = {
-  destination?: string;
-  checkIn?: string;
-  checkOut?: string;
-  adultCount?: string;
-  childCount?: string;
-  page?: string;
-  facilities?: string[];
-  types?: string[];
-  stars?: string[];
-  maxPrice?: string;
-  sortOption?: string;
-};
-
-export const searchHotels = async (
-  searchParams: SearchParams
-): Promise<HotelSearchResponse> => {
-  const queryParams = new URLSearchParams();
-  queryParams.append("destination", searchParams.destination || "");
-  queryParams.append("checkIn", searchParams.checkIn || "");
-  queryParams.append("checkOut", searchParams.checkOut || "");
-  queryParams.append("adultCount", searchParams.adultCount || "");
-  queryParams.append("childCount", searchParams.childCount || "");
-  queryParams.append("page", searchParams.page || "");
-
-  queryParams.append("maxPrice", searchParams.maxPrice || "");
-  queryParams.append("sortOption", searchParams.sortOption || "");
-
-  searchParams.facilities?.forEach((facility) =>
-    queryParams.append("facilities", facility)
-  );
-
-  searchParams.types?.forEach((type) => queryParams.append("types", type));
-  searchParams.stars?.forEach((star) => queryParams.append("stars", star));
-
-  const response = await fetch(
-    `${API_BASE_URL}/api/hotels/search?${queryParams}`
-  );
-
-  if (!response.ok) {
-    throw new Error("Error fetching hotels");
-  }
-
-  return response.json();
-};
-
-export const fetchHotels = async (): Promise<HotelType[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/hotels`);
-  if (!response.ok) {
-    throw new Error("Error fetching hotels");
-  }
-  return response.json();
-};
-
-export const fetchHotelById = async (hotelId: string): Promise<HotelType> => {
-  const response = await fetch(`${API_BASE_URL}/api/hotels/${hotelId}`);
-  if (!response.ok) {
-    throw new Error("Error fetching Hotels");
-  }
-
-  return response.json();
-};
-
-export const createPaymentIntent = async (
-  hotelId: string,
-  numberOfNights: string
-): Promise<PaymentIntentResponse> => {
-  const response = await fetch(
-    `${API_BASE_URL}/api/hotels/${hotelId}/bookings/payment-intent`,
-    {
-      credentials: "include",
-      method: "POST",
-      body: JSON.stringify({ numberOfNights }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Error fetching payment intent");
-  }
-
-  return response.json();
-};
-
-export const createRoomBooking = async (formData: BookingFormData) => {
-  const response = await fetch(
-    `${API_BASE_URL}/api/hotels/${formData.hotelId}/bookings`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify(formData),
-    }
-  );
-
-  if (!response.ok) {
-    throw new Error("Error booking room");
-  }
-};
-
-export const fetchMyBookings = async (): Promise<HotelType[]> => {
-  const response = await fetch(`${API_BASE_URL}/api/my-bookings`, {
-    credentials: "include",
-  });
-
-  if (!response.ok) {
-    throw new Error("Unable to fetch bookings");
-  }
-
-  return response.json();
-};
 export const fetchUsers = async () => {
   const response = await fetch(`${API_BASE_URL}/api/users`, {
     method: "GET",
@@ -356,26 +192,26 @@ export const deleteOwner = async (ownerId: string) => {
 
   return response.json();
 };
-export const fetchBookings = async () => {
-  const response = await fetch(`${API_BASE_URL}/api/bookings`, {
-    credentials: "include",
-  });
-  if (!response.ok) {
-    throw new Error("Failed to fetch bookings");
-  }
-  return response.json();
-};
+// export const fetchBookings = async () => {
+//   const response = await fetch(`${API_BASE_URL}/api/bookings`, {
+//     credentials: "include",
+//   });
+//   if (!response.ok) {
+//     throw new Error("Failed to fetch bookings");
+//   }
+//   return response.json();
+// };
 
-export const deleteBooking = async (bookingId: string) => {
-  const response = await fetch(`${API_BASE_URL}/api/bookings/${bookingId}`, {
-    method: "DELETE",
-    credentials: "include",
-  });
-  if (!response.ok) {
-    throw new Error("Failed to delete booking");
-  }
-  return response.json();
-};
+// export const deleteBooking = async (bookingId: string) => {
+//   const response = await fetch(`${API_BASE_URL}/api/bookings/${bookingId}`, {
+//     method: "DELETE",
+//     credentials: "include",
+//   });
+//   if (!response.ok) {
+//     throw new Error("Failed to delete booking");
+//   }
+//   return response.json();
+// };
 
 export const createPet = async (petData: FormData) => {
   const response = await fetch(`${API_BASE_URL}/api/pet`, {
@@ -440,62 +276,137 @@ export const deletePet = async (petId: string) => {
   return response.json();
 };
 
-export const searchPet = async (searchParams: any) => {
-  const queryParams = new URLSearchParams();
-  // Thêm các tham số tìm kiếm vào queryParams
+// export const searchPet = async (searchParams: any) => {
+//   const queryParams = new URLSearchParams();
+//   // Thêm các tham số tìm kiếm vào queryParams
 
-  const response = await fetch(`${API_BASE_URL}/api/pet/search?${queryParams.toString()}`, {
-    credentials: "include",
-  });
+//   const response = await fetch(`${API_BASE_URL}/api/pet/search?${queryParams.toString()}`, {
+//     credentials: "include",
+//   });
 
-  if (!response.ok) {
-    throw new Error("Failed to search pet");
-  }
+//   if (!response.ok) {
+//     throw new Error("Failed to search pet");
+//   }
 
-  return response.json();
-};
-
-export const fetchVet = async () => {
+//   return response.json();
+// };
+export const fetchVet = async (): Promise<VetCType> => {
   const response = await fetch(`${API_BASE_URL}/api/vet`, {
     method: "GET",
     credentials: "include",
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch vets");
+    throw new Error("Failed to fetch vet");
   }
 
   return response.json();
 };
 
-export const createVet = async (ownerData: FormData) => {
-  const response = await fetch(`${API_BASE_URL}/api/vet`, {
-    method: "POST",
-    credentials: "include",
-    body: ownerData,
+export const fetchVetById = async (vetId: string): Promise<VetCType> => {
+  const response = await fetch(`${API_BASE_URL}/api/my-vet/${vetId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include'
   });
 
+  if (!response.ok) {
+    throw new Error('Failed to fetch vet');
+  }
+
+  return response.json();
+};
+
+export const fetchMyVets = async (userId: string): Promise<VetCType[]> => {
+  const response = await fetch(`${API_BASE_URL}/api/my-vet?user_id=${userId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include', // Include credentials if needed (e.g., cookies)
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch vets');
+  }
+
+  return response.json();
+};
+
+export const createVet = async (name : string, phone: string, address:string,img: string) => {
+  let vet = {
+    name: name,
+    phone : phone,
+    address: address,
+    img : img,
+  }
+  const response = await fetch(`${API_BASE_URL}/api/my-vet`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(vet)
+  });
   if (!response.ok) {
     throw new Error("Failed to create vet");
   }
-
   return response.json();
 };
 
-export const updateVet = async (vetId: string, vetData: FormData) => {
-  const response = await fetch(`${API_BASE_URL}/api/owner/${vetId}`, {
-    method: "PUT",
-    credentials: "include",
-    body: vetData,
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to update vet");
+export const addMyVet = async (name : string, phone: string, address:string,img: string,description: string,userId: string) => {
+  let vetData = {
+    name: name,
+    phone : phone,
+    address: address,
+    img : img,
+    description: description,
+    userId: userId
   }
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/my-vet`, {
+        method: 'POST',
+        credentials: 'include',
+        body: JSON.stringify(vetData),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to add vet');
+      }
+  
+    } catch (error) {
+      console.error('Error adding vet:', error);
+      throw new Error('Failed to add vet');
+    }
+  };
 
-  return response.json();
-};
+// export const updateVet = async (vetId: string, vetData: FormData) => {
+//   const response = await fetch(`${API_BASE_URL}/api/my-vet/${vetId}`, {
+//     method: "PUT",
+//     credentials: "include",
+//     body: vetData,
+//   });
 
+//   if (!response.ok) {
+//     throw new Error("Failed to update vet");
+//   }
+//   return response.json();
+// };
+// export const updateVet = async (vetId: string, data: Partial<VetCType>): Promise<void> => {
+//   const response = await fetch(`${API_BASE_URL}/api/vets/${vetId}`, {
+//     method: 'PUT',
+//     headers: {
+//       'Content-Type': 'application/json',
+//     },
+//     body: JSON.stringify(data),
+//   });
+
+//   if (!response.ok) {
+//     throw new Error('Failed to update vet');
+//   }
+// };
 export const deleteVet = async (vetId: string) => {
   const response = await fetch(`${API_BASE_URL}/api/vet/${vetId}`, {
     method: "DELETE",
@@ -544,6 +455,35 @@ export const addBreed = async (breedData: string, img: string, id_type:string) =
 
   return response.json();
 };
+
+export const updateVet = async (id: string, vetData: {
+  name: string;
+  address: string;
+  phone: string;
+  imageUrls: string[];
+}) => {
+  const response = await fetch(`${API_BASE_URL}/api/my-vet/${id}`, {
+    method: 'PUT',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(vetData),
+  });
+
+  if (!response.ok) {
+    let errorMessage = 'Failed to update vet';
+    if (response.status === 404) {
+      errorMessage = 'Vet not found';
+    } else if (response.status === 500) {
+      errorMessage = 'Server error';
+    }
+    throw new Error(errorMessage);
+  }
+
+  return response.json();
+};
+
 
 export const updateBreed = async (breedId: string, breedData: string, img: string, id_type:string) => {
   let breed = 
@@ -611,7 +551,6 @@ export const fetchBreedType = async () => {
   return data; // The response should already contain the mapped breed types with their breeds
 };
 export const addBreedType = async (breedData: string) => {
-  alert("Add "+breedData+" to DB success");
   let breedType = {
     name: breedData
   }
@@ -672,3 +611,219 @@ export const deleteBreedType = async (breedId: string) => {
   }
   return response.json();
 };
+//service
+// export const fetchService = async (vetId: string) => {
+//   const response = await fetch(`${API_BASE_URL}/api/service`, {
+//     method: 'GET',
+//     credentials: 'include',
+//   });
+
+//   if (!response.ok) {
+//     throw new Error('Failed to fetch service');
+//   }
+
+//   return response.json();
+// };
+export const fetchServicesForVet = async (vetId: string): Promise<ServiceType[]> => {
+  const response = await fetch(`${API_BASE_URL}/api/service/${vetId}`, {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch services');
+  }
+
+  return response.json();
+};
+export const fetchServiceById = async (ser_id: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/service/${ser_id}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch service');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching service by id:', error);
+    throw error; // Rethrow the error for the caller to handle
+  }
+};
+
+export const addService = async (name: string, price: string, duration: string, available: boolean, vetId: string) => {
+  const response = await fetch(`${API_BASE_URL}/api/service/${vetId}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include', // Ensure cookies are sent with the request
+    body: JSON.stringify({ name, price, duration, available, vetId }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Error adding service');
+  }
+
+  return response.json();
+};
+
+export const updateService = async (service: ServiceType): Promise<ServiceType> => {
+  const response = await fetch(`${API_BASE_URL}/api/service/${service._id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials:"include",
+    body: JSON.stringify(service),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to update service");
+  }
+  return response.json();
+};
+export const deleteService = async (ser_id: string) => {
+  const response = await fetch(`${API_BASE_URL}/api/service/${ser_id}`, {
+    method: 'DELETE',
+    credentials: 'include',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to delete breed');
+  }
+
+  return response.json();
+};
+//booking
+export const fetchBookings = async (vetId: string): Promise<BookingType[]> => {
+  const response = await fetch(`${API_BASE_URL}/api/my-bookings/${vetId}`, {
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch bookings");
+  }
+
+  return response.json();
+};
+
+export const deleteBooking = async (bookingId: string) => {
+  const response = await fetch(`${API_BASE_URL}/api/my-vet/bookings/${bookingId}`, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    throw new Error('Failed to delete booking');
+  }
+  return response.json();
+};
+
+// Hàm gọi API để tạo bản ghi y tế mới
+export const createMedicalRecord = async (medicalRecordData: any) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/my-vet/medical-records`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        // Thêm token xác thực nếu backend của bạn yêu cầu
+        // 'Authorization': `Bearer ${token}`
+      },
+      credentials: 'include',
+      body: JSON.stringify(medicalRecordData),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to create medical record');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error creating medical record:', error);
+    throw error;
+  }
+};
+
+// Hàm gọi API để lấy danh sách bản ghi y tế dựa trên vetId
+// API client function to fetch vetId based on userId
+export const fetchVetIdByUserId = async (userId: string): Promise<string | null> => {
+  try {
+    // Call API to fetch vetId based on userId
+    const response = await fetch(`${API_BASE_URL}/my-vet/vetId?user_id=${userId}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch vetId');
+    }
+    const data = await response.json();
+    return data.vetId; // Assuming your API returns vetId in the response
+  } catch (error) {
+    console.error('Error fetching vetId:', error);
+    throw error;
+  }
+};
+
+
+// Hàm gọi API để cập nhật bản ghi y tế theo ID
+export const updateMedicalRecord = async (medicalRecordId: string, updatedData: any) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/medical-records/${medicalRecordId}`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatedData),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to update medical record');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating medical record:', error);
+    throw error;
+  }
+};
+
+// Hàm gọi API để xóa bản ghi y tế theo ID
+export const deleteMedicalRecord = async (medicalRecordId: string) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/medical-records/${medicalRecordId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!response.ok) {
+      throw new Error('Failed to delete medical record');
+    }
+    return { message: 'Medical record deleted' };
+  } catch (error) {
+    console.error('Error deleting medical record:', error);
+    throw error;
+  }
+};
+export async function fetchMedicalRecordsByVetId(vetId: string) {
+  try {
+  const response = await fetch(`${API_BASE_URL}/medical-records/${vetId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        // Add any other headers as needed
+      },
+      credentials: 'include', // Include credentials such as cookies
+    });
+    if (!response.ok) {
+      throw new Error(`Failed to fetch medical records: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching medical records:', error);
+    throw error; // Re-throw the error for the calling function to handle
+  }
+}

@@ -6,7 +6,7 @@ type VetDetailsProps = {
     name: string;
     address: string;
     phone: string;
-    service: string;
+    service: string[];
     image?: string;
   };
   onClose: () => void;

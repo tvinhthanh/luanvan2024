@@ -1,13 +1,18 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
-const medicalRecordSchema = new mongoose.Schema({
-  userID: { type: String, ref: 'User', required: true },
-  pet: { type: String, ref: 'Pet', required: true },
-  date: { type: Date, required: true },
-  description: { type: String, required: true },
-  status: { type: String, required: true, enum: ['open', 'closed', 'pending'] }
-});
+const MedicSchema: Schema = new Schema({
+  petId: { type: String, ref: 'Pet', required: true },
+  ownerId: { type: String, ref: 'Owner', required: true },
+  vetId: { type: String, ref: 'Vet', required: true },
+  visitDate: { type: Date, required: true },
+  reasonForVisit: { type: String, required: true },
+  symptoms: { type: String, required: true },//triệu chứng
+  diagnosis: { type: String, required: true },//chuẩn đoán
+  treatmentPlan: { type: String, required: true },//kế hoạch khám
+  notes: { type: String } //ghi chú
+}, { timestamps: true });
 
-const MedicalRecord = mongoose.model("MedicalRecord", medicalRecordSchema);
+const Medic = mongoose.model('Medic', MedicSchema);
 
-export default MedicalRecord;
+export default Medic;
+ 
