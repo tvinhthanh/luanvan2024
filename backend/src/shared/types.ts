@@ -140,16 +140,25 @@ export interface VetCType {
   lastUpdated: Date;
   description?: string;
   booking?: BookingType[];
+  medicalrecord?: MedicType[];
 } 
+
 export interface MedicType {
-  _id:string;
-  petId: string; // Reference to pet document in the `pets` collection
-  ownerId: string; // Reference to owner document in the `owners` collection
-  vetId: string; // Reference to vet document in the `vets` collection
-  visitDate: Date; // Date of the medical record entry
-  reasonForVisit: string; // Reason for the pet's visit
-  symptoms: string; // Description of the pet's symptoms
-  diagnosis: string; // Diagnosis made by the veterinarian
-  treatmentPlan: string; // Outline of the treatment plan
-  notes?: string; // Additional notes from the veterinarian
+  _id: string;
+  petId: string;
+  ownerId: string;
+  vetId: string;
+  visitDate: Date;
+  reasonForVisit: string;
+  symptoms: string;
+  diagnosis: string;
+  treatmentPlan: string;
+  notes?: string;
+  medications: MedicationType[]; // Add this line
+}
+
+export interface MedicationType {
+  name: string;
+  dosage: string;
+  instructions: string;
 }

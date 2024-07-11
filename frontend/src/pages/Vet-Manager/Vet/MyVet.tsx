@@ -1,10 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useAppContext } from "../../../contexts/AppContext";
 
 const Vet: React.FC = () => {
-  const { id_vet } = useAppContext();
-console.log(id_vet)
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl w-full space-y-8">

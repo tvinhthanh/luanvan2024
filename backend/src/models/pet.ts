@@ -10,7 +10,8 @@ const petSchema = new mongoose.Schema({
   owner_id: { type: String, ref: 'Owner', required: true },
   sex: { type: String, required: true },
   breed_type: { type: String, required: true },
-  img: { type: String, required: true }
+  img: { type: String, required: true },
+  medic_id: {type: [String], ref: 'medicalrecords', required: false}
 });
 
 const Pet = mongoose.model("pet", petSchema, "pet");

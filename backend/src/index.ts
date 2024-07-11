@@ -15,6 +15,7 @@ import breedTypeRoutes from "./routes/breedType";
 import medicalRecordRoutes from "./routes/medicrecord";
 import serviceRoutes from "./routes/service";
 import vetRoutes from "./routes/vet"
+import bookingsRoutes from "./routes/bookings"
 
 
 // import vetRoutes from "./routes/vet";
@@ -57,7 +58,7 @@ app.use("/api/breedType", breedTypeRoutes);
 app.use("/api/vet", vetRoutes);
 app.use('/api/medical-records', medicalRecordRoutes);
 app.use('/api/service', serviceRoutes);
-// app.use('/api/medics', medicalRecordRoutes);
+app.use('/api/bookings', bookingsRoutes);
 // app.use('/api/service',serviceRoutes)
 
 app.listen(PORT, () => {

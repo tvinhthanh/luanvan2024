@@ -1,21 +1,116 @@
 import express from "express";
 import verifyToken from "../middleware/auth";
-import {
-  getBookings,
-  deleteBooking
-} from "../controller/bookingsController";
 import Schedule from "../models/schedule";
 import Owner from "../models/owner";
 import Pet from "../models/pet";
 import { Error } from "mongoose";
 import Breed from "../models/breed";
+import Booking from "../models/booking";
 
 const router = express.Router();
 
-router.get("/", verifyToken, getBookings);
-router.delete("/:id", verifyToken, deleteBooking);
 
+// GET all bookings
+router.get("/", async (req, res) => {
+  try {
+    const bookings = await Booking.find({});
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
+// DELETE a booking by ID
+router.delete("/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const deletedBooking = await Booking.findByIdAndDelete(id);
+    if (!deletedBooking) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
+    res.status(200).json({ message: 'Booking deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting booking:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET a booking by ID
+router.get('/:bookingId', async (req, res) => {
+  const { bookingId } = req.params;
+
+  try {
+    const bookings = await Booking.findById({ _id: bookingId }); 
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error("Server error:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+router.patch("/:bookingId/status", async (req, res) => {
+  const { bookingId } = req.params;
+  const { status } = req.body;
+
+  if (typeof status !== "number") {
+    return res.status(400).json({ error: "Invalid status value" });
+  }
+
+  try {
+    const booking = await Booking.findById(bookingId);
+    if (!booking) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+
+    booking.status = status;
+    await booking.save();
+
+    res.status(200).json(booking);
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
+});
+// // get to update a booking by ID
+// router.push('/:bookingId', verifyToken, async (req, res) => {
+//   const { bookingId } = req.params;
+
+//   try {
+//     const booking = await Booking.findById(bookingId);
+
+//     if (!booking) {
+//       return res.status(404).json({ error: 'Booking not found' });
+//     }
+
+//     res.status(200).json(booking);
+//   } catch (error) {
+//     console.error('Error fetching booking:', error);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// });
+// PUT (update) a booking by ID
+router.put('/:bookingId', verifyToken, async (req, res) => {
+  const { bookingId } = req.params;
+  const { vetId, ownerId, petId, phoneOwner, date, status } = req.body;
+
+  try {
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      bookingId,
+      { vetId, ownerId, petId, phoneOwner, date, status },
+      { new: true }
+    );
+
+    if (!updatedBooking) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
+
+    res.status(200).json(updatedBooking);
+  } catch (error) {
+    console.error('Error updating booking:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 // Endpoint hiển thị sự kiện trong calendar
 router.get("/booking/showSchedule/:id", async (req, res) => {
   const ownerId = req.params.id;

@@ -1,9 +1,5 @@
 import express from "express";
 import verifyToken from "../middleware/auth";
-import {
-  getBookings,
-  deleteBooking
-} from "../controller/bookingsController";
 import Schedule from "../models/schedule";
 import Owner from "../models/owner";
 import Pet from "../models/pet";
@@ -12,8 +8,8 @@ import Breed from "../models/breed";
 
 const router = express.Router();
 
-router.get("/", verifyToken, getBookings);
-router.delete("/:id", verifyToken, deleteBooking);
+// router.get("/", verifyToken, getBookings);
+// router.delete("/:id", verifyToken, deleteBooking);
 
 
 // Endpoint hiển thị sự kiện trong calendar

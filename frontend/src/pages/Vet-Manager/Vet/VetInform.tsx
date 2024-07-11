@@ -1,4 +1,3 @@
-// MyVetInfo.tsx
 import React, { useState } from 'react';
 import { useQuery } from 'react-query';
 import * as apiClient from '../../../api-client';
@@ -7,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { useAppContext } from "../../../contexts/AppContext";
 
 const MyVetInfo: React.FC = () => {
-  const { userId } = useAppContext();
+  const { userId, id_vet } = useAppContext();
 
   const { data: vetData, isLoading, error } = useQuery<VetCType[]>(['fetchMyVet', userId], () => apiClient.fetchMyVets(userId), {
     onError: (err) => {
@@ -39,17 +38,19 @@ const MyVetInfo: React.FC = () => {
       {vetData && vetData.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6">
           {vetData.map((vet: VetCType) => (
-            <div key={vet._id} className="bg-white shadow-lg rounded-lg p-6">
+            <div key={id_vet} className="bg-white shadow-lg rounded-lg p-6">
               <h2 className="text-xl font-semibold mb-2">{vet.name}</h2>
               <p className="text-gray-700 mb-1"><strong>Address:</strong> {vet.address}</p>
               <p className="text-gray-700 mb-1"><strong>Phone:</strong> {vet.phone}</p>
+              <p className="text-gray-700 mb-1"><strong>Description:</strong> {vet.description}</p>
+
               {vet.imageUrls && vet.imageUrls.length > 0 && (
                 <div className="mt-4 grid grid-cols-3 gap-2">
                   {vet.imageUrls.map((url: string, idx: number) => (
                     <img
                       key={idx}
                       src={url}
-                      alt={`Vet ${vet._id} - Image ${idx}`}
+                      alt={`Vet ${id_vet} - Image ${idx}`}
                       className="w-full h-32 object-cover cursor-pointer rounded-md"
                       onClick={() => handleImageClick(url)}
                     />
@@ -58,7 +59,7 @@ const MyVetInfo: React.FC = () => {
               )}
               <div className="flex justify-end mt-4">
                 <Link
-                  to={`/edit-vet/${vet._id}`}
+                  to={`/edit-vet/${id_vet}`}
                   state={{ vet }} // Pass the vet data through state
                   className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                 >

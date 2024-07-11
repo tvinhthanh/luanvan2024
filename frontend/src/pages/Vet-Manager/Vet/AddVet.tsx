@@ -15,7 +15,7 @@ const AddVet: React.FC = () => {
     event.preventDefault();
 
     try {
-      await apiClient.addMyVet(name, address, phone, img,description,userId); // Call your API function to add vet
+      await apiClient.addMyVet(name, phone,address, img,description,userId); // Call your API function to add vet
       alert('Vet added successfully!');
       resetForm();
     } catch (error) {

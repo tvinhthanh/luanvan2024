@@ -2,87 +2,38 @@ import express, { Request, Response } from 'express';
 import medicalRecord from '../models/medicalRecord';
 import vet from '../models/vet';
 import verifyToken from '../middleware/auth';
+import Medic from '../models/medicalRecord';
+import Vet from '../models/vet';
+const { v4: uuidv4 } = require('uuid');
+
 
 const router = express.Router();
 
-router.get('/:vetId', verifyToken, async (req, res) => {
+router.get("/:vetId", verifyToken, async (req: Request, res: Response) => {
   const { vetId } = req.params;
 
   try {
-    const services = await medicalRecord.find({ id_vet: vetId }); // Lọc dịch vụ theo id_vet
-    res.status(200).json(services);
+    const medics = await Medic.find({ vetId }); 
+    res.status(200).json(medics);
   } catch (error) {
+    console.error("Server error:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-router.get('/', verifyToken, async (req: Request, res: Response) => {
-  const vetId = req.query.vet_id as string; // Assuming vet_id is a string
-  try {
-    // Find the vet document to get userId
-    const vetDoc = await vet.findOne({ _id: vetId });
-    console.log(vetId)
-
-    if (!vetDoc) {
-      return res.status(404).json({ message: 'Vet not found' });
-    }
-    // Query medical records based on vetId
-    const medicalRecords = await medicalRecord.find({ vetId });
-    res.json(medicalRecords);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error fetching medical records' });
-  }
-});
-
-
-// Create a new medical record
-router.post('/', verifyToken, async (req: Request, res: Response) => {
-  try {
-    const { petId, ownerId, visitDate, reasonForVisit, symptoms, diagnosis, treatmentPlan, medications, notes } = req.body;
-
-    const newMedicalRecord = new medicalRecord({
-      petId,
-      ownerId,
-      vetId: req.userId, // Assuming vetId is obtained from the authenticated user
-      visitDate,
-      reasonForVisit,
-      symptoms,
-      diagnosis,
-      treatmentPlan,
-      medications,
-      notes,
-    });
-
-    const savedMedicalRecord = await newMedicalRecord.save();
-    res.status(201).json(savedMedicalRecord);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// Get all medical records for the authenticated user (vet)
-router.get('/all', verifyToken, async (req: Request, res: Response) => {
-  try {
-    const medics = await medicalRecord.find({ vetId: req.userId }); // Assuming vetId is obtained from the authenticated user
-    res.status(200).json(medics);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
 // Get a specific medical record by ID (for vet)
-router.get('/:id_vet', verifyToken, async (req: Request, res: Response) => {
+router.get('/:medicId', verifyToken, async (req: Request, res: Response) => {
+  const { medicId } = req.params;
   try {
-    const medic = await medicalRecord.findOne({ _id: req.params.id, vetId: req.userId }); // Assuming vetId is obtained from the authenticated user
+    const medic = await Medic.findById(medicId);
+    
     if (!medic) {
       return res.status(404).json({ error: 'Medical record not found' });
     }
+
     res.status(200).json(medic);
   } catch (error) {
-    console.error(error);
+    console.error('Error fetching medical record:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -130,5 +81,50 @@ router.delete('/:id', verifyToken, async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+// Create a new medical record
+router.post('/', verifyToken, async (req: Request, res: Response) => {
+  try {
+    const { vetId, petId, ownerId, visitDate, reasonForVisit, symptoms, diagnosis, treatmentPlan, medications, notes } = req.body;
 
+    const newMedicalRecord = new medicalRecord({
+      _id: uuidv4(), 
+      petId,
+      ownerId,
+      vetId, // Assuming vetId is obtained from the authenticated user
+      visitDate,
+      reasonForVisit,
+      symptoms,
+      diagnosis,
+      treatmentPlan,
+      medications,
+      notes,
+    });
+
+    const savedMedicalRecord = await newMedicalRecord.save();
+    res.status(201).json(savedMedicalRecord);
+    
+    const vet = await Vet.findById(vetId);
+    if (!vet) {
+      return res.status(404).json({ error: 'Vet not found' });
+    }
+
+    vet.medicalRecord.push(newMedicalRecord);
+    await vet.save();
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Get all medical records for the authenticated user (vet)
+router.get('/all', verifyToken, async (req: Request, res: Response) => {
+  try {
+    const medics = await medicalRecord.find({ vetId: req.userId }); // Assuming vetId is obtained from the authenticated user
+    res.status(200).json(medics);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 export default router;

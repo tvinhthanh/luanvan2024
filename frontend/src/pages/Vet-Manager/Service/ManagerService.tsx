@@ -8,8 +8,8 @@ import ServicesList from "./ServicesList"; // Import ServicesList component
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons"; // Import the FontAwesome icon you want to use
 
-const MyVetInfo: React.FC = () => {
-  const { userId } = useAppContext();
+const MyVetSer: React.FC = () => {
+  const { userId,id_vet } = useAppContext();
 
   const {
     data: vetData,
@@ -49,10 +49,10 @@ const MyVetInfo: React.FC = () => {
       {vetData && vetData.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6">
           {vetData.map((vet: VetCType) => (
-            <div key={vet._id} className="bg-white shadow-lg rounded-lg p-6">
+            <div key={id_vet} className="bg-white shadow-lg rounded-lg p-6">
               <h2 className="text-xl font-semibold mb-2">{vet.name}</h2>
               {/* Pass vetId to ServicesList component */}
-              <ServicesList vetId={vet._id} />
+              <ServicesList vetId={id_vet} />
             </div>
           ))}
         </div>
@@ -68,4 +68,4 @@ const MyVetInfo: React.FC = () => {
   );
 };
 
-export default MyVetInfo;
+export default MyVetSer;

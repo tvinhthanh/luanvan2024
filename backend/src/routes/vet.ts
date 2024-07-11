@@ -36,27 +36,18 @@ router.get("/:id", async (req, res) => {
 });
 
 
-router.post('/',verifyToken, async (req, res) => {
-  const { name, address, phone ,img, description, userId } = req.body;
+// router.post('/',verifyToken, async (req, res) => {
+//   try {
+//     const { name, address, phone ,img, description, userId } = req.body;
 
-  try {
-    const vet = new Vet({
-      name,
-      address,
-      phone,
-      img,
-      description,
-      user_id: userId,
-      imageUrls: [], // Adjust as necessary
-    });
-
-    const newVet = await vet.save();
-    res.status(201).json(newVet);
-  } catch (err) {
-    console.error('Error adding vet:', err);
-    res.status(400).json({ message: "messageerr" });
-  }
-});
+//     const vet = new Vet({name,address,description,img,phone,user_id: userId,});
+//     const newVet = await vet.save();
+//     res.status(201).json(newVet);
+//   } catch (err) {
+//     console.error('Error adding vet:', err);
+//     res.status(400).json({ message: "messageerr" });
+//   }
+// });
 
 // const storage = multer.memoryStorage();
 // const upload = multer({

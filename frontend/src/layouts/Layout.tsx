@@ -5,11 +5,18 @@ interface Props {
   children: React.ReactNode;
 }
 
-const Layout = ({ children }: Props) => {
+const Layout: React.FC<Props> = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Header at the top */}
       <Header />
-      <div className="container mx-auto py-10 flex-1">{children}</div>
+      
+      {/* Main content area */}
+      <div className="container mx-auto py-10 flex-1">
+        {children}
+      </div>
+      
+      {/* Footer at the bottom */}
       <Footer />
     </div>
   );

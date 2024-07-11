@@ -5,6 +5,7 @@ import verifyToken from "../middleware/auth";
 import { body } from "express-validator";
 import { VetCType } from "../shared/types";
 import Vet from "../models/vet";
+const { v4: uuidv4 } = require('uuid');
 
 const router = express.Router();
 
@@ -16,29 +17,19 @@ const upload = multer({
   },
 });
 
-router.post(
-  "/",
-  verifyToken,
-  async (req: Request, res: Response) => {
-    try {
-      const { name, img, address, phone } = req.body;
-      const newVet = new Vet({
-        name,
-        img,
-        address,
-        phone,
-        createdAt: new Date(),
-        lastUpdated: new Date(),
-        userId: req.userId, // Make sure to include userId if needed
-      });
-      await newVet.save();
-      res.status(201).json(newVet);
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Internal server error" });
-    }
+
+router.post('/',verifyToken, async (req, res) => {
+  try {
+    const { name, address, phone ,img, description, userId } = req.body;
+
+    const vet = new Vet({_id: uuidv4(),name,address,description,img,phone,user_id: userId,});
+    const newVet = await vet.save();
+    res.status(201).json(newVet);
+  } catch (err) {
+    console.error('Error adding vet:', err);
+    res.status(400).json({ message: "messageerr" });
   }
-);
+});
 
 router.get("/",verifyToken, async (req: Request, res: Response) => {
   const userId = req.query.user_id;

@@ -1,14 +1,15 @@
 // EditVet.tsx
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as apiClient from '../../../api-client';
 import { VetCType } from '../../../../../backend/src/shared/types';
 import { toast } from 'react-toastify';
+import { useAppContext } from '../../../contexts/AppContext';
 
 const EditVet: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
+  const {id_vet} = useAppContext();
   // Get the state passed via the Link component
   const { vet } = location.state as { vet: VetCType };
 
@@ -17,12 +18,14 @@ const EditVet: React.FC = () => {
   const [phone, setPhone] = useState(vet.phone);
   const [imageUrls, setImageUrls] = useState<string[]>(vet.imageUrls);
   const [error, setError] = useState<string | null>(null);
+  const [description, setDescription] = useState(vet.description);
+
 console.log(vet)
 const handleUpdate = async (event: React.FormEvent) => {
   event.preventDefault();
 
   try {
-    await apiClient.updateVet(vet._id, { name, address, phone, imageUrls });
+    await apiClient.updateVet(id_vet, { name, address, phone, imageUrls });
     toast.success('Vet updated successfully!');
     navigate('/my-vet-info');
   } catch (err) {
@@ -39,7 +42,7 @@ const handleUpdate = async (event: React.FormEvent) => {
       <input
           type="text"
           placeholder="Id"
-          value={vet._id}
+          value={id_vet}
           onChange={(e) => setName(e.target.value)}
           className="border border-gray-300 rounded-md p-2"
           disabled
@@ -72,12 +75,12 @@ const handleUpdate = async (event: React.FormEvent) => {
           onChange={(e) => setImageUrls(e.target.value.split(',').map(url => url.trim()))}
           className="border border-gray-300 rounded-md p-2"
         />
-        {/* <textarea
+        <textarea
           placeholder="Description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           className="border border-gray-300 rounded-md p-2"
-        /> */}
+        />
         <button
           type="submit"
           className="py-2 px-4 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 focus:outline-none focus:bg-blue-600"

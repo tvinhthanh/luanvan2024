@@ -19,6 +19,8 @@
     "apexcharts": "^3.49.1",
     "core-js": "^3.37.1",
     "date-fns": "^2.0.0-alpha.34",
+    "firebase": "^10.12.3",
+    "mongoose": "^8.5.0",
     "next": "^14.2.4",
     "node-fetch": "^3.3.2",
     "react": "^18.2.0",

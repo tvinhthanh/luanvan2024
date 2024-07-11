@@ -30,6 +30,11 @@ import EditVet from "./pages/Vet-Manager/Vet/EditVet";
 import ManagerMedic from "./pages/Vet-Manager/MedicalRecord/ManagerMedic";
 import ServicesList from "./pages/Vet-Manager/Service/ManagerService";
 import AddService from "./pages/Vet-Manager/Service/AddService";
+import AddBooking from "./pages/Vet-Manager/Booking/AddBooking";
+import DetailBooking from "./pages/Vet-Manager/Booking/DetailBooking";
+import MedicalRecordDetail from "./pages/Vet-Manager/MedicalRecord/MedicDetail";
+import AddMedicalRecord from "./pages/Vet-Manager/MedicalRecord/AddMedic";
+
 const App = () => {
   const { isLoggedIn, userRole } = useAppContext();
   return (
@@ -88,7 +93,7 @@ const App = () => {
                 </Layout>
               }
             />
-             <Route
+            <Route
               path="/medical-record"
               element={
                 <Layout>
@@ -97,10 +102,26 @@ const App = () => {
               }
             />
             <Route
+              path="/medical-records/:recordId"
+              element={
+                <Layout>
+                  <MedicalRecordDetail />
+                </Layout>
+              }
+            />
+             <Route
+              path="/add-medical"
+              element={
+                <Layout>
+                  <AddMedicalRecord />
+                </Layout>
+              }
+            />
+            <Route
               path="/my-vet"
               element={
                 <Layout>
-                 <MyVets /> 
+                  <MyVets />
                 </Layout>
               }
             />
@@ -108,7 +129,7 @@ const App = () => {
               path="/my-vet-info"
               element={
                 <Layout>
-                  <MyVetInfo/>
+                  <MyVetInfo />
                 </Layout>
               }
             />
@@ -116,7 +137,7 @@ const App = () => {
               path="/my-vet/service"
               element={
                 <Layout>
-                  <ServicesList/>
+                  <ServicesList />
                 </Layout>
               }
             />
@@ -211,7 +232,23 @@ const App = () => {
                 </Layout>
               }
             />
-             <Route
+            <Route
+              path={`/bookings/:bookingId`}
+              element={
+                <Layout>
+                  <DetailBooking />
+                </Layout>
+              }
+            />
+            <Route
+              path="/add-booking"
+              element={
+                <Layout>
+                  <AddBooking />
+                </Layout>
+              }
+            />
+            <Route
               path="/manager-service"
               element={
                 <Layout>
@@ -220,13 +257,13 @@ const App = () => {
               }
             />
             <Route
-            path="/add-service"
-            element={
-              <Layout>
-                <AddService />
-              </Layout>
-            }
-          />
+              path="/add-service"
+              element={
+                <Layout>
+                  <AddService />
+                </Layout>
+              }
+            />
             <Route
               path="/manager-statistics"
               element={

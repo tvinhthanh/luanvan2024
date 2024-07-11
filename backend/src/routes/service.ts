@@ -17,7 +17,12 @@ router.post('/:vetId', verifyToken, async (req, res) => {
     const newService = new ServiceType({ name, price, duration, available, id_vet });
     
     const savedService = await newService.save(); // Save the new service to the database
-    await Vet.findByIdAndUpdate(id_vet, { $push: { services: savedService._id } });
+    const vet = await Vet.findById(id_vet);
+    if (!vet) {
+      return res.status(404).json({ error: 'Vet not found' });
+    }
+    vet.service.push(newService);
+    await vet.save();
 
     res.status(201).json(savedService); // Respond with the saved service object
   } catch (error) {

@@ -17,7 +17,17 @@ router.get("/show/:owner_id", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
+router.get("/:owner_id", async (req, res) => {
+  const owner_id = req.params.owner_id;
+  try {
+    // Tìm tất cả các thú cưng của chủ nhân với ID tương ứng
+    const ownerPets = await Pet.find({ owner_id });
+    res.status(200).json(ownerPets);
+  } catch (error) {
+    console.error("Error fetching pets:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 //Endpoint hiển thị thông tin pet
 router.get("/detail/:pet_id", async (req, res) => {
   const petId = req.params.pet_id; 

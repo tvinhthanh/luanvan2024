@@ -7,8 +7,8 @@ import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 
-const MyVetInfo: React.FC = () => {
-  const { userId } = useAppContext();
+const MyVetMedic: React.FC = () => {
+  const { userId, id_vet } = useAppContext();
 
   // Query to fetch vet information
   const {
@@ -50,9 +50,9 @@ const MyVetInfo: React.FC = () => {
 
       {/* Display medical records related to each vet */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold mt-5">Medical Record</h2>
+        <h2 className="text-2xl font-bold mt-5">Medical Records</h2>
         <Link
-          to={`/add-bookings`} // Adjust this path as needed
+          to={`/add-medical`} // Adjust this path as needed
           className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 flex items-center"
         >
           <FontAwesomeIcon icon={faPlus} className="mr-2" /> Add
@@ -60,17 +60,17 @@ const MyVetInfo: React.FC = () => {
       </div>
       <div className="space-y-5">
         {vetData?.map((vet) => (
-          <MedicalOfVet key={vet._id} vetId={vet._id} />
+          <MedicalOfVet key={vet._id} id_vet={vet._id} />
         ))}
       </div>
     </div>
-  );
+  ); 
 };
 
-const MedicalOfVet: React.FC<{ vetId: string }> = ({ vetId }) => {
+const MedicalOfVet: React.FC<{ id_vet: string }> = ({ id_vet }) => {
   const { data: medicalRecords, isLoading, error } = useQuery<MedicType[]>(
-    ["fetchMedicalRecordsByVetId", vetId],
-    () => apiClient.fetchMedicalRecordsByVetId(vetId),
+    ["fetchMedicalRecordsByVetId", id_vet],
+    () => apiClient.fetchMedicalRecordsByVetId(id_vet),
     {
       onError: (err) => {
         console.error("Error fetching medical records:", err);
@@ -112,33 +112,45 @@ const MedicalOfVet: React.FC<{ vetId: string }> = ({ vetId }) => {
 
   return (
     <div className="space-y-3">
-      {medicalRecords.map((record) => {
-        const owner = owners.find((owner) => owner._id === record.ownerId);
-        const pet = pets.find((pet) => pet._id === record.petId);
+      {medicalRecords?.map((record) => {
+        const owner = owners?.find((owner) => owner._id === record.ownerId);
+        const pet = pets?.find((pet) => pet._id === record.petId);
         return (
           <div
             key={record._id}
             className="border border-gray-200 p-4 rounded-lg shadow-md"
           >
-            <Link to={`/Edit-bookings/${record._id}`} className="text-blue-500 hover:underline">
-              <h3 className="text-lg font-bold">Medical Record for {pet ? pet.name : "Unknown Pet"}</h3>
+            <Link to={`/medical-records/${record._id}`} className="text-500 hover:underline">
+              <h3 className="text-lg font-bold">Bệnh Án của {pet ? pet.name : "Unknown Pet"}</h3>
             </Link>
             <p>
-              <strong>Date:</strong>{" "}
+              <strong>Ngày:</strong>{" "}
               {new Date(record.visitDate).toLocaleDateString()}
+              <strong> Giờ:</strong>{" "}
+              {new Date(record.visitDate).toLocaleTimeString()}
             </p>
             <p>
-              <strong>Reason for Visit:</strong> {record.reasonForVisit}
+              <strong>Lí do:</strong> {record.reasonForVisit}
             </p>
             <p>
-              <strong>Symptoms:</strong> {record.symptoms}
+              <strong>Triệu chứng:</strong> {record.symptoms}
             </p>
             <p>
-              <strong>Diagnosis:</strong> {record.diagnosis}
+              <strong>Chuẩn đoán:</strong> {record.diagnosis}
             </p>
             <p>
-              <strong>Treatment Plan:</strong> {record.treatmentPlan}
+              <strong>Kế Hoạch Chữa Trị:</strong> {record.treatmentPlan}
             </p>
+            <div>
+              <strong>Thuốc:</strong>
+              <ul className="list-disc list-inside">
+                {record.medications?.map((medication, index) => (
+                  <li key={index}>
+                    {medication.name} - {medication.dosage} - {medication.instructions}
+                  </li>
+                ))}
+              </ul>
+            </div>
             {record.notes && (
               <p>
                 <strong>Notes:</strong> {record.notes}
@@ -149,9 +161,6 @@ const MedicalOfVet: React.FC<{ vetId: string }> = ({ vetId }) => {
                 <strong>Owner:</strong> {owner.name}
               </p>
             )}
-            <p>
-              {/* <strong>Phone:</strong> {record.phone} */}
-            </p>
           </div>
         );
       })}
@@ -159,4 +168,4 @@ const MedicalOfVet: React.FC<{ vetId: string }> = ({ vetId }) => {
   );
 };
 
-export default MyVetInfo;
+export default MyVetMedic;

@@ -1,18 +1,18 @@
-import mongoose, { Schema, Document } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
 const MedicSchema: Schema = new Schema({
-  petId: { type: String, ref: 'Pet', required: true },
-  ownerId: { type: String, ref: 'Owner', required: true },
-  vetId: { type: String, ref: 'Vet', required: true },
-  visitDate: { type: Date, required: true },
-  reasonForVisit: { type: String, required: true },
-  symptoms: { type: String, required: true },//triệu chứng
-  diagnosis: { type: String, required: true },//chuẩn đoán
-  treatmentPlan: { type: String, required: true },//kế hoạch khám
-  notes: { type: String } //ghi chú
-}, { timestamps: true });
+  _id: {type: String, required: true},
+  petId: { type: String, ref: 'Pet', required: true }, // Reference to Pet document
+  ownerId: { type: String, ref: 'Owner', required: true }, // Reference to Owner document
+  vetId: { type: String, ref: 'Vet', required: true }, // Reference to Vet document
+  visitDate: { type: Date, required: true }, // Date of the medical record entry
+  reasonForVisit: { type: String, required: true }, // Reason for the pet's visit
+  symptoms: { type: String, required: true }, // Symptoms observed
+  diagnosis: { type: String, required: true }, // Diagnosis made by the veterinarian
+  treatmentPlan: { type: String, required: true }, // Treatment plan outlined
+  notes: { type: String }, // Additional notes
+}, { timestamps: true }); // Automatic timestamps for createdAt and updatedAt
 
-const Medic = mongoose.model('Medic', MedicSchema);
+const Medic = mongoose.model('Medic', MedicSchema, 'medicalrecords');
 
 export default Medic;
- 
