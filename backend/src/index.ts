@@ -14,9 +14,9 @@ import breedRoutes from "./routes/breed";
 import breedTypeRoutes from "./routes/breedType";
 import medicalRecordRoutes from "./routes/medicrecord";
 import serviceRoutes from "./routes/service";
-import vetRoutes from "./routes/vet"
-import bookingsRoutes from "./routes/bookings"
-
+import vetRoutes from "./routes/vet";
+import bookingsRoutes from "./routes/bookings";
+import recordsRoutes from "./routes/records";
 
 // import vetRoutes from "./routes/vet";
 import Stripe from "stripe";
@@ -59,7 +59,7 @@ app.use("/api/vet", vetRoutes);
 app.use('/api/medical-records', medicalRecordRoutes);
 app.use('/api/service', serviceRoutes);
 app.use('/api/bookings', bookingsRoutes);
-// app.use('/api/service',serviceRoutes)
+app.use('/api/records',recordsRoutes)
 
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

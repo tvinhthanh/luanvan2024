@@ -1,9 +1,10 @@
 import express, { Request, Response } from 'express';
-import medicalRecord from '../models/medicalRecord';
+import medicalRecord from '../models/medical';
 import vet from '../models/vet';
 import verifyToken from '../middleware/auth';
-import Medic from '../models/medicalRecord';
+import Medic from '../models/medical';
 import Vet from '../models/vet';
+import Record from '../models/records';
 const { v4: uuidv4 } = require('uuid');
 
 
@@ -22,15 +23,14 @@ router.get("/:vetId", verifyToken, async (req: Request, res: Response) => {
 });
 
 // Get a specific medical record by ID (for vet)
-router.get('/:medicId', verifyToken, async (req: Request, res: Response) => {
+router.get('/detail/:medicId', verifyToken, async (req: Request, res: Response) => {
   const { medicId } = req.params;
   try {
-    const medic = await Medic.findById(medicId);
+    const medic = await Medic.findById({_id: medicId});
     
     if (!medic) {
       return res.status(404).json({ error: 'Medical record not found' });
     }
-
     res.status(200).json(medic);
   } catch (error) {
     console.error('Error fetching medical record:', error);
@@ -69,9 +69,9 @@ router.put('/:id', verifyToken, async (req: Request, res: Response) => {
 });
 
 // Delete a medical record by ID (for vet)
-router.delete('/:id', verifyToken, async (req: Request, res: Response) => {
+router.delete('/del/:id', verifyToken, async (req: Request, res: Response) => {
   try {
-    const deletedMedic = await medicalRecord.findOneAndDelete({ _id: req.params.id, vetId: req.userId }); // Assuming vetId is obtained from the authenticated user
+    const deletedMedic = await medicalRecord.findOneAndDelete({ _id: req.params.id, vetId: req.userId });
     if (!deletedMedic) {
       return res.status(404).json({ error: 'Medical record not found' });
     }
@@ -81,16 +81,26 @@ router.delete('/:id', verifyToken, async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-// Create a new medical record
+//create
 router.post('/', verifyToken, async (req: Request, res: Response) => {
   try {
-    const { vetId, petId, ownerId, visitDate, reasonForVisit, symptoms, diagnosis, treatmentPlan, medications, notes } = req.body;
+    const { recordId, vetId, petId, ownerId, visitDate, reasonForVisit, symptoms, diagnosis, treatmentPlan, medications, notes } = req.body;
 
+    // Find existing medical record for the pet
+    const existingRecord = await Record.findOne({ petId });
+
+    // Check if existingRecord is null or undefined
+    if (!existingRecord) {
+      return res.status(400).json({ error: "Pet doesn't have a medical record. Please create one first." });
+    }
+
+    // Create a new instance of MedicalRecord
     const newMedicalRecord = new medicalRecord({
-      _id: uuidv4(), 
+      _id: uuidv4(),
       petId,
       ownerId,
-      vetId, // Assuming vetId is obtained from the authenticated user
+      vetId,
+      recordId,
       visitDate,
       reasonForVisit,
       symptoms,
@@ -100,22 +110,52 @@ router.post('/', verifyToken, async (req: Request, res: Response) => {
       notes,
     });
 
+    // Save the new MedicalRecord
     const savedMedicalRecord = await newMedicalRecord.save();
-    res.status(201).json(savedMedicalRecord);
-    
-    const vet = await Vet.findById(vetId);
-    if (!vet) {
+
+    // Update medicalRecords array for the pet
+    const updatedPet = await Record.findByIdAndUpdate(
+      existingRecord._id,
+      { $push: { medicId: savedMedicalRecord._id } },
+      { new: true }
+    );
+
+    if (!updatedPet) {
+      return res.status(404).json({ error: 'Pet not found' });
+    }
+
+    // Update medicalRecords array for the vet
+    const updatedVet = await Vet.findByIdAndUpdate(
+      vetId,
+      { $push: { medicalRecords: savedMedicalRecord._id } },
+      { new: true }
+    );
+
+    if (!updatedVet) {
       return res.status(404).json({ error: 'Vet not found' });
     }
 
-    vet.medicalRecord.push(newMedicalRecord);
-    await vet.save();
+    // Update medicalRecords array for the record (if needed)
+    const updatedRecord = await Record.findByIdAndUpdate(
+      recordId,
+      { $push: { medicalRecords: savedMedicalRecord._id } },
+      { new: true }
+    );
 
+    if (!updatedRecord) {
+      return res.status(404).json({ error: 'Record not found' });
+    }
+
+    // Return the saved MedicalRecord
+    res.status(201).json(savedMedicalRecord);
+    
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
 
 // Get all medical records for the authenticated user (vet)
 router.get('/all', verifyToken, async (req: Request, res: Response) => {

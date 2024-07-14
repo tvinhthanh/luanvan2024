@@ -27,13 +27,18 @@ import ManagerService from "./pages/Vet-Manager/Service/ManagerService";
 import MyVetInfo from "./pages/Vet-Manager/Vet/VetInform";
 import EditVet from "./pages/Vet-Manager/Vet/EditVet";
 // import ManagerBookingOfMyVet from "./pages/Vet-Manager/Booking/ManagerBooking";
-import ManagerMedic from "./pages/Vet-Manager/MedicalRecord/ManagerMedic";
+import ManagerMedic from "./pages/Vet-Manager/MedicalInfo/ManagerMedic";
 import ServicesList from "./pages/Vet-Manager/Service/ManagerService";
 import AddService from "./pages/Vet-Manager/Service/AddService";
 import AddBooking from "./pages/Vet-Manager/Booking/AddBooking";
 import DetailBooking from "./pages/Vet-Manager/Booking/DetailBooking";
-import MedicalRecordDetail from "./pages/Vet-Manager/MedicalRecord/MedicDetail";
-import AddMedicalRecord from "./pages/Vet-Manager/MedicalRecord/AddMedic";
+import MedicalRecordDetail from "./pages/Vet-Manager/MedicalInfo/MedicDetail";
+import AddMedicalRecord from "./pages/Vet-Manager/MedicalInfo/AddMedic";
+import RecordInfo from "./pages/Vet-Manager/Records/ManagerRecord";
+import ManagerRecord from "./pages/Vet-Manager/Records/ManagerRecord";
+import DetailRecords from "./pages/Vet-Manager/Records/DetailRecord";
+import AddRecords from "./pages/Vet-Manager/Records/AddRecord";
+import ManageMedications from "./pages/Vet-Manager/Medications/ManagerMed";
 
 const App = () => {
   const { isLoggedIn, userRole } = useAppContext();
@@ -108,12 +113,44 @@ const App = () => {
                   <MedicalRecordDetail />
                 </Layout>
               }
+            /> 
+            <Route
+              path="/record-info"
+              element={
+                <Layout>
+                  <ManagerRecord />
+                </Layout>
+              }
+            />
+            <Route
+              path="/details-record"
+              element={
+                <Layout>
+                  <DetailRecords />
+                </Layout>
+              }
+            />
+            <Route
+              path="/add-record"
+              element={
+                <Layout>
+                  <AddRecords />
+                </Layout>
+              }
             />
              <Route
               path="/add-medical"
               element={
                 <Layout>
                   <AddMedicalRecord />
+                </Layout>
+              }
+            />
+              <Route
+              path="/my-vet/med"
+              element={
+                <Layout>
+                  <ManageMedications />
                 </Layout>
               }
             />

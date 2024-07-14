@@ -12,7 +12,8 @@ const vetSchema = new mongoose.Schema({
   imageUrls: [{ type: String, required: true }],
   lastUpdated: { type: Date, required: true, default: Date.now },
   booking: [{type : [String],ref:'bookings', required: false}],
-  medicalRecord: [{type:[String], ref:'medicalrecords', required: false}]
+  medicalRecord: [{type:[String], ref:'medicalrecords', required: false}],
+  record: [{type:[String], ref:'records', required: false}]
 });
 
 const Vet = mongoose.model("vet", vetSchema, "vetC");

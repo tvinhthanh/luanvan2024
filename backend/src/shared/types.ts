@@ -129,6 +129,7 @@ export interface ServiceType {
 //   booking?: any[];
 // };
 export interface VetCType {
+  [x: string]: any;
   _id: string;
   name: string;
   address: string;
@@ -148,6 +149,7 @@ export interface MedicType {
   petId: string;
   ownerId: string;
   vetId: string;
+  recordId : string;
   visitDate: Date;
   reasonForVisit: string;
   symptoms: string;
@@ -158,7 +160,17 @@ export interface MedicType {
 }
 
 export interface MedicationType {
+  _id: string;
   name: string;
   dosage: string;
   instructions: string;
+  price: string;
+}
+
+export interface RecordType{
+  _id: string,
+  petId: string,
+  ownerId: string,
+  vetId: string,
+  medicId?: MedicType[],
 }

@@ -62,10 +62,42 @@ const Vet: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  Quản Lý Phiếu Khám
+                </h3>
+                <p className="mt-2 text-sm text-gray-500">
+                  Khởi tạo và quản lý phiếu khám của thú cưng.
+                </p>
+              </div>
+            </div>
+          </Link>
+          <Link
+            to="/record-info"
+            className="block p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+          >
+            <div className="flex items-center space-x-4">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-12 w-12 text-green-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-3 5h3m-6 0h.01M12 16h3m-6 0h.01M10 3v4h4V3h-4Z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg leading-6 font-medium text-gray-900">
                   Quản Lý Bệnh Án
                 </h3>
                 <p className="mt-2 text-sm text-gray-500">
-                  Theo dõi và quản lý bệnh án của thú cưng.
+                  Lưu trữ và quản lý bệnh án của thú cưng.
                 </p>
               </div>
             </div>
@@ -156,6 +188,37 @@ const Vet: React.FC = () => {
                 </h3>
                 <p className="mt-2 text-sm text-gray-500">
                   Xem và phân tích các số liệu thống kê.
+                </p>
+              </div>
+            </div>
+          </Link>
+          <Link
+            to="/my-vet/med"
+            className="block p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
+          >
+            <div className="flex items-center space-x-4">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-12 w-12 text-blue-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M18 9V4a1 1 0 0 0-1-1H8.914a1 1 0 0 0-.707.293L4.293 7.207A1 1 0 0 0 4 7.914V20a1 1 0 0 0 1 1h4M9 3v4a1 1 0 0 1-1 1H4m11 6v4m-2-2h4m3 0a5 5 0 1 1-10 0 5 5 0 0 1 10 0Z"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  Thuốc
+                </h3>
+                <p className="mt-2 text-sm text-gray-500">
+                  Quản lý chi tiết các loại thuốc của phòng khám.
                 </p>
               </div>
             </div>
