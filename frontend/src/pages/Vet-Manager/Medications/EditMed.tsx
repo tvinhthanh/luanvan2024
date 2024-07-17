@@ -1,14 +1,15 @@
 import React, { useState } from "react";
-import { useMutation, useQuery } from "react-query";
-import { useAppContext } from "../../../contexts/AppContext";
-import { useNavigate } from "react-router-dom";
+import { useQuery, useMutation } from "react-query";
+import { useNavigate, useParams } from "react-router-dom";
 import * as apiClient from "../../../api-client";
 import { MedicationType } from "../../../../../backend/src/shared/types";
 import Toast from "../../../components/Toast";
+import { useAppContext } from "../../../contexts/AppContext";
 
-const AddMed: React.FC = () => {
-  const { id_vet } = useAppContext();
+const EditMed: React.FC = () => {
   const navigate = useNavigate();
+  const {id_vet} = useAppContext();
+  const { medicationId } = useParams<{ medicationId?: string }>(); // Define medicationId as optional
 
   const [name, setName] = useState<string>("");
   const [dosage, setDosage] = useState<string>("");
@@ -24,51 +25,69 @@ const AddMed: React.FC = () => {
     "400ml 2 times per day, one time 200ml",
   ];
 
-  const { data: existingMedications = [], isLoading, error } = useQuery<MedicationType[]>(
-    ["fetchMedicationsForVet", id_vet],
-    () => apiClient.fetchMedicationsForVet(id_vet),
+  // Use useQuery to fetch medication data for editing
+  const { data: medication, isLoading, error } = useQuery<MedicationType>(
+    ["fetchMedication", medicationId],
+    () => apiClient.fetchMedicationsById(medicationId), // Ensure medicationId is defined before making the API call
     {
-      onError: (err) => {
-        console.error(`Error fetching medications for vet ${id_vet}:`, err);
+      onSuccess: (data) => {
+        setName(data.name);
+        setDosage(data.dosage);
+        setInstructions(data.instructions);
+        setPrice(data.price.toString());
       },
+      onError: (err) => {
+        console.error(`Error fetching medication ${medicationId}:`, err);
+      },
+      enabled: !!medicationId, // Only fetch if medicationId is defined
     }
   );
 
-  const addMedicationMutation = useMutation(
-    () => apiClient.addMedications(name, price, dosage, instructions, id_vet),
+  // Use useMutation to handle medication update
+  const editMedicationMutation = useMutation(
+    (updatedMedication: MedicationType) =>
+      apiClient.updateMedication(updatedMedication),
     {
       onSuccess: () => {
-        setToastMessage("Medication added successfully!");
+        setToastMessage("Medication updated successfully!");
         setToastType("SUCCESS");
-        setName("");
-        setPrice("0");
-        setDosage("");
-        setInstructions("");
-        navigate('/my-vet/med'); // Redirect to /my-vet/medication after success
+        navigate("/my-vet/medication");
       },
       onError: (error: Error) => {
-        setToastMessage("Error adding medication: " + error.message);
+        setToastMessage("Error updating medication: " + error.message);
         setToastType("ERROR");
       },
     }
   );
 
+  // Handle form submission
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    addMedicationMutation.mutate();
+    const updatedMedication: MedicationType = {
+      _id: medicationId || "", // Ensure medicationId is defined before using it
+      name,
+      dosage,
+      instructions,
+      price,
+      vetId: id_vet,
+    };
+    editMedicationMutation.mutate(updatedMedication);
   };
 
+  // Show loading message while fetching data
   if (isLoading) {
     return <span>Loading...</span>;
   }
 
+  // Show error message if fetching data fails
   if (error) {
-    return <span>Error loading medications</span>;
+    return <span>Error loading medication</span>;
   }
 
+  // Render edit medication form
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Add New Medication</h1>
+      <h1 className="text-2xl font-bold mb-6">Edit Medication</h1>
       <form onSubmit={handleSubmit} className="max-w-md">
         <div className="mb-4">
           <label htmlFor="name" className="block text-gray-700 font-bold mb-2">
@@ -95,7 +114,6 @@ const AddMed: React.FC = () => {
             onChange={(e) => setDosage(e.target.value)}
             required
           >
-            <option value="" disabled>Select dosage</option>
             {instructionOptions.map((option, index) => (
               <option key={index} value={option}>
                 {option}
@@ -136,10 +154,11 @@ const AddMed: React.FC = () => {
             type="submit"
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           >
-            Thêm Thuốc
+            Lưu lại
           </button>
         </div>
       </form>
+      {/* Display success or error message */}
       {toastMessage && (
         <Toast
           message={toastMessage}
@@ -151,4 +170,4 @@ const AddMed: React.FC = () => {
   );
 };
 
-export default AddMed;
+export default EditMed;

@@ -139,10 +139,10 @@ const DetailBooking: React.FC = () => {
 
           {/* Nút chuyển sang trang AddMedic.tsx */}
           <Link
-            to={`/add-medic/${bookingId}`} // Đường dẫn đến trang AddMedic.tsx với bookingId làm params
+            to={`/add-medical`} // Đường dẫn đến trang AddMedic.tsx với bookingId làm params
             className="bg-blue-500 text-white px-4 py-2 rounded mt-4 inline-block"
           >
-            Thêm đơn thuốc
+            Tạo phiếu khám
           </Link>
         </div>
       )}

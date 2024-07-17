@@ -11,9 +11,9 @@ export interface Pet {
   _id: string;
   name: string;
   age: string;
-  weigh: string;
+  weight: string;
   breed_id: string;
-  owner_id: string;
+  gmail: string;
   sex: string;
   breed_type: string;
   img: string;
@@ -65,9 +65,9 @@ export interface PetType {
   _id: string;
   name: string;
   age: string;
-  weigh: string;
+  weight: string;
   breed_id: string;
-  owner_id: string;
+  gmail: string;
   sex: string;
   breed_type: string;
   img: string;
@@ -142,6 +142,7 @@ export interface VetCType {
   description?: string;
   booking?: BookingType[];
   medicalrecord?: MedicType[];
+  medications?: MedicationType[];
 } 
 
 export interface MedicType {
@@ -165,6 +166,7 @@ export interface MedicationType {
   dosage: string;
   instructions: string;
   price: string;
+  vetId: string;
 }
 
 export interface RecordType{
@@ -173,4 +175,15 @@ export interface RecordType{
   ownerId: string,
   vetId: string,
   medicId?: MedicType[],
+}
+// Define interfaces for Invoice and related data types if not already defined
+export interface InvoiceType {
+  medicalRecordId: string;
+  ownerId: string;
+  petName: string;
+  vetId: string;
+  medications: MedicationType[]; // Assuming IDs of medications associated with the invoice
+  services: ServiceType[]; // Assuming IDs of services associated with the invoice
+  total: number;
+  createdAt: Date;
 }

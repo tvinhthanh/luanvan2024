@@ -9,7 +9,6 @@ import Booking from "../models/booking";
 
 const router = express.Router();
 
-
 // GET all bookings
 router.get("/", async (req, res) => {
   try {

@@ -1,19 +1,36 @@
-import React, { useState, useEffect } from "react";
-import { useQuery } from "react-query";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "react-query";
 import * as apiClient from "../../../api-client";
 import { RecordType, PetType, OwnerType } from "../../../../../backend/src/shared/types";
-import { Link } from "react-router-dom";
 import { useAppContext } from "../../../contexts/AppContext";
 import MyVetInfo from "../Vet/VetInfo";
 
 const ManagerRecord: React.FC = () => {
   const { id_vet } = useAppContext();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+
+  // Fetching records for the current vet using react-query
   const { data: records = [], isLoading, error } = useQuery<RecordType[]>(
     "fetchRecordForVet",
     () => apiClient.fetchRecordForVet(id_vet),
     {
       onError: (err) => {
         console.error("Error fetching records:", err);
+      },
+    }
+  );
+
+  // Mutation to delete a record
+  const deleteRecordMutation = useMutation(
+    (recordId: string) => apiClient.deleteRecordById(recordId),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries("fetchRecordForVet");
+      },
+      onError: (err) => {
+        console.error("Error deleting record:", err);
       },
     }
   );
@@ -25,7 +42,7 @@ const ManagerRecord: React.FC = () => {
   useEffect(() => {
     const fetchNames = async () => {
       try {
-        // Fetch pets, owners
+        // Fetch pets and owners
         const petsResponse = await apiClient.fetchpet();
         const ownersResponse = await apiClient.fetchOwner();
 
@@ -57,10 +74,17 @@ const ManagerRecord: React.FC = () => {
     return <span>Error loading records</span>;
   }
 
+  // Handle delete button click
+  const handleDelete = (recordId: string) => {
+    if (window.confirm("Are you sure you want to delete this record?")) {
+      deleteRecordMutation.mutate(recordId);
+    }
+  };
+
   return (
     <div className="container mx-auto p-4">
       <MyVetInfo />
-      <br/>
+      <br />
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Manager Records</h1>
         <Link to="/add-record">
@@ -73,7 +97,7 @@ const ManagerRecord: React.FC = () => {
         <table className="min-w-full bg-white border-collapse overflow-hidden border border-gray-300 rounded-lg shadow-md">
           <thead className="bg-gray-100 text-gray-700">
             <tr>
-            <th className="py-2 px-4 border-b border-gray-300">ID</th>
+              <th className="py-2 px-4 border-b border-gray-300">ID</th>
               <th className="py-2 px-4 border-b border-gray-300">Pet Name</th>
               <th className="py-2 px-4 border-b border-gray-300">Owner Name</th>
               <th className="py-2 px-4 border-b border-gray-300">Medical Records</th>
@@ -83,22 +107,31 @@ const ManagerRecord: React.FC = () => {
           <tbody className="text-gray-600">
             {records.map((record) => (
               <tr key={record._id}>
+                <td className="py-2 px-4 border-b border-gray-300">{record._id}</td>
+                <td className="py-2 px-4 border-b border-gray-300">{namesMap[record.petId] || `Pet ${record.petId}`}</td>
+                <td className="py-2 px-4 border-b border-gray-300">{namesMap[record.ownerId] || `Owner ${record.ownerId}`}</td>
+                <td className="py-2 px-4 border-b border-gray-300">{record.medicId?.length || 0}</td>
                 <td className="py-2 px-4 border-b border-gray-300">
-                  {namesMap[record._id] || `${record._id}`}
-                </td>
-                <td className="py-2 px-4 border-b border-gray-300">
-                  {namesMap[record.petId] || `Pet ${record.petId}`}
-                </td>
-                <td className="py-2 px-4 border-b border-gray-300">
-                  {namesMap[record.ownerId] || `Owner ${record.ownerId}`}
-                </td>
-                <td className="py-2 px-4 border-b border-gray-300">
-                  {record.medicId?.length}
-                </td>
-                <td className="py-2 px-4 border-b border-gray-300">
-                  <Link to={`/details-record`} className="text-blue-500 hover:underline">
+                  <button
+                    className="text-blue-500 hover:underline"
+                    onClick={() =>
+                      navigate(`/details-record`, {
+                        state: {
+                          recordId: record._id,
+                          petId: record.petId || `Pet ${record.petId}`,
+                          ownerId: record.ownerId || `Owner ${record.ownerId}`,
+                        },
+                      })
+                    }
+                  >
                     View Details
-                  </Link>
+                  </button>
+                  <button
+                    className="text-red-500 hover:underline ml-4"
+                    onClick={() => handleDelete(record._id)}
+                  >
+                    Delete
+                  </button>
                 </td>
               </tr>
             ))}

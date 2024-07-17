@@ -13,10 +13,10 @@ export const getAllPets = async (req: Request, res: Response) => {
 };
 
 export const createPet = async (req: Request, res: Response) => {
-  const { name, type, age, weigh, breed_id, owner_id, sex, breed_type, img } = req.body;
+  const { name, type, age, weight, breed_id, owner_id, sex, breed_type, img } = req.body;
   try {
     // Example hashing the password, adjust as needed
-    const newPet = new Pet({ name, type, age, weigh, breed_id, owner_id, sex, breed_type, img });
+    const newPet = new Pet({ name, type, age, weight, breed_id, owner_id, sex, breed_type, img });
     await newPet.save();
     res.status(201).json(newPet);
   } catch (err) {
@@ -26,9 +26,9 @@ export const createPet = async (req: Request, res: Response) => {
 
 export const updatePet = async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { name, type, age, weigh, breed_id, owner_id, sex, breed_type, img } = req.body;
+  const { name, type, age, weight, breed_id, owner_id, sex, breed_type, img } = req.body;
   try {
-    const updateData: any = { name, type, age, weigh, breed_id, owner_id, sex, breed_type, img };
+    const updateData: any = { name, type, age, weight, breed_id, owner_id, sex, breed_type, img };
     const updatedPet = await Pet.findByIdAndUpdate(id, updateData, { new: true });
     res.status(200).json(updatedPet);
   } catch (err) {

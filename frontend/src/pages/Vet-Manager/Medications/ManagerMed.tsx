@@ -5,14 +5,16 @@ import { MedicationType } from "../../../../../backend/src/shared/types";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { Link } from "react-router-dom";
+import { useAppContext } from "../../../contexts/AppContext";
 
 const ManageMedications: React.FC = () => {
+  const { id_vet } = useAppContext();
   const queryClient = useQueryClient();
 
   // Fetch medications query
   const { data: medications = [], isLoading, error } = useQuery<MedicationType[]>(
     "fetchMedications",
-    apiClient.fetchMedications,
+    () => apiClient.fetchMedicationsForVet(id_vet),
     {
       onError: (err) => {
         console.error("Error fetching medications:", err);
@@ -20,10 +22,11 @@ const ManageMedications: React.FC = () => {
     }
   );
 
+
   // Mutation for deleting medication
   const deleteMedicationMutation = useMutation(apiClient.deleteMedication, {
     onSuccess: () => {
-      queryClient.invalidateQueries("fetchMedications"); // Invalidate cache to trigger refetch
+      queryClient.invalidateQueries("fetchMedicationsForVet"); // Invalidate cache to trigger refetch
     },
     onError: (error: Error) => {
       console.error("Error deleting medication:", error);
@@ -41,31 +44,27 @@ const ManageMedications: React.FC = () => {
     }
   };
 
-  if (isLoading) {
-    return <span>Loading...</span>;
-  }
-
-  if (error) {
-    return <span>Error loading medications</span>;
-  }
-
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Manage Medications</h1>
-        <Link to="/add-medication" className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
-          <FontAwesomeIcon icon={faPlus} className="mr-2" /> Add Medication
+        <h1 className="text-2xl font-bold">Quản Lý Thuốc</h1>
+        <Link to="/add-med" className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600">
+          <FontAwesomeIcon icon={faPlus} className="mr-2" /> Thêm Thuốc
         </Link>
       </div>
 
-      {medications.length > 0 ? (
+      {isLoading ? (
+        <span>Loading...</span>
+      ) : error ? (
+        <span>Error loading medications</span>
+      ) : medications.length > 0 ? (
         <table className="min-w-full bg-white border border-gray-200">
           <thead>
             <tr>
-              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Name</th>
-              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Dosage</th>
-              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Instructions</th>
-              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Price</th>
+              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Tên</th>
+              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Liều lượng</th>
+              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Hướng dẫn sử dụng</th>
+              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Giá</th>
               <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Actions</th>
             </tr>
           </thead>

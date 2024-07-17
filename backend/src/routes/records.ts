@@ -3,6 +3,7 @@ import express from 'express';
 import { Request, Response } from 'express';
 import Record from '../models/records'; // Import your Mongoose model here
 import verifyToken from '../middleware/auth';
+import Vet from '../models/vet';
 
 // Create an Express Router
 const router = express.Router();
@@ -60,6 +61,15 @@ router.post('/', verifyToken, async (req: Request, res: Response) => {
       vetId,
     });
 
+    const updatedVet = await Vet.findByIdAndUpdate(
+      vetId,
+      { $push: { record: newRecord._id } },
+      { new: true }
+    );
+
+    if (!updatedVet) {
+      return res.status(404).json({ error: 'Vet not found' });
+    }
     await newRecord.save();
     res.status(201).json(newRecord);
   } catch (error) {

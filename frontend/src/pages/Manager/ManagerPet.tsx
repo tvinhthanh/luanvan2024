@@ -55,7 +55,7 @@ const ManagerPet: React.FC = () => {
   // Create a map of ownerId to ownerName for quick lookup
   const ownerMap = new Map<string, string>();
   owners?.forEach((owner) => {
-    ownerMap.set(owner._id, owner.name);
+    ownerMap.set(owner.email, owner.name);
   });
 
   // Create a map of breedId to breedName for quick lookup
@@ -67,7 +67,7 @@ const ManagerPet: React.FC = () => {
   console.log(ownerMap)
   
   // Filter pets by selected owner
-  const filteredPets = selectedOwner ? pets?.filter((pet) => pet.owner_id === selectedOwner) : pets;
+  const filteredPets = selectedOwner ? pets?.filter((pet:any) => pet.gmail === selectedOwner) : pets;
 
   // Display the form and list of pets
   return (
@@ -114,9 +114,9 @@ const ManagerPet: React.FC = () => {
             <tr key={pet._id}>
               <td className="px-6 py-4 whitespace-nowrap">{pet.name}</td>
               <td className="px-6 py-4 whitespace-nowrap">{pet.age}</td>
-              <td className="px-6 py-4 whitespace-nowrap">{pet.weigh}</td>
+              <td className="px-6 py-4 whitespace-nowrap">{pet.weight}</td>
               <td className="px-6 py-4 whitespace-nowrap">{breedMap.get(pet.breed_id) || 'Unknown'}</td>
-              <td className="px-6 py-4 whitespace-nowrap">{ownerMap.get(pet.owner_id) || 'Unknown'}</td>
+              <td className="px-6 py-4 whitespace-nowrap">{ownerMap.get(pet.gmail) || 'Unknown'}</td>
               <td className="px-6 py-4 whitespace-nowrap">{pet.sex}</td>
               <td className="px-6 py-4 whitespace-nowrap">{pet.breed_type}</td>
               <td className="px-6 py-4 whitespace-nowrap">

@@ -5,7 +5,7 @@ import { VetCType } from "../../../../../backend/src/shared/types";
 import { useAppContext } from "../../../contexts/AppContext";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlus } from "@fortawesome/free-solid-svg-icons";
+import { faAddressCard, faAppleWhole, faAtlas, faPlus } from "@fortawesome/free-solid-svg-icons";
 import BookingsForVet from "./BookingsForVet";
 
 const Mybooking: React.FC = () => {
@@ -59,7 +59,12 @@ const Mybooking: React.FC = () => {
           >
             <FontAwesomeIcon icon={faPlus} className="mr-2" /> Add Booking
           </Link>
-
+          <Link
+            to={`/manager-booking?vetId=${vet._id}`} // Pass vetId as a query parameter
+            className="bg-green-500 text-white p-2 rounded hover:bg-red-600 flex items-center mt-4"
+          >
+            <FontAwesomeIcon icon={faAtlas} className="mr-2" /> Manager Booking
+          </Link>
           {/* Display bookings related to each vet */}
           <h2 className="flex items-center justify-between text-2xl font-bold mt-5">
             Bookings

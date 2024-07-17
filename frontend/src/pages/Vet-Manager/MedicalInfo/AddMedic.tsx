@@ -8,9 +8,10 @@ import { useAppContext } from "../../../contexts/AppContext";
 const AddMedicalRecord: React.FC = () => {
   const { id_vet } = useAppContext();
   const [petId, setPetId] = useState("");
-  const [ownerId, setOwnerId] = useState("");
+  const [ownerId, setOwnerId] = useState(""); // Initialize ownerId state
+  const [ownerEmail, setOwnerEmail] = useState("");
   const [recordId, setRecordId] = useState<string>(""); // State for recordId
-  const [visitDate, setVisitDate] = useState("");
+  const [visitDate] = useState("");
   const [reasonForVisit, setReasonForVisit] = useState("");
   const [symptoms, setSymptoms] = useState("");
   const [diagnosis, setDiagnosis] = useState("");
@@ -18,9 +19,12 @@ const AddMedicalRecord: React.FC = () => {
   const [medications, setMedications] = useState<MedicationType[]>([]);
   const [notes, setNotes] = useState("");
   const [pets, setPets] = useState<PetType[]>([]);
+  const [selectedMedicationId, setSelectedMedicationId] = useState<string>(""); // State for selected medication ID
+
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  // Fetch owners
   const { data: owners = [], isLoading: isOwnersLoading, error: ownersError } = useQuery<OwnerType[]>(
     "fetchOwners",
     apiClient.fetchOwner,
@@ -31,11 +35,24 @@ const AddMedicalRecord: React.FC = () => {
     }
   );
 
+  // Fetch available medications for the vet
+  const { data: availableMedications = [], isLoading: isMedicationsLoading, error: medicationsError } = useQuery<MedicationType[]>(
+    ["fetchMedications", id_vet],
+    () => apiClient.fetchMedicationsForVet(id_vet),
+    {
+      enabled: !!id_vet,
+      onError: (err) => {
+        console.error("Error fetching medications:", err);
+      },
+    }
+  );
+
+  // Fetch pets by owner email when ownerEmail changes
   useEffect(() => {
     const fetchPets = async () => {
-      if (ownerId) {
+      if (ownerEmail) {
         try {
-          const fetchedPets = await apiClient.fetchPetByOwnerId(ownerId);
+          const fetchedPets: PetType[] = await apiClient.fetchPetByOwnerId(ownerEmail);
           setPets(fetchedPets);
         } catch (error) {
           console.error("Error fetching pets:", error);
@@ -46,31 +63,28 @@ const AddMedicalRecord: React.FC = () => {
     };
 
     fetchPets();
-  }, [ownerId]);
+  }, [ownerEmail]);
 
+  // Fetch records by petId when petId changes
   useEffect(() => {
     const fetchRecords = async () => {
       try {
         if (petId) {
           const fetchedRecords: RecordType[] = await apiClient.fetchRecordsByPet(petId);
-          console.log("Fetched records:", fetchedRecords); // Debug: Log fetched records
-          if (fetchedRecords.length === 1) {
-            setRecordId(fetchedRecords[0]._id); // Set the record's id if only one record exists
-          } else {
-            setRecordId(""); // No records found or multiple records found
-          }
+          setRecordId(fetchedRecords.length === 1 ? fetchedRecords[0]._id : "");
         } else {
           setRecordId("");
         }
       } catch (error) {
         console.error("Error fetching records:", error);
-        // Handle the error appropriately, e.g., show a message to the user
+        // Handle the error
       }
     };
-  
+
     fetchRecords();
   }, [petId]);
-  
+
+  // Mutation for adding a new medical record
   const addMedicalRecordMutation = useMutation(apiClient.createMedicalRecord, {
     onSuccess: () => {
       queryClient.invalidateQueries(["fetchMedicalRecordsForVet", id_vet]);
@@ -78,10 +92,11 @@ const AddMedicalRecord: React.FC = () => {
     },
   });
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!recordId) {
-      alert("Record ID is required");
+    if (!recordId || !reasonForVisit) {
+      alert("Please fill out all required fields.");
       return;
     }
 
@@ -91,13 +106,13 @@ const AddMedicalRecord: React.FC = () => {
         petId,
         ownerId,
         vetId: id_vet,
-        recordId, // Assign recordId from state
+        recordId,
         visitDate: new Date(visitDate),
         reasonForVisit,
         symptoms,
         diagnosis,
         treatmentPlan,
-        medications,
+        medications, // Ensure medications are of type MedicationType[]
         notes,
       };
 
@@ -107,25 +122,32 @@ const AddMedicalRecord: React.FC = () => {
     }
   };
 
-  if (isOwnersLoading) {
-    return <span>Loading owners...</span>;
+  // Handle removing a medication from the list
+  const handleRemoveMedication = (index: number) => {
+    const updatedMedications = [...medications];
+    updatedMedications.splice(index, 1);
+    setMedications(updatedMedications);
+  };
+
+  // Handle owner selection change
+  const handleOwnerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedOwnerEmail = e.target.value;
+    setOwnerEmail(selectedOwnerEmail);
+    const selectedOwner = owners.find((owner) => owner.email === selectedOwnerEmail);
+    setOwnerId(selectedOwner ? selectedOwner._id : "");
+  };
+
+  // Render loading state
+  if (isOwnersLoading || isMedicationsLoading) {
+    return <span>Loading...</span>;
   }
 
-  if (ownersError) {
-    return <span>Error loading owners</span>;
+  // Render error state
+  if (ownersError || medicationsError) {
+    return <span>Error loading data</span>;
   }
 
-  // const handleAddMedication = () => {
-  //   setMedications([...medications, {_ name: "", dosage: "", instructions: "" }]);
-  // };
-
-  // const handleMedicationChange = (index: number, field: string, value: string) => {
-  //   const updatedMedications = medications.map((medication, i) =>
-  //     i === index ? { ...medication, [field]: value } : medication
-  //   );
-  //   setMedications(updatedMedications);
-  // };
-
+  // Render the form once data is loaded
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">Add Medical Record</h1>
@@ -133,20 +155,20 @@ const AddMedicalRecord: React.FC = () => {
         <div>
           <label className="block text-sm font-medium text-gray-700">Owner</label>
           <select
-            value={ownerId}
-            onChange={(e) => setOwnerId(e.target.value)}
+            value={ownerEmail}
+            onChange={handleOwnerChange}
             className="mt-1 block w-full border border-gray-300 rounded-md p-2"
             required
           >
             <option value="">Select Owner</option>
             {owners.map((owner) => (
-              <option key={owner._id} value={owner._id}>
-                {owner.name}
+              <option key={owner._id} value={owner.email}>
+                {owner.name} - {owner.email}
               </option>
             ))}
           </select>
         </div>
-        {ownerId && (
+        {ownerEmail && (
           <div>
             <label className="block text-sm font-medium text-gray-700">Pet</label>
             <select
@@ -170,21 +192,11 @@ const AddMedicalRecord: React.FC = () => {
             <input
               type="text"
               value={recordId}
-              readOnly // Make the input read-only
+              readOnly
               className="mt-1 block w-full border border-gray-300 rounded-md p-2"
             />
           </div>
         )}
-        <div>
-          <label className="block text-sm font-medium text-gray-700">Visit Date</label>
-          <input
-            type="date"
-            value={visitDate}
-            onChange={(e) => setVisitDate(e.target.value)}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
-            required
-          />
-        </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Reason for Visit</label>
           <input
@@ -223,43 +235,62 @@ const AddMedicalRecord: React.FC = () => {
           />
         </div>
         <div>
-          {/* <label className="block text-sm font-medium text-gray-700">Medications</label>
+          <label className="block text-sm font-medium text-gray-700">Medications</label>
+          <select
+            value={selectedMedicationId}
+            onChange={(e) => setSelectedMedicationId(e.target.value)}
+            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+            required
+          >
+            <option value="">Select Medication</option>
+            {availableMedications.map((medication) => (
+              <option key={medication._id} value={medication._id}>
+                {medication.name} - {medication.dosage} - {medication.instructions}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            onClick={() => {
+              const selectedMed = availableMedications.find((med) => med._id === selectedMedicationId);
+              if (selectedMed) {
+                setMedications([...medications, selectedMed]);
+              }
+            }}
+            className="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md"
+          >
+            Add Medication
+          </button>
           {medications.map((medication, index) => (
             <div key={index} className="mt-2 flex space-x-2">
               <input
                 type="text"
                 value={medication.name}
-                onChange={(e) => handleMedicationChange(index, "name", e.target.value)}
-                placeholder="Name"
+                readOnly
                 className="block w-1/3 border border-gray-300 rounded-md p-2"
-                required
               />
               <input
                 type="text"
                 value={medication.dosage}
-                onChange={(e) => handleMedicationChange(index, "dosage", e.target.value)}
-                placeholder="Dosage"
+                readOnly
                 className="block w-1/3 border border-gray-300 rounded-md p-2"
-                required
               />
               <input
                 type="text"
                 value={medication.instructions}
-                onChange={(e) => handleMedicationChange(index, "instructions", e.target.value)}
-                placeholder="Instructions"
+                readOnly
                 className="block w-1/3 border border-gray-300 rounded-md p-2"
-                required
               />
+              <button
+                type="button"
+                onClick={() => handleRemoveMedication(index)}
+                className="bg-red-500 text-white px-4 py-1 rounded-md ml-2"
+              >
+                Remove
+              </button>
             </div>
           ))}
-          {/* <button
-            type="button"
-            onClick={handleAddMedication}
-            className="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md"
-          >
-            Add Medication
-          </button> */}
-        </div> 
+        </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Notes</label>
           <textarea

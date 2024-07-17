@@ -10,5 +10,5 @@ const ownerSchema = new mongoose.Schema({
   img: { type: String, required: true }
   });
 
-const Owner = mongoose.model("owner", ownerSchema, "owner");
+const Owner = mongoose.model("owner", ownerSchema, "usersApp");
 export default Owner;

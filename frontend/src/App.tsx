@@ -34,14 +34,16 @@ import AddBooking from "./pages/Vet-Manager/Booking/AddBooking";
 import DetailBooking from "./pages/Vet-Manager/Booking/DetailBooking";
 import MedicalRecordDetail from "./pages/Vet-Manager/MedicalInfo/MedicDetail";
 import AddMedicalRecord from "./pages/Vet-Manager/MedicalInfo/AddMedic";
-import RecordInfo from "./pages/Vet-Manager/Records/ManagerRecord";
 import ManagerRecord from "./pages/Vet-Manager/Records/ManagerRecord";
 import DetailRecords from "./pages/Vet-Manager/Records/DetailRecord";
 import AddRecords from "./pages/Vet-Manager/Records/AddRecord";
 import ManageMedications from "./pages/Vet-Manager/Medications/ManagerMed";
+import AddMed from "./pages/Vet-Manager/Medications/AddMed";
+import CreateInvoice from "./pages/Vet-Manager/Recept/AddInvoid";
+import ManagerBooking from "./pages/Vet-Manager/Booking/ManagerBooking";
 
 const App = () => {
-  const { isLoggedIn, userRole } = useAppContext();
+  const { isLoggedIn, userRole,id_vet } = useAppContext();
   return (
     <Router>
       <Routes>
@@ -113,7 +115,16 @@ const App = () => {
                   <MedicalRecordDetail />
                 </Layout>
               }
-            /> 
+            />
+            <Route
+              path="/create-invoice"
+              element={
+                <Layout>
+                  <CreateInvoice />
+                </Layout>
+              }
+            />
+
             <Route
               path="/record-info"
               element={
@@ -138,7 +149,7 @@ const App = () => {
                 </Layout>
               }
             />
-             <Route
+            <Route
               path="/add-medical"
               element={
                 <Layout>
@@ -146,11 +157,19 @@ const App = () => {
                 </Layout>
               }
             />
-              <Route
+            <Route
               path="/my-vet/med"
               element={
                 <Layout>
                   <ManageMedications />
+                </Layout>
+              }
+            />
+            <Route
+              path="/add-med"
+              element={
+                <Layout>
+                  <AddMed />
                 </Layout>
               }
             />
@@ -282,6 +301,14 @@ const App = () => {
               element={
                 <Layout>
                   <AddBooking />
+                </Layout>
+              }
+            />
+             <Route
+              path="/manager-booking"
+              element={
+                <Layout>
+                  <ManagerBooking vetId={id_vet} />
                 </Layout>
               }
             />

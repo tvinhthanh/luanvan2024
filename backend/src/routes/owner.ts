@@ -53,7 +53,22 @@ router.post("/register", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+// Fetch owner by ID
+router.get('/:ownerId', async (req, res) => {
+  try {
+    const { ownerId } = req.params;
+    const owner = await Owner.findById(ownerId);
 
+    if (!owner) {
+      return res.status(404).json({ message: 'Owner not found' });
+    }
+
+    res.json(owner);
+  } catch (error) {
+    console.error('Error fetching owner by ID:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
 // Endpoint hiển thị thông tin Pet
 router.get("/pet/:petId", async (req: Request, res: Response) => {
   const petId = req.params.petId ?? '';

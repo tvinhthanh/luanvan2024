@@ -1,114 +1,112 @@
-import React, { useEffect, useState } from "react";
-import { useQuery } from "react-query";
+// DetailRecords.tsx
+
+import React, { useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { RecordType, PetType, OwnerType } from "../../../../../backend/src/shared/types";
+import { PetType, OwnerType, MedicType } from "../../../../../backend/src/shared/types";
 import * as apiClient from "../../../api-client";
 import MyVetInfo from "../Vet/VetInfo";
+import { useQuery } from "react-query";
 
 const DetailRecords: React.FC = () => {
   const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const vetId = queryParams.get("vetId") || "";
-  const petId = queryParams.get("petId") || "";
-  const medicId = queryParams.get("medicId") || "";
-  const ownerId = queryParams.get("ownerId") || "";
-  const recordId = queryParams.get("recordId") || "";
+  const { petId, ownerId } = location.state || {};
 
-  const { data: record, isLoading, error } = useQuery<RecordType>(
-    "fetchRecordDetails",
-    () => apiClient.fetchRecordById(recordId),
-    {
-      enabled: !!recordId, // Ensure recordId is present before fetching
-      onError: (err) => {
-        console.error("Error fetching record details:", err);
-      },
-    }
+  // Fetch pet details
+  const { data: pet, error: petError, isLoading: petLoading } = useQuery<PetType>(
+    ["fetchPet", petId],
+    () => apiClient.fetchPetById(petId)
   );
 
-  // State to store pet and owner names
-  const [petName, setPetName] = useState<string>("");
-  const [ownerName, setOwnerName] = useState<string>("");
+  // Fetch owner details
+  const { data: owner, error: ownerError, isLoading: ownerLoading } = useQuery<OwnerType>(
+    ["fetchOwner", ownerId],
+    () => apiClient.fetchOwnerById(ownerId)
+  );
 
-  // Fetch pet and owner names
+  // Fetch medical records
+  const { data: medicalRecords, error: medicalRecordsError, isLoading: medicalRecordsLoading } = useQuery<MedicType[]>(
+    ["fetchMedicalRecords", petId],
+    () => apiClient.fetchMedicalRecordsByPet(petId)
+  );
+
   useEffect(() => {
-    const fetchNames = async () => {
-      try {
-        const petResponse = await apiClient.fetchPetbyId(petId);
-        const ownerResponse = await apiClient.fetchOwnerById(ownerId);
-
-        setPetName(petResponse.name);
-        setOwnerName(ownerResponse.name);
-      } catch (error) {
-        console.error("Error fetching pet or owner details:", error);
-      }
-    };
-
-    fetchNames();
-  }, [petId, ownerId]);
-
-  if (isLoading) {
-    return <span>Loading...</span>;
-  }
-
-  if (error) {
-    return <span>Error loading record details</span>;
-  }
+    // Optional: Any side effects or additional logic here
+  }, [pet, owner, medicalRecords]);
 
   return (
     <div className="max-w-4xl mx-auto p-4 grid gap-6">
-      <h1 className="text-3xl font-bold mb-4">Patient Record</h1>
-
-      {/* Grid container for the first row */}
       <div className="grid grid-cols-3 gap-4">
         <div className="bg-white shadow-md rounded-lg p-6">
-          <h2 className="text-2xl font-semibold mb-2">{petName}</h2>
+          <h2 className="text-2xl font-semibold mb-2">
+            <div className="container mx-auto p-4">
+              <p className="mx-auto">
+                {pet?.img || "N/A"}
+              </p>
+            </div>
+          </h2>
         </div>
-
         <div className="col-span-2 bg-white shadow-md rounded-lg p-6">
-        <MyVetInfo/>
+          <MyVetInfo />
         </div>
       </div>
-
-      {/* Grid container for the second row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Column 1 */}
         <div className="bg-white shadow-md rounded-lg p-6 col-span-1 mb-6">
-          <MyVetInfo/>
+          <p>
+            <strong>Tên:</strong> {pet?.name || "N/A"}
+          </p>
+          <p>
+            <strong>Tuổi:</strong> {pet?.age || "N/A"}
+          </p>
+          <p>
+            <strong>Giống:</strong> {pet?.breed_type || "N/A"}
+          </p>
+          <p>
+            <strong>Loại:</strong> {pet?.breed_id || "N/A"}
+          </p>
+          <p>
+            <strong>Cân nặng:</strong> {pet?.weight || "N/A"}
+          </p>
+          <p>
+            <strong>Giới tính:</strong> {pet?.sex || "N/A"}
+          </p>
+          <p>
+            <strong>Hình ảnh:</strong> {pet?.img || "N/A"}
+          </p>
         </div>
-
-        {/* Column 2 */}
         <div className="bg-white shadow-md rounded-lg p-6 col-span-3 mb-6">
-          <h2 className="text-2xl font-semibold mb-2">Center</h2>
+          <h2 className="text-2xl font-semibold mb-2">Lịch sử bệnh án</h2>
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-100">
               <tr>
-                <th className="py-2 px-4">Header 1</th>
-                <th className="py-2 px-4">Header 2</th>
-                <th className="py-2 px-4">Header 1</th>
-                <th className="py-2 px-4">Header 2</th>
+              <th className="py-2 px-4">Pet ID</th>
+                <th className="py-2 px-4">Ngày khám</th>
+                <th className="py-2 px-4">Lí do</th>
+                <th className="py-2 px-4">Kế hoạch điều trị</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              <tr>
-                <td className="py-2 px-4">Data 1</td>
-                <td className="py-2 px-4">Data 2</td>
-                <td className="py-2 px-4">Data 1</td>
-                <td className="py-2 px-4">Data 2</td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4">Data 3</td>
-                <td className="py-2 px-4">Data 4</td>
-                <td className="py-2 px-4">Data 1</td>
-                <td className="py-2 px-4">Data 2</td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4">Data 3</td>
-                <td className="py-2 px-4">Data 4</td>
-              </tr>
-              <tr>
-                <td className="py-2 px-4">Data 3</td>
-                <td className="py-2 px-4">Data 4</td>
-              </tr>
+              {medicalRecords?.map((record: any) => (
+                <tr key={record._id}>
+                  <td className="py-2 px-4">{record.petId}</td>
+                  <td className="py-2 px-4">{new Date(record.visitDate).toLocaleDateString()}</td>
+                  <td className="py-2 px-4">{record.reasonForVisit}</td>
+                  <td className="py-2 px-4">{record.treatmentPlan}</td>
+                </tr>
+              ))}
+              {medicalRecordsError && (
+                <tr>
+                  <td className="py-2 px-4" colSpan={4}>
+                    Error fetching medical records:
+                  </td>
+                </tr>
+              )}
+              {!medicalRecordsLoading && !medicalRecords && !medicalRecordsError && (
+                <tr>
+                  <td className="py-2 px-4" colSpan={4}>
+                    No medical records found.
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

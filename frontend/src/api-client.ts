@@ -2,9 +2,12 @@ import { RegisterFormData } from "./pages/Register";
 import { SignInFormData } from "./pages/SignIn";
 import {
   BookingType,
+  InvoiceType,
   MedicType,
   MedicationType,
+  OwnerType,
   Pet,
+  PetType,
   RecordType,
   ServiceType,
   UserType,
@@ -242,26 +245,26 @@ export const updatePet = async (petId: string, petData: FormData) => {
 
   return response.json();
 };
-export const fetchpet = async (): Promise<Pet[]> => {
+export const fetchpet = async (): Promise<PetType[]> => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/pet`);
     if (!response.ok) {
       throw new Error("Failed to fetch pet");
     }
     const data = await response.json();
-    return data as Pet[]; // Đảm bảo rằng dữ liệu được trả về là một mảng của các đối tượng Pet
+    return data as PetType[]; // Đảm bảo rằng dữ liệu được trả về là một mảng của các đối tượng Pet
   } catch (error) {
     throw new Error("Failed to fetch pet"); // Xử lý lỗi nếu cần thiết
   }
 };
-export const fetchPetByOwnerId = async (ownerId: string): Promise<Pet[]> => {
+export const fetchPetByOwnerId = async (ownerId: string): Promise<PetType[]> => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/pet/${ownerId}`);
     if (!response.ok) {
       throw new Error("Failed to fetch pets");
     }
     const data = await response.json();
-    return data as Pet[]; // Đảm bảo rằng dữ liệu được trả về là một mảng các đối tượng Pet
+    return data as PetType[]; // Đảm bảo rằng dữ liệu được trả về là một mảng các đối tượng Pet
   } catch (error) {
     throw new Error("Failed to fetch pets"); // Xử lý lỗi nếu cần thiết
   }
@@ -757,7 +760,6 @@ export const deleteBooking = async (bookingId: string) => {
   return response.json();
 };
 
-// Hàm gọi API để tạo bản ghi y tế mới
 export const createMedicalRecord = async (medicalRecordData: any) => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/medical-records`, {
@@ -768,9 +770,11 @@ export const createMedicalRecord = async (medicalRecordData: any) => {
       credentials: "include",
       body: JSON.stringify(medicalRecordData),
     });
+
     if (!response.ok) {
       throw new Error("Failed to create medical record");
     }
+
     return await response.json();
   } catch (error) {
     console.error("Error creating medical record:", error);
@@ -835,14 +839,9 @@ export const updateMedicalRecord = async (
 
 export const deleteMedicalRecord = async (medicalRecordId: string) => {
   try {
-    const response = await fetch(
-      `${API_BASE_URL}/api/medical-records/del/${medicalRecordId}`, // Ensure there's a slash (/) before 'api'
+    const response = await fetch(`${API_BASE_URL}/api/medical-records/detail/${medicalRecordId}`,
       {
         method: "DELETE",
-        credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-        },
       }
     );
     if (!response.ok) {
@@ -965,9 +964,17 @@ export async function fetchRecordForVet(vetId: string): Promise<RecordType[]> {
     throw error;
   }
 }
-export const fetchPetbyId = async (petId: string): Promise<string[]> => {
+export const deleteRecordById = async (recordId: string): Promise<void> => {
+  const response = await fetch(`${API_BASE_URL}/api/records/${recordId}`, {
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error("Failed to delete record");
+  }
+};
+export const fetchPetById = async (petId: string): Promise<PetType> => {
   try {
-    const response = await fetch(`/api/pet/${petId}`);
+    const response = await fetch(`${API_BASE_URL}/api/pet/detail/${petId}`);
     if (!response.ok) {
       throw new Error("Failed to fetch records by pet.");
     }
@@ -978,6 +985,41 @@ export const fetchPetbyId = async (petId: string): Promise<string[]> => {
     throw error;
   }
 };
+
+export const fetchOwnerById = async (ownerId: string): Promise<OwnerType> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/owner/${ownerId}`);
+    if (!response.ok) {
+      throw new Error("Failed to fetch records by pet.");
+    }
+    const data = await response.json(); // Parse JSON response
+    return data; // Return array of recordIds
+  } catch (error) {
+    console.error("Error fetching records by pet:", error);
+    throw error;
+  }
+};
+export const fetchMedicalRecordsByPet = async (petId: string): Promise<RecordType[]> => {
+  try {
+    // Gửi yêu cầu GET đến API endpoint của backend
+    const response = await fetch(`${API_BASE_URL}/api/medical-records/by-pet/${petId}`);
+
+    // Kiểm tra nếu phản hồi thành công (status code 200-299)
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    // Phân tích nội dung JSON từ phản hồi
+    const data = await response.json();
+
+    // Trả về dữ liệu đã phân tích, giả sử đây là một mảng các đối tượng RecordType
+    return data as RecordType[];
+  } catch (error) {
+    // Ném ra lỗi nếu có bất kỳ lỗi mạng hoặc lỗi phân tích nào xảy ra
+    throw new Error(`Error fetching records: ${error}`);
+  }
+};
+
 export const fetchRecordsByPet = async (petId: string): Promise<RecordType[]> => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/records/by-pet/${petId}`);
@@ -1046,32 +1088,168 @@ export async function deleteRecord(recordId: string): Promise<void> {
   }
 }
 //med
-export async function fetchMedications(): Promise<MedicationType[]> {
-  const response = await fetch(`${API_BASE_URL}/med`);
+export async function fetchMedicationsForVet(vetId: string): Promise<MedicationType[]> {
+  const response = await fetch(`${API_BASE_URL}/api/medications/${vetId}`,{
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  });
   if (!response.ok) {
     throw new Error('Failed to fetch medications');
   }
   return response.json();
 }
-
-export async function addMedication(medication: Partial<MedicationType>): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/med`, {
-    method: 'POST',
+export async function fetchMedicationsById(medId: string): Promise<MedicationType[]> {
+  const response = await fetch(`${API_BASE_URL}/api/medications/med/${medId}`,{
+    method: 'GET',
+    credentials: 'include',
     headers: {
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(medication),
   });
   if (!response.ok) {
-    throw new Error('Failed to add medication');
+    throw new Error('Failed to fetch medications');
   }
+  return response.json();
 }
+export async function fetchMedicationsByRecordId(recordId: string): Promise<MedicationType[]> {
+  const response = await fetch(`${API_BASE_URL}/api/medications/${recordId}`,{
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  });
+  if (!response.ok) {
+    throw new Error('Failed to fetch medications');
+  }
+  return response.json();
+}
+export async function fetchMedicationsByIds(medId: string[]): Promise<MedicationType[]> {
+  const response = await fetch(`${API_BASE_URL}/api/medications/med/${medId}`,{
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  });
+  if (!response.ok) {
+    throw new Error('Failed to fetch medications');
+  }
+  return response.json();
+}
+export const addMedications = async (
+  name: string,
+  price: string,
+  dosage: string,
+  instructions: string,
+  vetId: string
+) => {
+  const response = await fetch(`${API_BASE_URL}/api/medications/${vetId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include", // Ensure cookies are sent with the request
+    body: JSON.stringify({ name, price, dosage, instructions, vetId }),
+  });
 
+  if (!response.ok) {
+    throw new Error("Error adding medications");
+  }
+
+  return response.json();
+};
 export async function deleteMedication(medicationId: string): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/med/${medicationId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/medications/${medicationId}`, {
     method: 'DELETE',
+    credentials: 'include'
   });
   if (!response.ok) {
     throw new Error('Failed to delete medication');
   }
 }
+export const updateMedication = async (medication: MedicationType): Promise<MedicationType> => {
+  const response = await fetch(`${API_BASE_URL}/api/medications/${medication._id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(medication),
+  });
+  if (!response.ok) {
+    throw new Error("Failed to update service");
+  }
+  return response.json();
+};
+export const createInvoice = async (invoiceData: InvoiceType) => {
+  const response = await fetch(`${API_BASE_URL}/api/invoices`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(invoiceData),
+  });
+
+  if (!response.ok) {
+    throw new Error('Error creating invoice');
+  }
+
+  return response.json();
+};
+
+// Lấy danh sách tất cả các hóa đơn
+export const fetchInvoices = async () => {
+  const response = await fetch(`${API_BASE_URL}/api/invoices`);
+
+  if (!response.ok) {
+    throw new Error('Error fetching invoices');
+  }
+
+  return response.json();
+};
+
+// Lấy thông tin chi tiết của một hóa đơn theo ID
+export const fetchInvoiceById = async (id: string) => {
+  const response = await fetch(`${API_BASE_URL}/api/invoices/${id}`);
+
+  if (!response.ok) {
+    throw new Error('Error fetching invoice');
+  }
+
+  return response.json();
+};
+
+// Cập nhật thông tin của một hóa đơn theo ID
+export const updateInvoice = async (id: string, invoiceData: InvoiceType) => {
+  const response = await fetch(`${API_BASE_URL}/api/invoices/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(invoiceData),
+  });
+
+  if (!response.ok) {
+    throw new Error('Error updating invoice');
+  }
+
+  return response.json();
+};
+
+// Xóa một hóa đơn theo ID
+export const deleteInvoice = async (id: string) => {
+  const response = await fetch(`${API_BASE_URL}/api/invoices/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    throw new Error('Error deleting invoice');
+  }
+
+  return response.json();
+};
