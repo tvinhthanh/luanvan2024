@@ -53,23 +53,31 @@ const ManagerBooking: React.FC<Props> = ({ vetId }) => {
     return <span>No bookings found</span>;
   }
 
-  // Function to filter bookings by status
+  // Function to filter and sort bookings by status and date
   const filteredBookings = filterStatus
     ? bookings.filter((booking) => booking.status === filterStatus)
     : bookings;
 
-    const getStatusText = (status: number) => {
-      switch (status) {
-        case 1:
-          return <span className="text-yellow-500">Đang chờ</span>;
-        case 2:
-          return <span className="text-green-500">Đã xác nhận</span>;
-        case 3:
-          return <span className="text-gray-500">Hoàn thành</span>;
-        default:
-          return <span className="text-red-500">Unknown</span>;
-      }
-    };
+  const sortedBookings = [...filteredBookings].sort((a, b) => {
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    return dateB - dateA; // Sort in descending order
+  });
+
+  const getStatusText = (status: number) => {
+    switch (status) {
+      case 0:
+        return <span className="text-yellow-500">Đang chờ xác nhận</span>;
+      case 1:
+        return <span className="text-red-500">Từ chối</span>;
+      case 2:
+        return <span className="text-green-500">Đã xác nhận</span>;
+      case 3:
+        return <span className="text-gray-500">Hoàn thành</span>;
+      default:
+        return <span className="text-red-500">Unknown</span>;
+    }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -86,9 +94,9 @@ const ManagerBooking: React.FC<Props> = ({ vetId }) => {
           </tr>
         </thead>
         <tbody>
-          {filteredBookings.map((booking) => {
+          {sortedBookings.map((booking) => {
             const owner = owners.find((owner) => owner._id === booking.ownerId);
-            const isCompleted = booking.status === 1 || booking.status === 2; // Check if booking status is Completed
+            const isCompleted = booking.status === 1 || booking.status === 2 || booking.status === 0; // Check if booking status is Completed
 
             // Find the pet by petId
             const pet = pets.find((pet) => pet._id === booking.petId);

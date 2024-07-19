@@ -179,7 +179,8 @@ const MedicalRecordDetail: React.FC = () => {
       </button>
       <button
         onClick={handleCreateInvoice}
-        className="bg-green-500 text-white px-4 py-2 rounded-md mt-4 ml-2"
+        className={`bg-green-500 text-white px-4 py-2 rounded-md mt-4 ml-2 ${medicalRecord.hasInvoice ? 'opacity-50 cursor-not-allowed' : ''}`}
+        disabled={medicalRecord.hasInvoice ? true : undefined}
       >
         Create Invoice
       </button>

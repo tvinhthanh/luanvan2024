@@ -3,6 +3,7 @@ import verifyToken from '../middleware/auth';
 import Medic from '../models/medications'; // Import Medic model
 import Vet from '../models/vet';
 import medicalRecords from '../models/medical';
+import Medication from '../models/medications';
 
 
 const router = express.Router();
@@ -13,7 +14,7 @@ router.post('/:vetId', verifyToken, async (req, res) => {
     
     try {
       const { name, dosage, instructions, price } = req.body;
-      const lastMedication = await Medic.findOne({}).sort({ _id: -1 }).limit(1);
+      const lastMedication = await Medication.findOne({}).sort({ _id: -1 }).limit(1);
 
     let newMedicationId;
     if (lastMedication) {
@@ -24,13 +25,13 @@ router.post('/:vetId', verifyToken, async (req, res) => {
       newMedicationId = 1;
     }
       // Check if medication with the same name already exists for the vet
-      const existingMedication = await Medic.findOne({ name, vetId });
+      const existingMedication = await Medication.findOne({ name, vetId });
       if (existingMedication) {
         return res.status(400).json({ error: 'Medication with this name already exists for this vet.' });
       }
   
       // Create a new medication instance
-      const newMedication = new Medic({ _id: newMedicationId, name, dosage, instructions, price, vetId });
+      const newMedication = new Medication({ _id: newMedicationId, name, dosage, instructions, price, vetId });
   
       // Save the new medication to the database
       const savedMedication = await newMedication.save();
@@ -56,7 +57,7 @@ router.get('/:vetId', verifyToken, async (req, res) => {
   const { vetId } = req.params;
 
   try {
-    const medications = await Medic.find({ vetId });
+    const medications = await Medication.find({ vetId });
     res.status(200).json(medications);
   } catch (error) {
     console.error('Error fetching medications:', error);
@@ -67,7 +68,7 @@ router.get('/:vetId', verifyToken, async (req, res) => {
 // Get all medications (for admin or general purpose)
 router.get('/', verifyToken, async (req, res) => {
   try {
-    const medications = await Medic.find();
+    const medications = await Medication.find();
     res.status(200).json(medications);
   } catch (error) {
     console.error('Error fetching medications:', error);
@@ -78,7 +79,7 @@ router.get('/', verifyToken, async (req, res) => {
 // Get a medication by id
 router.get('/med/:id', verifyToken, async (req, res) => {
   try {
-    const medication = await Medic.findById(req.params.id);
+    const medication = await Medication.findById(req.params.id);
     if (!medication) {
       return res.status(404).json({ message: 'Medication not found' });
     }
@@ -95,7 +96,7 @@ router.put('/:id', verifyToken, async (req, res) => {
   const { name, dosage, instructions, price, vetId } = req.body;
 
   try {
-    const updatedMedication = await Medic.findByIdAndUpdate(
+    const updatedMedication = await Medication.findByIdAndUpdate(
       id,
       { name, dosage, instructions, price,vetId },
       { new: true }
@@ -121,7 +122,7 @@ router.put('/:id', verifyToken, async (req, res) => {
 // Delete a medication by id
 router.delete('/:id', verifyToken, async (req, res) => {
   try {
-    const deletedMedication = await Medic.findByIdAndDelete(req.params.id);
+    const deletedMedication = await Medication.findByIdAndDelete(req.params.id);
     if (!deletedMedication) {
       return res.status(404).json({ message: 'Medication not found' });
     }

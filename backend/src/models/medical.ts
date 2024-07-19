@@ -12,7 +12,8 @@ const MedicSchema = new mongoose.Schema({
   diagnosis: { type: String, required: true }, // Diagnosis made by the veterinarian
   treatmentPlan: { type: String, required: true }, // Treatment plan outlined
   notes: { type: String }, // Additional notes
-  medications: [{ type: String, ref: 'Medication' }] // Reference to Medication documents
+  medications: [{ type: String, ref: 'Medication' }], // Reference to Medication documents
+  hasInvoice: {type : Boolean, default: false}
 }, { timestamps: true });
 
 const Medic = mongoose.model('Medic', MedicSchema, 'medicalrecords');

@@ -13,7 +13,7 @@ const ManageMedications: React.FC = () => {
 
   // Fetch medications query
   const { data: medications = [], isLoading, error } = useQuery<MedicationType[]>(
-    "fetchMedications",
+    ["fetchMedicationsForVet", id_vet],
     () => apiClient.fetchMedicationsForVet(id_vet),
     {
       onError: (err) => {
@@ -22,11 +22,10 @@ const ManageMedications: React.FC = () => {
     }
   );
 
-
   // Mutation for deleting medication
   const deleteMedicationMutation = useMutation(apiClient.deleteMedication, {
     onSuccess: () => {
-      queryClient.invalidateQueries("fetchMedicationsForVet"); // Invalidate cache to trigger refetch
+      queryClient.invalidateQueries(["fetchMedicationsForVet", id_vet]); // Invalidate cache to trigger refetch
     },
     onError: (error: Error) => {
       console.error("Error deleting medication:", error);
@@ -76,7 +75,13 @@ const ManageMedications: React.FC = () => {
                 <td className="px-4 py-2 border-b">{medication.instructions}</td>
                 <td className="px-4 py-2 border-b">{medication.price}$</td>
                 <td className="px-4 py-2 border-b">
-                  <button className="mr-2 px-2 py-1 bg-blue-500 text-white rounded">Edit</button>
+                  <Link
+                    to= {`/edit-med/${medication._id}`}
+                    state= { {medication} }
+                    className="mr-2 px-2 py-1 bg-blue-500 text-white rounded"
+                  >
+                    Edit
+                  </Link>
                   <button
                     onClick={() => handleDelete(medication._id)}
                     className="px-2 py-1 bg-red-500 text-white rounded"

@@ -33,7 +33,7 @@ const ManagerUser = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleUpdate = (e: React.FormEvent) => {
     e.preventDefault();
     const form = new FormData();
     form.append("name", formData.name);
@@ -82,10 +82,11 @@ const ManagerUser = () => {
   if (error) {
     return <div>Error loading users</div>;
   }
+  const nonAdminUsers = users.filter((user: any) => !user.isAdmin);
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">User Management</h1>
+      <h1 className="text-2xl font-bold mb-4">Host Management</h1>
       
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
@@ -97,18 +98,30 @@ const ManagerUser = () => {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {users.map((user: any) => (
+          {nonAdminUsers.map((user: any) => (
             <tr key={user._id} className="cursor-pointer hover:bg-gray-100" onClick={() => handleRowClick(user)}>
               <td className="px-6 py-4 whitespace-nowrap">{user.firstName} {user.lastName}</td>
               <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
               <td className="px-6 py-4 whitespace-nowrap">{user.isAdmin ? 'Admin' : 'Host'}</td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <button
-                  onClick={(e) => { e.stopPropagation(); handleDelete(user._id); }}
-                  className="inline-flex items-center px-2 py-1 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:border-red-700 focus:ring focus:ring-red-200 disabled:opacity-25 transition"
-                >
-                  Delete
-                </button>
+                {!user.isAdmin && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleDelete(user._id); }}
+                    className="inline-flex items-center px-2 py-1 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:border-red-700 focus:ring focus:ring-red-200 disabled:opacity-25 transition"
+                  >
+                    Delete
+                  </button>
+                  
+                )}
+                {!user.isAdmin && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); handleEdit(user._id); }}
+                    className="inline-flex items-center px-2 py-1 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:border-red-700 focus:ring focus:ring-red-200 disabled:opacity-25 transition"
+                  >
+                    Reset Password
+                  </button>
+                  
+                )}
               </td>
             </tr>
           ))}
@@ -120,10 +133,7 @@ const ManagerUser = () => {
         <UserDetail user={selectedUser} onClose={handleCloseDetail} />
       )}
     </div>
-    
   );
-  
 };
-
 
 export default ManagerUser;

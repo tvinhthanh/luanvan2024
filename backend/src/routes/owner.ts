@@ -53,7 +53,7 @@ router.post("/register", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
-// Fetch owner by ID
+//get name by id owner
 router.get('/:ownerId', async (req, res) => {
   try {
     const { ownerId } = req.params;
@@ -62,8 +62,8 @@ router.get('/:ownerId', async (req, res) => {
     if (!owner) {
       return res.status(404).json({ message: 'Owner not found' });
     }
-
-    res.json(owner);
+    // Return only the name property
+    res.json({ name: owner.name });
   } catch (error) {
     console.error('Error fetching owner by ID:', error);
     res.status(500).json({ message: 'Server error' });

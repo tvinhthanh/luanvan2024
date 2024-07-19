@@ -42,7 +42,7 @@ const VetDetails: React.FC<VetDetailsProps> = ({ vet, onClose }) => {
           <p><strong>Name:</strong> {vet.name}</p>
           <p><strong>Address:</strong> {vet.address}</p>
           <p><strong>Phone:</strong> {vet.phone}</p>
-          <p><strong>Service:</strong> {vet.service}</p>
+          <p><strong>Service:</strong> {vet.service.name}</p>
           {vet.image && (
             <img src={vet.image} alt={`${vet.name}'s image`} className="mt-4 w-32 h-32 object-cover rounded-full" />
           )}

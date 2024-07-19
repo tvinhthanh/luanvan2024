@@ -1101,7 +1101,7 @@ export async function fetchMedicationsForVet(vetId: string): Promise<MedicationT
   }
   return response.json();
 }
-export async function fetchMedicationsById(medId: string): Promise<MedicationType[]> {
+export async function fetchMedicationsById(medId: string): Promise<MedicationType> {
   const response = await fetch(`${API_BASE_URL}/api/medications/med/${medId}`,{
     method: 'GET',
     credentials: 'include',
@@ -1249,6 +1249,19 @@ export const deleteInvoice = async (id: string) => {
 
   if (!response.ok) {
     throw new Error('Error deleting invoice');
+  }
+
+  return response.json();
+};
+
+export const fetchInvoicesForVet = async (vetId: string) => {
+  const response = await fetch(`${API_BASE_URL}/api/invoices/${vetId}`,{
+    method: 'GET',
+    credentials: 'include'
+  });
+
+  if (!response.ok) {
+    throw new Error('Error fetching invoices');
   }
 
   return response.json();

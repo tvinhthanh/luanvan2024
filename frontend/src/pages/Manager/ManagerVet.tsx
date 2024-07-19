@@ -9,7 +9,10 @@ const ManagerVet: React.FC = () => {
   const [selectedVet, setSelectedVet] = useState<VetCType | null>(null);
 
   // Fetching the list of vets
-  const { data: vets, error, isLoading } = useQuery<VetCType[], Error>("fetchVets", apiClient.fetchVet);
+  const { data: vets, error, isLoading } = useQuery<VetCType[], Error>(
+    "fetchVets",
+    apiClient.fetchVet
+  );
 
   // Mutation for deleting a vet
   const deleteVetMutation = useMutation(apiClient.deleteVet, {
@@ -42,18 +45,34 @@ const ManagerVet: React.FC = () => {
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specialty</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Updated</th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Name
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Address
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Last Updated
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Actions
+            </th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {vets?.map((vet: VetCType) => (
-            <tr key={vet._id} onClick={() => setSelectedVet(vet)} className="cursor-pointer">
+            <tr
+              key={vet._id}
+              onClick={() => setSelectedVet(vet)}
+              className="cursor-pointer"
+            >
               <td className="px-6 py-4 whitespace-nowrap">{vet.name}</td>
-              <td className="px-6 py-4 whitespace-nowrap">{vet.specialty}</td>
-              <td className="px-6 py-4 whitespace-nowrap">{vet.lastUpdated ? new Date(vet.lastUpdated).toLocaleDateString() : 'N/A'}</td>
+              <td className="px-6 py-4 whitespace-nowrap">{vet.address}</td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                {vet.lastUpdated
+                  ? new Date(vet.lastUpdated).toLocaleDateString()
+                  : "N/A"}
+              </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <button
                   onClick={(e) => {

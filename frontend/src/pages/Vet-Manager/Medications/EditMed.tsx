@@ -1,171 +1,90 @@
-import React, { useState } from "react";
-import { useQuery, useMutation } from "react-query";
-import { useNavigate, useParams } from "react-router-dom";
-import * as apiClient from "../../../api-client";
-import { MedicationType } from "../../../../../backend/src/shared/types";
-import Toast from "../../../components/Toast";
-import { useAppContext } from "../../../contexts/AppContext";
+import React, { useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import * as apiClient from '../../../api-client';
+import { MedicationType } from '../../../../../backend/src/shared/types';
+import { toast } from 'react-toastify';
+import { useAppContext } from '../../../contexts/AppContext';
 
 const EditMed: React.FC = () => {
+  const location = useLocation();
   const navigate = useNavigate();
-  const {id_vet} = useAppContext();
-  const { medicationId } = useParams<{ medicationId?: string }>(); // Define medicationId as optional
+  const { id_vet } = useAppContext();
 
-  const [name, setName] = useState<string>("");
-  const [dosage, setDosage] = useState<string>("");
-  const [instructions, setInstructions] = useState<string>("");
-  const [price, setPrice] = useState<string>("0");
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [toastType, setToastType] = useState<"SUCCESS" | "ERROR">("SUCCESS");
+  // Get the state passed via the Link component
+  const { medication } = location.state as { medication: MedicationType };
 
-  const instructionOptions = [
-    "200ml 2 times per day",
-    "300ml 3 times per day, one time 100ml",
-    "200ml 1 time per day",
-    "400ml 2 times per day, one time 200ml",
-  ];
+  // Initialize state variables with medication data
+  const [name, setName] = useState(medication.name);
+  const [dosage, setDosage] = useState(medication.dosage);
+  const [instructions, setInstructions] = useState(medication.instructions);
+  const [price, setPrice] = useState(medication.price.toString());
+  const [error, setError] = useState<string | null>(null);
 
-  // Use useQuery to fetch medication data for editing
-  const { data: medication, isLoading, error } = useQuery<MedicationType>(
-    ["fetchMedication", medicationId],
-    () => apiClient.fetchMedicationsById(medicationId), // Ensure medicationId is defined before making the API call
-    {
-      onSuccess: (data) => {
-        setName(data.name);
-        setDosage(data.dosage);
-        setInstructions(data.instructions);
-        setPrice(data.price.toString());
-      },
-      onError: (err) => {
-        console.error(`Error fetching medication ${medicationId}:`, err);
-      },
-      enabled: !!medicationId, // Only fetch if medicationId is defined
-    }
-  );
-
-  // Use useMutation to handle medication update
-  const editMedicationMutation = useMutation(
-    (updatedMedication: MedicationType) =>
-      apiClient.updateMedication(updatedMedication),
-    {
-      onSuccess: () => {
-        setToastMessage("Medication updated successfully!");
-        setToastType("SUCCESS");
-        navigate("/my-vet/medication");
-      },
-      onError: (error: Error) => {
-        setToastMessage("Error updating medication: " + error.message);
-        setToastType("ERROR");
-      },
-    }
-  );
-
-  // Handle form submission
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  // Function to handle form submission
+  const handleUpdate = async (event: React.FormEvent) => {
     event.preventDefault();
-    const updatedMedication: MedicationType = {
-      _id: medicationId || "", // Ensure medicationId is defined before using it
-      name,
-      dosage,
-      instructions,
-      price,
-      vetId: id_vet,
-    };
-    editMedicationMutation.mutate(updatedMedication);
+
+    try {
+      // Call API to update medication information
+      const updatedMedication: MedicationType = {
+        _id: medication._id,
+        name,
+        dosage,
+        instructions,
+        price: price,
+        vetId: id_vet,
+      };
+      await apiClient.updateMedication(updatedMedication);
+      // Show success toast and navigate back
+      toast.success('Medication updated successfully!');
+      navigate('/my-vet/med');
+    } catch (err) {
+      // Handle error
+      setError('Error updating medication');
+      toast.error('Error updating medication');
+    }
   };
 
-  // Show loading message while fetching data
-  if (isLoading) {
-    return <span>Loading...</span>;
-  }
-
-  // Show error message if fetching data fails
-  if (error) {
-    return <span>Error loading medication</span>;
-  }
-
-  // Render edit medication form
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Edit Medication</h1>
-      <form onSubmit={handleSubmit} className="max-w-md">
-        <div className="mb-4">
-          <label htmlFor="name" className="block text-gray-700 font-bold mb-2">
-            Tên thuốc
-          </label>
-          <input
-            type="text"
-            id="name"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            placeholder="Enter medication name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="dosage" className="block text-gray-700 font-bold mb-2">
-            Liều lượng
-          </label>
-          <select
-            id="dosage"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            value={dosage}
-            onChange={(e) => setDosage(e.target.value)}
-            required
-          >
-            {instructionOptions.map((option, index) => (
-              <option key={index} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="mb-4">
-          <label htmlFor="instructions" className="block text-gray-700 font-bold mb-2">
-            Hướng dẫn sử dụng
-          </label>
-          <input
-            type="text"
-            id="instructions"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            placeholder="Enter instructions"
-            value={instructions}
-            onChange={(e) => setInstructions(e.target.value)}
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="price" className="block text-gray-700 font-bold mb-2">
-            Giá
-          </label>
-          <input
-            type="number"
-            id="price"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            placeholder="Enter price"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            required
-          />
-        </div>
-        <div className="flex items-center justify-center">
-          <button
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-          >
-            Lưu lại
-          </button>
-        </div>
-      </form>
-      {/* Display success or error message */}
-      {toastMessage && (
-        <Toast
-          message={toastMessage}
-          type={toastType}
-          onClose={() => setToastMessage(null)}
+    <div className="container mx-auto mt-8">
+      <h1 className="text-2xl font-bold">Edit Medication</h1>
+      {error && <div className="text-red-500">{error}</div>}
+      <form onSubmit={handleUpdate} className="flex flex-col space-y-4">
+        <input
+          type="text"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="border border-gray-300 rounded-md p-2"
         />
-      )}
+        <input
+          type="text"
+          placeholder="Dosage"
+          value={dosage}
+          onChange={(e) => setDosage(e.target.value)}
+          className="border border-gray-300 rounded-md p-2"
+        />
+        <input
+          type="text"
+          placeholder="Instructions"
+          value={instructions}
+          onChange={(e) => setInstructions(e.target.value)}
+          className="border border-gray-300 rounded-md p-2"
+        />
+        <input
+          type="number"
+          placeholder="Price"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+          className="border border-gray-300 rounded-md p-2"
+        />
+        <button
+          type="submit"
+          className="py-2 px-4 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
+        >
+          Update Medication
+        </button>
+      </form>
     </div>
   );
 };

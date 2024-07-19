@@ -9,6 +9,6 @@ const MedicationsSchema = new mongoose.Schema({
   price: { type: String, required: true },
 });
 
-const Medic = mongoose.model("Medications", MedicationsSchema, "medications");
+const Medication = mongoose.model("Medication", MedicationsSchema, "medications");
 
-export default Medic;
+export default Medication;

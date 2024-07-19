@@ -60,21 +60,25 @@ const BookingsForVet: React.FC<Props> = ({ vetId }) => {
 
   const getStatusText = (status: number) => {
     switch (status) {
+      case 0:
+        return <span className="text-yellow-500">Đang chờ xác nhận</span>;
       case 1:
-        return "Pending";
+        return <span className="text-red-500">Từ chối</span>;
       case 2:
-        return "Confirmed";
+        return <span className="text-green-500">Đã xác nhận</span>;
       case 3:
-        return "Completed";
+        return <span className="text-gray-500">Hoàn thành</span>;
       default:
-        return "Unknown";
+        return <span className="text-red-500">Unknown</span>;
     }
   };
 
   const getStatusColor = (status: number) => {
     switch (status) {
-      case 1:
+      case 0:
         return "bg-yellow-100";
+      case 1:
+        return "bg-red-100";
       case 2:
         return "bg-green-100";
       case 3:
@@ -83,6 +87,16 @@ const BookingsForVet: React.FC<Props> = ({ vetId }) => {
         return "bg-red-100";
     }
   };
+
+  // Sắp xếp theo trạng thái và sau đó theo ngày
+  const sortedBookings = [...filteredBookings].sort((a, b) => {
+    if (a.status !== b.status) {
+      return a.status - b.status; // Sắp xếp theo trạng thái tăng dần
+    }
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    return dateB - dateA; // Sắp xếp theo ngày giảm dần
+  });
 
   return (
     <div className="space-y-3">
@@ -97,16 +111,17 @@ const BookingsForVet: React.FC<Props> = ({ vetId }) => {
           className="mt-1 block w-full border border-gray-300 rounded-md p-2"
         >
           <option value="">All</option>
+          <option value="0">Cancel</option>
           <option value="1">Pending</option>
           <option value="2">Confirmed</option>
           <option value="3">Completed</option>
         </select>
       </div>
 
-      {filteredBookings.map((booking) => {
+      {sortedBookings.map((booking) => {
         const owner = owners.find((owner) => owner._id === booking.ownerId);
-        const statusColor = getStatusColor(booking.status);
         const isCompleted = booking.status === 3; // Check if booking status is Completed
+        const statusColor = getStatusColor(booking.status);
 
         // Find the pet by petId
         const pet = pets.find((pet) => pet._id === booking.petId);
@@ -136,7 +151,7 @@ const BookingsForVet: React.FC<Props> = ({ vetId }) => {
                 </p>
               </div>
             ) : (
-              <Link to={`/bookings/${booking._id}`} className="text-500">
+              <Link to={`/bookings/${booking._id}`} className="text-blue-500 hover:underline">
                 <h3 className="text-lg font-bold">Booking for {pet ? pet.name : `Owner's Phone: ${owner?.phone}`}</h3>
                 <p>
                   <strong>Date:</strong> {new Date(booking.date).toLocaleDateString()}

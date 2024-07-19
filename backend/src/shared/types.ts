@@ -158,6 +158,7 @@ export interface MedicType {
   treatmentPlan: string;
   notes?: string;
   medications: MedicationType[]; // Add this line
+  hasInvoice: Boolean;
 }
 
 export interface MedicationType {
@@ -178,6 +179,7 @@ export interface RecordType{
 }
 // Define interfaces for Invoice and related data types if not already defined
 export interface InvoiceType {
+  _id: string;
   medicalRecordId: string;
   ownerId: string;
   petName: string;

@@ -47,7 +47,7 @@ const AddInvoice: React.FC = () => {
     {
       onSuccess: (invoice) => {
         console.log("Invoice created:", invoice);
-        navigate(`/invoices/${invoice._id}`); // Redirect to invoice page after creation
+        navigate(`/manager-invoice`); // Redirect to invoice page after creation
       },
       onError: (error: Error) => {
         console.error("Error creating invoice:", error);
@@ -94,10 +94,6 @@ const AddInvoice: React.FC = () => {
 
     const medicationObjects = medications.map((medication) => ({
       _id: medication._id,
-      // name: medication.name,
-      // dosage: medication.dosage,
-      // instructions: medication.instructions,
-      // price: medication.price,
     }));
 
     const invoiceData: InvoiceType = {

@@ -55,7 +55,7 @@ const ManagerPet: React.FC = () => {
   // Create a map of ownerId to ownerName for quick lookup
   const ownerMap = new Map<string, string>();
   owners?.forEach((owner) => {
-    ownerMap.set(owner.email, owner.name);
+    ownerMap.set(owner._id, owner.name);
   });
 
   // Create a map of breedId to breedName for quick lookup
@@ -63,11 +63,9 @@ const ManagerPet: React.FC = () => {
   breedTypes?.forEach((breed) => {
     breedMap.set(breed._id, breed.name);
   });
-  console.log(breedMap)
-  console.log(ownerMap)
-  
+
   // Filter pets by selected owner
-  const filteredPets = selectedOwner ? pets?.filter((pet:any) => pet.gmail === selectedOwner) : pets;
+  const filteredPets = selectedOwner ? pets?.filter((pet) => pet.gmail === selectedOwner) : pets;
 
   // Display the form and list of pets
   return (

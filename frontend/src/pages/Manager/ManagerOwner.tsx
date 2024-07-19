@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import * as apiClient from "../../api-client";
 import OwnerDetails from '../../components/detail/ownerDetail';
+import ManagerUser from "./ManagerUser";
 
 const ManagerOwner = () => {
   const queryClient = useQueryClient();

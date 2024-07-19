@@ -69,14 +69,16 @@ const DetailBooking: React.FC = () => {
 
   const getStatusText = (status: number) => {
     switch (status) {
-      case 1:
-        return <span className="text-yellow-500">Đang chờ</span>;
-      case 2:
-        return <span className="text-green-500">Đã xác nhận</span>;
-      case 3:
-        return <span className="text-gray-500">Hoàn thành</span>;
-      default:
-        return <span className="text-red-500">Unknown</span>;
+      case 0:
+          return <span className="text-yellow-500">Đang chờ xác nhận</span>;
+        case 1:
+          return <span className="red-yellow-500">Từ chối</span>;
+        case 2:
+          return <span className="text-green-500">Đã xác nhận</span>;
+        case 3:
+          return <span className="text-gray-500">Hoàn thành</span>;
+        default:
+          return <span className="text-red-500">Unknown</span>;
     }
   };
 
@@ -124,6 +126,7 @@ const DetailBooking: React.FC = () => {
               className="mt-1 block w-full border border-gray-300 rounded-md p-2"
             >
               <option value="">Chọn trạng thái...</option>
+              <option value="0">Huỷ</option>
               <option value="1">Đang chờ</option>
               <option value="2">Đã xác nhận</option>
               <option value="3">Hoàn thành</option>
@@ -142,7 +145,7 @@ const DetailBooking: React.FC = () => {
             to={`/add-medical`} // Đường dẫn đến trang AddMedic.tsx với bookingId làm params
             className="bg-blue-500 text-white px-4 py-2 rounded mt-4 inline-block"
           >
-            Tạo phiếu khám
+            Tạo bệnh án
           </Link>
         </div>
       )}
