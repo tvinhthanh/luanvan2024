@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useQuery } from "react-query";
 import * as apiClient from "../../../api-client";
-import { BookingType, OwnerType, PetType } from "../../../../../backend/src/shared/types"; // Make sure PetType is imported
+import { BookingType, OwnerType, PetType } from "../../../../../backend/src/shared/types";
 import { Link } from "react-router-dom";
 
 interface Props {
@@ -10,6 +10,7 @@ interface Props {
 
 const ManagerBooking: React.FC<Props> = ({ vetId }) => {
   const [filterStatus, setFilterStatus] = useState<number | null>(null); // State for filtering by status
+  const [filterDate, setFilterDate] = useState<string | null>(null); // State for filtering by date
 
   const { data: bookings, isLoading, error } = useQuery<BookingType[]>(
     ["fetchBookingsForVet", vetId],
@@ -54,9 +55,14 @@ const ManagerBooking: React.FC<Props> = ({ vetId }) => {
   }
 
   // Function to filter and sort bookings by status and date
-  const filteredBookings = filterStatus
-    ? bookings.filter((booking) => booking.status === filterStatus)
-    : bookings;
+  const filteredBookings = bookings.filter((booking) => {
+    const matchesStatus = filterStatus ? booking.status === filterStatus : true;
+    const matchesDate = filterDate
+      ? new Date(booking.date).toLocaleDateString() === new Date(filterDate).toLocaleDateString()
+      : true;
+
+    return matchesStatus && matchesDate;
+  });
 
   const sortedBookings = [...filteredBookings].sort((a, b) => {
     const dateA = new Date(a.date).getTime();
@@ -82,6 +88,31 @@ const ManagerBooking: React.FC<Props> = ({ vetId }) => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-4">Manager Bookings</h1>
+      
+      {/* Filter UI */}
+      <div className="mb-4">
+        <label className="mr-2">Filter by Status:</label>
+        <select
+          value={filterStatus ?? ""}
+          onChange={(e) => setFilterStatus(parseInt(e.target.value))}
+          className="mr-4 border border-gray-300 rounded p-2"
+        >
+          <option value="">All Statuses</option>
+          <option value="0">Đang chờ xác nhận</option>
+          <option value="1">Từ chối</option>
+          <option value="2">Đã xác nhận</option>
+          <option value="3">Hoàn thành</option>
+        </select>
+
+        <label className="mr-2">Filter by Date:</label>
+        <input
+          type="date"
+          value={filterDate ?? ""}
+          onChange={(e) => setFilterDate(e.target.value)}
+          className="border border-gray-300 rounded p-2"
+        />
+      </div>
+
       <table className="min-w-full bg-white border border-gray-200">
         <thead>
           <tr>
@@ -116,7 +147,7 @@ const ManagerBooking: React.FC<Props> = ({ vetId }) => {
                   ) : (
                     <span className="text-gray-500">Done</span>
                   )}
-                  <p className="text-red-500 hover:underline"> Delete</p>
+                  <p className="text-red-500 hover:underline cursor-pointer"> Delete</p>
                 </td>
               </tr>
             );

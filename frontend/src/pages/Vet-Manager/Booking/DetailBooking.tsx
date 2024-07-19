@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import * as apiClient from "../../../api-client";
-import { BookingType, PetType } from "../../../../../backend/src/shared/types";
+import { BookingType, PetType, OwnerType } from "../../../../../backend/src/shared/types";
 
 const DetailBooking: React.FC = () => {
   const { bookingId } = useParams<{ bookingId: string }>(); // Lấy bookingId từ params của URL
   const queryClient = useQueryClient(); // Use the useQueryClient hook
+  const navigate = useNavigate(); // Hook to navigate
 
   // State cho trạng thái booking
   const [selectedStatus, setSelectedStatus] = useState<number | undefined>(undefined);
@@ -33,12 +34,26 @@ const DetailBooking: React.FC = () => {
     }
   );
 
+  // Query để fetch owner thông tin
+  const { data: owner, isLoading: ownerLoading, error: ownerError } = useQuery<OwnerType | undefined>(
+    ["fetchOwner", booking?.ownerId],
+    () => (booking?.ownerId ? apiClient.fetchOwnerById(booking.ownerId) : Promise.resolve(undefined)),
+    {
+      enabled: !!booking?.ownerId, // Chỉ fetch khi ownerId có giá trị
+      onError: (err) => {
+        console.error("Error fetching owner details:", err);
+      },
+    }
+  );
+
   // Mutation để cập nhật trạng thái
   const updateBookingStatus = useMutation(
     (newStatus: number) => apiClient.updateBookingStatus(bookingId!, newStatus),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(["fetchBooking", bookingId]); // Làm mới query khi thành công
+        queryClient.invalidateQueries(["fetchBooking", bookingId]); 
+        navigate('/my-booking');
+
       },
       onError: (err) => {
         console.error("Error updating booking status:", err);
@@ -59,26 +74,24 @@ const DetailBooking: React.FC = () => {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || ownerLoading) {
     return <span>Đang tải...</span>;
   }
 
-  if (error) {
+  if (error || ownerError) {
     return <span>Lỗi khi tải chi tiết booking</span>;
   }
 
   const getStatusText = (status: number) => {
     switch (status) {
-      case 0:
-          return <span className="text-yellow-500">Đang chờ xác nhận</span>;
-        case 1:
-          return <span className="red-yellow-500">Từ chối</span>;
-        case 2:
-          return <span className="text-green-500">Đã xác nhận</span>;
-        case 3:
-          return <span className="text-gray-500">Hoàn thành</span>;
-        default:
-          return <span className="text-red-500">Unknown</span>;
+      case 1:
+        return <span className="text-yellow-500">Đang chờ</span>;
+      case 2:
+        return <span className="text-green-500">Đã xác nhận</span>;
+      case 3:
+        return <span className="text-gray-500">Hoàn thành</span>;
+      default:
+        return <span className="text-red-500">Huỷ</span>;
     }
   };
 
@@ -98,15 +111,15 @@ const DetailBooking: React.FC = () => {
               {pets.find((pet) => pet._id === booking.petId)?.name}
             </h2>
           )}
-          <p className="text-gray-600">Chủ nhân: {booking.ownerId}</p>
+          <p className="text-gray-600">
+            Chủ nhân: {owner ? owner.name : "Không tìm thấy"}
+          </p>
           <p className="mt-2">
             <strong>Ngày:</strong>{" "}
             {new Date(booking.date).toLocaleDateString()}
-
             <strong> Giờ:</strong>{" "}
             {new Date(booking.date).toLocaleTimeString()}
           </p>
-          
           <p>
             <strong>Trạng thái:</strong>{" "}
             {getStatusText(booking.status)}

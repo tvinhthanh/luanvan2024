@@ -59,7 +59,7 @@ const ManagerBreed: React.FC = () => {
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Quản Lý Loại Giống</h1>
         <Link
-          to="/"
+          to="/pet"
           className="py-2 px-4 bg-gray-500 text-white rounded-lg text-sm font-semibold hover:bg-gray-600 focus:outline-none focus:bg-gray-600"
         >
           Quay lại Trang Chính

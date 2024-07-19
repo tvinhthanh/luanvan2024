@@ -39,10 +39,15 @@ router.post('/', verifyToken, async (req: Request, res: Response) => {
   try {
     const { petId, ownerId, vetId } = req.body;
 
-    // Check if there's already a record for this pet
-    const existingRecord = await Record.findOne({ petId }).lean();
+    // Validate required fields
+    if (!petId || !ownerId || !vetId) {
+      return res.status(400).json({ error: 'Missing required fields.' });
+    }
+
+    // Check if there's already a record for this pet with the same vetId
+    const existingRecord = await Record.findOne({ petId, vetId }).lean();
     if (existingRecord) {
-      return res.status(400).json({ error: 'Pet already has a record.' });
+      return res.status(400).json({ error: 'A record already exists for this pet with this vet.' });
     }
 
     // Generate a unique ID for the new record
@@ -61,6 +66,10 @@ router.post('/', verifyToken, async (req: Request, res: Response) => {
       vetId,
     });
 
+    // Save the new Record
+    await newRecord.save();
+
+    // Update the vet with the new record
     const updatedVet = await Vet.findByIdAndUpdate(
       vetId,
       { $push: { record: newRecord._id } },
@@ -70,13 +79,16 @@ router.post('/', verifyToken, async (req: Request, res: Response) => {
     if (!updatedVet) {
       return res.status(404).json({ error: 'Vet not found' });
     }
-    await newRecord.save();
+
+    // Return the newly created record
     res.status(201).json(newRecord);
   } catch (error) {
     console.error('Error creating record:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
 router.get('/by-pet/:petId', async (req, res) => {
   const { petId } = req.params;
 

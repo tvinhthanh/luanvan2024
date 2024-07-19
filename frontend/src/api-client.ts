@@ -1254,15 +1254,15 @@ export const deleteInvoice = async (id: string) => {
   return response.json();
 };
 
-export const fetchInvoicesForVet = async (vetId: string) => {
-  const response = await fetch(`${API_BASE_URL}/api/invoices/${vetId}`,{
-    method: 'GET',
-    credentials: 'include'
-  });
-
-  if (!response.ok) {
-    throw new Error('Error fetching invoices');
+export const fetchInvoicesForVet = async (vetId: string): Promise<InvoiceType[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/invoices/${vetId}`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching invoices:', error);
+    throw error;
   }
-
-  return response.json();
 };

@@ -41,15 +41,15 @@ const ManagerVet: React.FC = () => {
   // Display the list of vets
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Vet Management</h1>
+      <h1 className="text-2xl font-bold mb-4">Quản lý phòng khám</h1>
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Name
+              Tên
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Address
+              Địa Chỉ
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Last Updated

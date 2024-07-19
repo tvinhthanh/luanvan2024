@@ -86,6 +86,7 @@ const ManagerInvoice: React.FC = () => {
             <tr>
               <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Pet Name</th>
               <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Owner Name</th>
+              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Date</th>
               <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Total</th>
               <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Actions</th>
             </tr>
@@ -95,6 +96,7 @@ const ManagerInvoice: React.FC = () => {
               <tr key={invoice._id}>
                 <td className="px-4 py-2 border-b">{invoice.petName}</td>
                 <td className="py-2 px-4 border-b border-gray-300">{namesMap[invoice.ownerId] || `Owner ${invoice.ownerId}`}</td>
+                <td className="px-4 py-2 border-b">{new Date(invoice.createdAt).toLocaleDateString()}</td>
                 <td className="px-4 py-2 border-b">${invoice.total.toFixed(2)}</td>
                 <td className="px-4 py-2 border-b">
                   <button

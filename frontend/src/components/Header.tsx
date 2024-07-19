@@ -18,7 +18,7 @@ const Header = () => {
                   className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
                   to="/manager-user"
                 >
-                  Manager User
+                  Quản lý người dùng
                 </Link>
               ) : (
                 <></>
@@ -26,23 +26,23 @@ const Header = () => {
 
               {userRole ? (
                 <>
-                  <Link
+                  {/* <Link
                     className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
                     to="/manager-owner"
                   >
                     Manager Owner
-                  </Link>
+                  </Link> */}
                   <Link
                     className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
                     to="/manager-vet"
                   >
-                    Manager Vet
+                    Quản lý phòng khám
                   </Link>
                   <Link
                     className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
                     to="/pet"
                   >
-                    Pet
+                    Quản lý thú cưng
                   </Link>
                 </>
               ) : (
@@ -52,7 +52,7 @@ const Header = () => {
                     className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
                     to="/my-vet"
                   >
-                    My Vet
+                    Phòng Khám
                   </Link>
                 </>
               )}
@@ -63,7 +63,7 @@ const Header = () => {
               to="/sign-in"
               className="flex bg-white items-center text-blue-600 px-3 font-bold hover:bg-gray-100"
             >
-              Sign In
+              Đăng nhập
             </Link>
           )}
         </span>

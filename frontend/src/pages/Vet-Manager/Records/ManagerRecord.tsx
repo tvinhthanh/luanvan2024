@@ -5,11 +5,18 @@ import * as apiClient from "../../../api-client";
 import { RecordType, PetType, OwnerType } from "../../../../../backend/src/shared/types";
 import { useAppContext } from "../../../contexts/AppContext";
 import MyVetInfo from "../Vet/VetInfo";
+import { FaSearch } from "react-icons/fa"; // Import biểu tượng kính lúp
 
 const ManagerRecord: React.FC = () => {
   const { id_vet } = useAppContext();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  // State for search query and filtered records
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredRecords, setFilteredRecords] = useState<RecordType[]>([]);
+  const [namesMap, setNamesMap] = useState<{ [key: string]: string }>({});
+  const [loadingNames, setLoadingNames] = useState(true);
 
   // Fetching records for the current vet using react-query
   const { data: records = [], isLoading, error } = useQuery<RecordType[]>(
@@ -19,6 +26,10 @@ const ManagerRecord: React.FC = () => {
       onError: (err) => {
         console.error("Error fetching records:", err);
       },
+      onSuccess: (data) => {
+        // Set initial filtered records based on search query
+        setFilteredRecords(data);
+      }
     }
   );
 
@@ -35,18 +46,16 @@ const ManagerRecord: React.FC = () => {
     }
   );
 
-  // State to store pet, owner, and vet names mapped by their IDs
-  const [namesMap, setNamesMap] = useState<{ [key: string]: string }>({});
-
   // Function to fetch and update namesMap
   useEffect(() => {
     const fetchNames = async () => {
       try {
-        // Fetch pets and owners
-        const petsResponse = await apiClient.fetchpet();
-        const ownersResponse = await apiClient.fetchOwner();
+        setLoadingNames(true);
+        const [petsResponse, ownersResponse] = await Promise.all([
+          apiClient.fetchpet(),
+          apiClient.fetchOwner()
+        ]);
 
-        // Map IDs to names
         const petNames = petsResponse.reduce((acc: { [key: string]: string }, pet: PetType) => {
           acc[pet._id] = pet.name;
           return acc;
@@ -56,17 +65,36 @@ const ManagerRecord: React.FC = () => {
           return acc;
         }, {});
 
-        // Merge all mappings into one namesMap
         setNamesMap({ ...petNames, ...ownerNames });
       } catch (error) {
         console.error("Error fetching names:", error);
+      } finally {
+        setLoadingNames(false);
       }
     };
 
     fetchNames();
   }, []);
 
-  if (isLoading) {
+  // Update filtered records when records or searchQuery change
+  useEffect(() => {
+    if (records.length > 0) {
+      const results = records.filter(record => {
+        const petName = namesMap[record.petId] || `Pet ${record.petId}`;
+        const ownerName = namesMap[record.ownerId] || `Owner ${record.ownerId}`;
+        return petName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+               ownerName.toLowerCase().includes(searchQuery.toLowerCase());
+      });
+      setFilteredRecords(results);
+    }
+  }, [records, searchQuery, namesMap]);
+
+  // Handle search input change
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  if (isLoading || loadingNames) {
     return <span>Loading...</span>;
   }
 
@@ -93,6 +121,18 @@ const ManagerRecord: React.FC = () => {
           </button>
         </Link>
       </div>
+      <div className="flex items-center mb-4">
+        <div className="relative w-full max-w-md">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            placeholder="Search by owner or pet name"
+            className="w-full p-2 pl-10 border border-gray-300 rounded-md"
+          />
+          <FaSearch className="absolute top-2 left-2 text-gray-500" />
+        </div>
+      </div>
       <div className="mt-4">
         <table className="min-w-full bg-white border-collapse overflow-hidden border border-gray-300 rounded-lg shadow-md">
           <thead className="bg-gray-100 text-gray-700">
@@ -105,7 +145,7 @@ const ManagerRecord: React.FC = () => {
             </tr>
           </thead>
           <tbody className="text-gray-600">
-            {records.map((record) => (
+            {filteredRecords.map((record) => (
               <tr key={record._id}>
                 <td className="py-2 px-4 border-b border-gray-300">{record._id}</td>
                 <td className="py-2 px-4 border-b border-gray-300">{namesMap[record.petId] || `Pet ${record.petId}`}</td>

@@ -62,7 +62,9 @@ router.post('/', verifyToken, async (req, res) => {
 // Route để lấy tất cả các hóa đơn dựa trên vetId
 router.get('/:vetId', async (req : Request, res : Response ) => {
   const { vetId } = req.params;
-
+  if (!vetId) {
+    return res.status(400).json({ error: 'Vet ID is required' });
+  }
   try {
     const invoices = await Invoice.find({ vetId });
     res.status(200).json(invoices);

@@ -39,7 +39,7 @@ const MyVetSer: React.FC = () => {
         <h1 className="text-2xl font-bold">My Vet's Service</h1>
         {vetData && vetData.length > 0 && (
           <Link
-            to={`/add-service/${vetData[0]._id}`}
+            to={`/add-service`}
             className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
           >
             <FontAwesomeIcon icon={faPlus} className="mr-2" /> Add Service

@@ -30,12 +30,14 @@ const ManagerOwner = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Owner Management</h1>
+      <h1 className="text-2xl font-bold mb-4">Quản lý người dùng</h1>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SĐT</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
@@ -43,6 +45,8 @@ const ManagerOwner = () => {
               {owners.map((owner: any) => (
                 <tr key={owner._id} onClick={() => handleRowClick(owner)} className="cursor-pointer hover:bg-gray-100">
                   <td className="px-6 py-4 whitespace-nowrap">{owner.name}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{owner.phone}</td>
+                  <td className="px-6 py-4 whitespace-nowrap">{owner.email}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button
                       onClick={(e) => {

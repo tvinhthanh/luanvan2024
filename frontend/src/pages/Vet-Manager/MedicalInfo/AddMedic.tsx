@@ -46,7 +46,6 @@ const AddMedicalRecord: React.FC = () => {
       },
     }
   );
-
   // Fetch pets by owner email when ownerEmail changes
   useEffect(() => {
     const fetchPets = async () => {
@@ -114,6 +113,7 @@ const AddMedicalRecord: React.FC = () => {
         treatmentPlan,
         medications, // Ensure medications are of type MedicationType[]
         notes,
+        hasInvoice:false,
       };
 
       await addMedicalRecordMutation.mutateAsync(newMedicalRecord);
@@ -245,51 +245,41 @@ const AddMedicalRecord: React.FC = () => {
             <option value="">Select Medication</option>
             {availableMedications.map((medication) => (
               <option key={medication._id} value={medication._id}>
-                {medication.name} - {medication.dosage} - {medication.instructions}
+                {medication.name} - {medication.dosage}
               </option>
             ))}
           </select>
           <button
             type="button"
             onClick={() => {
-              const selectedMed = availableMedications.find((med) => med._id === selectedMedicationId);
-              if (selectedMed) {
-                setMedications([...medications, selectedMed]);
+              const selectedMedication = availableMedications.find(
+                (medication) => medication._id === selectedMedicationId
+              );
+              if (selectedMedication) {
+                setMedications([...medications, selectedMedication]);
+                setSelectedMedicationId(""); // Reset the selected medication ID
               }
             }}
             className="mt-2 bg-blue-500 text-white px-4 py-2 rounded-md"
           >
             Add Medication
           </button>
-          {medications.map((medication, index) => (
-            <div key={index} className="mt-2 flex space-x-2">
-              <input
-                type="text"
-                value={medication.name}
-                readOnly
-                className="block w-1/3 border border-gray-300 rounded-md p-2"
-              />
-              <input
-                type="text"
-                value={medication.dosage}
-                readOnly
-                className="block w-1/3 border border-gray-300 rounded-md p-2"
-              />
-              <input
-                type="text"
-                value={medication.instructions}
-                readOnly
-                className="block w-1/3 border border-gray-300 rounded-md p-2"
-              />
-              <button
-                type="button"
-                onClick={() => handleRemoveMedication(index)}
-                className="bg-red-500 text-white px-4 py-1 rounded-md ml-2"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
+          {medications.length > 0 && (
+            <ul className="mt-2">
+              {medications.map((medication, index) => (
+                <li key={index} className="flex justify-between items-center">
+                  <span>{medication.name} - {medication.dosage}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveMedication(index)}
+                    className="bg-red-500 text-white px-2 py-1 rounded-md ml-2"
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Notes</label>
@@ -301,9 +291,9 @@ const AddMedicalRecord: React.FC = () => {
         </div>
         <button
           type="submit"
-          className="mt-4 bg-green-500 text-white px-4 py-2 rounded-md"
+          className="bg-green-500 text-white px-4 py-2 rounded-md"
         >
-          Save Record
+          Add Medical Record
         </button>
       </form>
     </div>

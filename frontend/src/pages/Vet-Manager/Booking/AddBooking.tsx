@@ -46,7 +46,7 @@ const AddBooking: React.FC = () => {
   const addBookingMutation = useMutation(apiClient.addBooking, {
     onSuccess: () => {
       queryClient.invalidateQueries(["fetchBookingsForVet", id_vet]);
-      navigate(`/bookings`);
+      navigate(`/my-booking`);
     },
   });
 
