@@ -3,19 +3,23 @@ import * as apiClient from '../../../api-client'; // Import your API client func
 import { useAppContext } from '../../../contexts/AppContext';
 
 const AddVet: React.FC = () => {
-  const {userId} = useAppContext();
+  const { userId } = useAppContext();
   const [name, setName] = useState('');
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
-  const [img, setImg] = useState('');
+  const [imageUrls, setImg] = useState<File | null>(null);
   const [description, setDescription] = useState('');
-
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
+    if (!imageUrls) {
+      alert('Please select an image file.');
+      return;
+    }
+
     try {
-      await apiClient.addMyVet(name, phone,address, img,description,userId); // Call your API function to add vet
+      await apiClient.addMyVet(name, phone, address, imageUrls, description, userId);
       alert('Vet added successfully!');
       resetForm();
     } catch (error) {
@@ -24,11 +28,19 @@ const AddVet: React.FC = () => {
     }
   };
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      setImg(event.target.files[0]);
+    } else {
+      setImg(null);
+    }
+  };
+
   const resetForm = () => {
     setName('');
     setAddress('');
     setPhone('');
-    setImg('');
+    setImg(null);
     setDescription('');
   };
 
@@ -64,7 +76,7 @@ const AddVet: React.FC = () => {
         </div>
         <div className="flex flex-col">
           <label htmlFor="description" className="text-sm font-semibold">
-          Description:
+            Description:
           </label>
           <input
             id="description"
@@ -90,13 +102,13 @@ const AddVet: React.FC = () => {
         </div>
         <div className="flex flex-col">
           <label htmlFor="img" className="text-sm font-semibold">
-            Image URL:
+            Image:
           </label>
           <input
-            id="img"
-            type="text"
-            value={img}
-            onChange={(e) => setImg(e.target.value)}
+            id="imageUrls"
+            type="file"
+            name="imageFiles" // Ensure this name matches what your server expects
+            onChange={handleFileChange}
             className="border border-gray-300 px-3 py-2 rounded-md focus:outline-none focus:border-blue-500"
           />
         </div>

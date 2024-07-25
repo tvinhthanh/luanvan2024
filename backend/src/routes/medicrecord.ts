@@ -93,24 +93,12 @@ router.delete('/detail/:medicId', async (req: Request, res: Response) => {
   }
 });
 //create
-router.post('/', verifyToken, async (req: Request, res: Response) => {
+router.post('/',verifyToken, async (req: Request, res: Response) => {
   try {
-    const {
-      recordId,
-      vetId,
-      petId,
-      ownerId,
-      visitDate,
-      reasonForVisit,
-      symptoms,
-      diagnosis,
-      treatmentPlan,
-      medications,
-      notes
-    } = req.body;
+    const { recordId, vetId, petId, ownerId, visitDate, reasonForVisit, symptoms, diagnosis, treatmentPlan, medications, notes } = req.body;
 
     // Validate required fields
-    if (!vetId || !petId || !ownerId || !reasonForVisit) {
+    if (!recordId || !vetId || !petId || !ownerId || !reasonForVisit) {
       return res.status(400).json({ error: 'Missing required fields.' });
     }
 
@@ -119,11 +107,11 @@ router.post('/', verifyToken, async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid medications array.' });
     }
 
-    // Check if there is an existing medical record for the pet and vet
-    const existingRecord = await medicalRecord.findOne({ petId, vetId });
+    // Check if the pet has an existing medical record
+    const existingRecord = await Record.findOne({ petId });
 
-    if (existingRecord) {
-      return res.status(400).json({ error: 'A medical record already exists for this pet and vet.' });
+    if (!existingRecord) {
+      return res.status(400).json({ error: "Pet doesn't have a medical record. Please create one first." });
     }
 
     // Create a new instance of MedicalRecord
@@ -148,7 +136,7 @@ router.post('/', verifyToken, async (req: Request, res: Response) => {
     // Update medicalRecords array for the pet
     const updatedPet = await Pet.findByIdAndUpdate(
       petId,
-      { $push: { record_id: savedMedicalRecord._id } },
+      { $push: { medic_id: savedMedicalRecord._id } },
       { new: true }
     );
 
@@ -168,16 +156,14 @@ router.post('/', verifyToken, async (req: Request, res: Response) => {
     }
 
     // Optionally, update medicalRecords array for the specific record (if needed)
-    if (recordId) {
-      const updatedRecord = await Record.findByIdAndUpdate(
-        recordId,
-        { $push: { medicId: savedMedicalRecord._id } },
-        { new: true }
-      );
+    const updatedRecord = await Record.findByIdAndUpdate(
+      recordId,
+      { $push: { medicId: savedMedicalRecord._id } },
+      { new: true }
+    );
 
-      if (!updatedRecord) {
-        return res.status(404).json({ error: 'Record not found' });
-      }
+    if (!updatedRecord) {
+      return res.status(404).json({ error: 'Record not found' });
     }
 
     // Return the saved MedicalRecord

@@ -18,7 +18,7 @@ import Pet from "./pages/Pet";
 import ManagerBreed from "./pages/Manager/ManagerBreed";
 import ManagerBreedType from "./pages/Manager/ManagerBreedTypes";
 import MyVets from "./pages/Vet-Manager/Vet/MyVet";
-import ManagerStatistics from "./pages/Manager/ManagerStatistics";
+import ManagerStatistics from "./pages/Vet-Manager/Statistics/ManagerStatistics";
 import ManagerVet from "./pages/Manager/ManagerVet";
 import VetDash from "./pages/Manager/VetDash";
 import BreedForm from "./forms/BreedForm";

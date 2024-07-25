@@ -10,7 +10,7 @@ import vetController from "../controller/vetController";
 const router = express.Router();
 const upload = multer(); // Initialize multer middleware
 
-router.post('/', verifyToken, upload.single('image'), vetController.createMyVet);
+//router.post('/', verifyToken, upload.single('image'), vetController.createMyVet);
 
 // Get all vets
 router.get("/", async (req, res) => {

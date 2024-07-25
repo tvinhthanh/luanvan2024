@@ -1,4 +1,3 @@
-// EditVet.tsx
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as apiClient from '../../../api-client';
@@ -9,41 +8,45 @@ import { useAppContext } from '../../../contexts/AppContext';
 const EditVet: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const {id_vet} = useAppContext();
-  // Get the state passed via the Link component
+  const { id_vet } = useAppContext();
+
   const { vet } = location.state as { vet: VetCType };
 
-  const [name, setName] = useState(vet.name);
-  const [address, setAddress] = useState(vet.address);
-  const [phone, setPhone] = useState(vet.phone);
-  const [imageUrls, setImageUrls] = useState<string[]>(vet.imageUrls);
+  const [name, setName] = useState(vet.name || '');
+  const [address, setAddress] = useState(vet.address || '');
+  const [phone, setPhone] = useState(vet.phone || '');
+  const [description, setDescription] = useState(vet.description || '');
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [description, setDescription] = useState(vet.description);
 
-console.log(vet)
-const handleUpdate = async (event: React.FormEvent) => {
-  event.preventDefault();
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files) {
+      setImageFiles(Array.from(event.target.files));
+    }
+  };
 
-  try {
-    await apiClient.updateVet(id_vet, { name, address, phone, imageUrls });
-    toast.success('Vet updated successfully!');
-    navigate('/my-vet-info');
-  } catch (err) {
-    setError('Error updating vet information');
-    toast.error('Error updating vet information');
-  }
-};
+  const handleUpdate = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    try {
+      await apiClient.updateVet(id_vet, { name, address, phone, imageFiles, description });
+      toast.success('Vet updated successfully!');
+      navigate('/my-vet-info');
+    } catch (err) {
+      setError('Error updating vet information');
+      toast.error('Error updating vet information');
+    }
+  };
 
   return (
     <div className="container mx-auto mt-8">
       <h1 className="text-2xl font-bold">Update Vet</h1>
       {error && <div className="text-red-500">{error}</div>}
       <form onSubmit={handleUpdate} className="flex flex-col space-y-4">
-      <input
+        <input
           type="text"
           placeholder="Id"
           value={id_vet}
-          onChange={(e) => setName(e.target.value)}
           className="border border-gray-300 rounded-md p-2"
           disabled
         />
@@ -69,10 +72,9 @@ const handleUpdate = async (event: React.FormEvent) => {
           className="border border-gray-300 rounded-md p-2"
         />
         <input
-          type="text"
-          placeholder="Image URLs (comma separated)"
-          value={imageUrls.join(',')}
-          onChange={(e) => setImageUrls(e.target.value.split(',').map(url => url.trim()))}
+          type="file"
+          multiple
+          onChange={handleImageChange}
           className="border border-gray-300 rounded-md p-2"
         />
         <textarea

@@ -338,33 +338,33 @@ export const fetchMyVets = async (userId: string): Promise<VetCType[]> => {
   return response.json();
 };
 
+
 export const addMyVet = async (
   name: string,
   phone: string,
   address: string,
-  img: string,
+  imageUrls: File,
   description: string,
   userId: string
 ) => {
-  let vetData = {
-    name: name,
-    phone: phone,
-    address: address,
-    img: img,
-    description: description,
-    userId: userId,
-  };
+  // Create FormData object
+  const formData = new FormData();
+  formData.append('name', name);
+  formData.append('phone', phone);
+  formData.append('address', address);
+  formData.append('imageFiles', imageUrls); // Ensure this name matches what your server expects
+  formData.append('description', description);
+  formData.append('userId', userId);
+
+  // Send the FormData via fetch
   const response = await fetch(`${API_BASE_URL}/api/my-vet`, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(vetData),
+    method: 'POST',
+    credentials: 'include',
+    body: formData,
   });
-  alert(vetData);
+
   if (!response.ok) {
-    throw new Error("Failed to add vet");
+    throw new Error('Failed to add vet');
   }
 };
 
@@ -394,27 +394,39 @@ export const fetchBreeds = async () => {
   return response.json();
 };
 
-export const addBreed = async (
-  breedData: string,
-  img: string,
-  id_type: string
-) => {
-  let breed = {
-    name: breedData,
-    img: img,
-    id_type: id_type,
-  };
+export const addBreed = async (formData: FormData) => {
   const response = await fetch(`${API_BASE_URL}/api/breed`, {
-    method: "POST",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(breed),
+    method: 'POST',
+    body: formData,
   });
 
   if (!response.ok) {
-    throw new Error("Failed to add breed");
+    let errorMessage = 'Failed to add breed';
+    if (response.status === 404) {
+      errorMessage = 'Not found';
+    } else if (response.status === 500) {
+      errorMessage = 'Server error';
+    }
+    throw new Error(errorMessage);
+  }
+
+  return response.json();
+};
+
+export const updateBreed = async (id: string, formData: FormData) => {
+  const response = await fetch(`${API_BASE_URL}/api/breed/${id}`, {
+    method: 'PUT',
+    body: formData,
+  });
+
+  if (!response.ok) {
+    let errorMessage = 'Failed to update breed';
+    if (response.status === 404) {
+      errorMessage = 'Breed not found';
+    } else if (response.status === 500) {
+      errorMessage = 'Server error';
+    }
+    throw new Error(errorMessage);
   }
 
   return response.json();
@@ -426,16 +438,25 @@ export const updateVet = async (
     name: string;
     address: string;
     phone: string;
-    imageUrls: string[];
+    imageFiles: File[];
+    description: string;
   }
 ) => {
+  const formData = new FormData();
+  formData.append('name', vetData.name);
+  formData.append('address', vetData.address);
+  formData.append('phone', vetData.phone);
+  formData.append('description', vetData.description);
+
+  // Thêm các tệp hình ảnh vào FormData
+  vetData.imageFiles.forEach((file) => {
+    formData.append('imageFiles', file);
+  });
+
   const response = await fetch(`${API_BASE_URL}/api/my-vet/${id}`, {
     method: "PUT",
     credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(vetData),
+    body: formData, // Sử dụng FormData
   });
 
   if (!response.ok) {
@@ -446,34 +467,6 @@ export const updateVet = async (
       errorMessage = "Server error";
     }
     throw new Error(errorMessage);
-  }
-
-  return response.json();
-};
-
-export const updateBreed = async (
-  breedId: string,
-  breedData: string,
-  img: string,
-  id_type: string
-) => {
-  let breed = {
-    id: breedId,
-    name: breedData,
-    img: img,
-    id_type: id_type,
-  };
-  const response = await fetch(`${API_BASE_URL}/api/breed/${breedId}`, {
-    method: "PUT",
-    credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(breed),
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to update breed");
   }
 
   return response.json();
@@ -580,19 +573,6 @@ export const deleteBreedType = async (breedId: string) => {
   }
   return response.json();
 };
-//service
-// export const fetchService = async (vetId: string) => {
-//   const response = await fetch(`${API_BASE_URL}/api/service`, {
-//     method: 'GET',
-//     credentials: 'include',
-//   });
-
-//   if (!response.ok) {
-//     throw new Error('Failed to fetch service');
-//   }
-
-//   return response.json();
-// };
 export const fetchServicesForVet = async (
   vetId: string
 ): Promise<ServiceType[]> => {
@@ -855,7 +835,6 @@ export const deleteMedicalRecord = async (medicalRecordId: string) => {
   }
 };
 
-
 export const fetchMedicalRecordsByVetId = async (
   vetId: string
 ): Promise<MedicType[]> => {
@@ -1114,6 +1093,7 @@ export async function fetchMedicationsById(medId: string): Promise<MedicationTyp
   }
   return response.json();
 }
+
 export async function fetchMedicationsByRecordId(recordId: string): Promise<MedicationType[]> {
   const response = await fetch(`${API_BASE_URL}/api/medications/${recordId}`,{
     method: 'GET',
@@ -1127,6 +1107,7 @@ export async function fetchMedicationsByRecordId(recordId: string): Promise<Medi
   }
   return response.json();
 }
+
 export async function fetchMedicationsByIds(medId: string[]): Promise<MedicationType[]> {
   const response = await fetch(`${API_BASE_URL}/api/medications/med/${medId}`,{
     method: 'GET',
@@ -1140,6 +1121,7 @@ export async function fetchMedicationsByIds(medId: string[]): Promise<Medication
   }
   return response.json();
 }
+
 export const addMedications = async (
   name: string,
   price: string,
@@ -1162,6 +1144,7 @@ export const addMedications = async (
 
   return response.json();
 };
+
 export async function deleteMedication(medicationId: string): Promise<void> {
   const response = await fetch(`${API_BASE_URL}/api/medications/${medicationId}`, {
     method: 'DELETE',
@@ -1171,6 +1154,7 @@ export async function deleteMedication(medicationId: string): Promise<void> {
     throw new Error('Failed to delete medication');
   }
 }
+
 export const updateMedication = async (medication: MedicationType): Promise<MedicationType> => {
   const response = await fetch(`${API_BASE_URL}/api/medications/${medication._id}`, {
     method: "PUT",
@@ -1185,6 +1169,7 @@ export const updateMedication = async (medication: MedicationType): Promise<Medi
   }
   return response.json();
 };
+
 export const createInvoice = async (invoiceData: InvoiceType) => {
   const response = await fetch(`${API_BASE_URL}/api/invoices`, {
     method: 'POST',
@@ -1212,7 +1197,16 @@ export const fetchInvoices = async () => {
 
   return response.json();
 };
+export const fetchInvoices2 = async (type: any ) => {
+  const response = await fetch(`${API_BASE_URL}/api/invoices`,{
+    body: JSON.stringify(type),
 
+  });
+  if (!response.ok) {
+    throw new Error('Error fetching invoices');
+  }
+  return response.json();
+};
 // Lấy thông tin chi tiết của một hóa đơn theo ID
 export const fetchInvoiceById = async (id: string) => {
   const response = await fetch(`${API_BASE_URL}/api/invoices/${id}`);

@@ -4,6 +4,8 @@ import { Request, Response } from 'express';
 import Record from '../models/records'; // Import your Mongoose model here
 import verifyToken from '../middleware/auth';
 import Vet from '../models/vet';
+import mongoose from 'mongoose';
+import Pet from '../models/pet';
 
 // Create an Express Router
 const router = express.Router();
@@ -34,6 +36,7 @@ router.get('/:recordId', async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 // Create a new record
 router.post('/', verifyToken, async (req: Request, res: Response) => {
   try {
@@ -51,16 +54,10 @@ router.post('/', verifyToken, async (req: Request, res: Response) => {
     }
 
     // Generate a unique ID for the new record
-    const lastRecord = await Record.findOne().sort({ _id: -1 }).lean();
-    let newId = 1; // Default ID starting from 1
-
-    if (lastRecord && typeof lastRecord._id === 'string') {
-      // Extract the number from the _id and increment it
-      newId = parseInt(lastRecord._id.replace('record', ''), 10) + 1;
-    }
+    const newRecordId = await getNextRecordId();
 
     const newRecord = new Record({
-      _id: `record${newId}`,
+      _id: newRecordId,
       petId,
       ownerId,
       vetId,
@@ -68,6 +65,17 @@ router.post('/', verifyToken, async (req: Request, res: Response) => {
 
     // Save the new Record
     await newRecord.save();
+
+
+    const updatedPet = await Pet.findByIdAndUpdate(
+      petId,
+      { $push: { record_id: newRecord._id } },
+      { new: true }
+    );
+
+    if (!updatedPet) {
+      return res.status(404).json({ error: 'Pet not found' });
+    }
 
     // Update the vet with the new record
     const updatedVet = await Vet.findByIdAndUpdate(
@@ -87,6 +95,41 @@ router.post('/', verifyToken, async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// Function to get the next record ID
+const getNextRecordId = async (): Promise<string> => {
+  // Use a transaction to ensure uniqueness
+  const session = await mongoose.startSession();
+  let newId = 1; // Default ID starting from 1
+  let newRecordId = `record${newId}`; // Initialize the new record ID
+
+  try {
+    session.startTransaction();
+
+    while (true) {
+      // Check if the ID already exists
+      const existingIdRecord = await Record.findById(newRecordId).session(session).lean();
+
+      if (!existingIdRecord) {
+        // If the ID does not exist, break out of the loop
+        break;
+      }
+
+      // If the ID exists, increment the ID and try again
+      newId += 1;
+      newRecordId = `record${newId}`;
+    }
+
+    await session.commitTransaction();
+    session.endSession();
+
+    return newRecordId;
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+  }
+};
 
 
 router.get('/by-pet/:petId', async (req, res) => {

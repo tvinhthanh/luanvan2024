@@ -5,7 +5,7 @@ import { Breed, BreedType } from '../../../backend/src/shared/types';
 
 interface FormDataState {
   name: string;
-  img: string;
+  img: File | null; // Thay đổi từ string sang File
   breedTypeId?: string;
 }
 
@@ -13,7 +13,7 @@ const BreedForm: React.FC = () => {
   const { breedId } = useParams<{ breedId: string }>();
   const [formDataState, setFormDataState] = useState<FormDataState>({
     name: '',
-    img: '',
+    img: null,
     breedTypeId: undefined,
   });
   const [breedTypes, setBreedTypes] = useState<BreedType[]>([]);
@@ -31,7 +31,7 @@ const BreedForm: React.FC = () => {
       const breed: Breed = await apiClient.fetchBreedById(id);
       setFormDataState({
         name: breed.name,
-        img: breed.img,
+        img: null, // Do not set image here
         breedTypeId: breed.id_type,
       });
     } catch (error) {
@@ -52,28 +52,35 @@ const BreedForm: React.FC = () => {
     e.preventDefault();
     try {
       const { name, img, breedTypeId } = formDataState;
-  
-      if (!name || !img || !breedTypeId) {
-        console.error('Name, img, and breedTypeId are required fields');
+
+      if (!name || !breedTypeId) {
+        console.error('Name and breedTypeId are required fields');
         return;
       }
-  
+
       const formData = new FormData();
       formData.append('name', name);
-      formData.append('img', img);
+      if (img) formData.append('img', img); // Append file if it exists
       formData.append('id_type', breedTypeId);
-  
+
       if (!breedId) {
-        await apiClient.addBreed(name, img, breedTypeId); // Assuming addBreed uses FormData
+        await apiClient.addBreed(formData); // Assuming addBreed uses FormData
       } else {
-        await apiClient.updateBreed(breedId, name, img, breedTypeId); // Assuming updateBreed uses FormData
+        await apiClient.updateBreed(breedId, formData); // Assuming updateBreed uses FormData
       }
-  
+
       navigate('/manager-breed');
     } catch (error) {
       console.error(`${breedId ? 'Error updating' : 'Error adding'} breed:`, error);
     }
   };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setFormDataState({ ...formDataState, img: e.target.files[0] }); // Set file
+    }
+  };
+
   return (
     <div className="container mx-auto mt-8">
       <h1 className="text-2xl font-bold">{breedId ? 'Cập Nhật Giống' : 'Thêm Giống Mới'}</h1>
@@ -86,10 +93,8 @@ const BreedForm: React.FC = () => {
           className="border border-gray-300 rounded-md p-2"
         />
         <input
-          type="text"
-          placeholder="Link ảnh"
-          value={formDataState.img}
-          onChange={(e) => setFormDataState({ ...formDataState, img: e.target.value })}
+          type="file"
+          onChange={handleFileChange}
           className="border border-gray-300 rounded-md p-2"
         />
         <div>
