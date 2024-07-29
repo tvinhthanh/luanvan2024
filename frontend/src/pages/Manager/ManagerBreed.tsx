@@ -83,7 +83,10 @@ const ManagerBreed: React.FC = () => {
       <ul>
         {filteredBreeds.map((breed) => (
           <li key={breed._id} className="py-2 px-4 border-b border-gray-300 flex justify-between items-center">
-            <span>{breed.name}</span>
+            <div className="flex items-center">
+              {breed.img && <img src={breed.img} alt={breed.name} className="w-16 h-16 object-cover mr-4" />}
+              <span>{breed.name}</span>
+            </div>
             <div>
               <span className="mr-2">{getBreedTypeName(breed.id_type)}</span>
               <button

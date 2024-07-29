@@ -197,27 +197,21 @@ export const deleteOwner = async (ownerId: string) => {
 
   return response.json();
 };
-// export const fetchBookings = async () => {
-//   const response = await fetch(`${API_BASE_URL}/api/bookings`, {
-//     credentials: "include",
-//   });
-//   if (!response.ok) {
-//     throw new Error("Failed to fetch bookings");
-//   }
-//   return response.json();
-// };
+export const updatePetWeight = async (petId: string, weight: number) => {
+  const response = await fetch(`${API_BASE_URL}/api/pet/${petId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ weight }),
+  });
 
-// export const deleteBooking = async (bookingId: string) => {
-//   const response = await fetch(`${API_BASE_URL}/api/bookings/${bookingId}`, {
-//     method: "DELETE",
-//     credentials: "include",
-//   });
-//   if (!response.ok) {
-//     throw new Error("Failed to delete booking");
-//   }
-//   return response.json();
-// };
+  if (!response.ok) {
+    throw new Error('Failed to update pet weight');
+  }
 
+  return await response.json();
+};
 export const createPet = async (petData: FormData) => {
   const response = await fetch(`${API_BASE_URL}/api/pet`, {
     method: "POST",
@@ -999,9 +993,9 @@ export const fetchMedicalRecordsByPet = async (petId: string): Promise<RecordTyp
   }
 };
 
-export const fetchRecordsByPet = async (petId: string): Promise<RecordType[]> => {
+export const fetchRecordsByPet = async (petId: string, vet_id: string,): Promise<RecordType[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/records/by-pet/${petId}`);
+    const response = await fetch(`${API_BASE_URL}/api/records/${vet_id}/${petId}`);
     if (!response.ok) {
       throw new Error('Network response was not ok');
     }

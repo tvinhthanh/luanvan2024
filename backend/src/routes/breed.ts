@@ -1,43 +1,19 @@
 import express from "express";
-import multer from "multer"; // Thư viện để xử lý file upload
+import multer from "multer";
 import path from "path";
+import cloudinary from 'cloudinary'; // Đường dẫn đến file cấu hình Cloudinary
 import Breed from "../models/breed";
 import BreedType from "../models/breedType";
 
 const router = express.Router();
 
 // Cấu hình multer
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../uploads')); // Điều chỉnh đường dẫn
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage: storage,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB
   },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)); // Tạo tên file duy nhất
-  }
-});
-
-const upload = multer({ storage: storage });
-
-router.post("/", upload.single('img'), async (req, res) => {
-  try {
-    const { name, id_type } = req.body;
-    const img = req.file?.path; // Đường dẫn đến file
-
-    if (!img) {
-      throw new Error('File upload failed');
-    }
-
-    const maxBreed = await Breed.findOne().sort({ _id: -1 });
-    const newId = maxBreed?._id ? maxBreed._id + 1 : 1;
-    const newBreed = new Breed({ _id: newId, name, img, id_type });
-    const savedBreed = await newBreed.save();
-    await BreedType.findByIdAndUpdate(id_type, { $push: { array: savedBreed._id } });
-
-    res.status(201).json(savedBreed);
-  } catch (error) {
-    console.error('Error adding breed:', error);
-    res.status(500).json({ error: "Internal server error" });
-  }
 });
 
 router.get("/", async (req, res) => {
@@ -62,34 +38,51 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+// Route POST để thêm giống
+router.post("/", upload.single('img'), async (req, res) => {
+  try {
+    const { name, id_type } = req.body;
+    const img = req.file;
 
-// // Sử dụng multer để xử lý file upload trong POST route
-// router.post("/", upload.single('img'), async (req, res) => {
-//   try {
-//     const { name, id_type } = req.body;
-//     const img = req.file?.path; // Lấy đường dẫn đến file đã tải lên
+    if (!img) {
+      throw new Error('File upload failed');
+    }
 
-//     const maxBreed = await Breed.findOne().sort({ _id: -1 });
-//     const newId = maxBreed?._id ? maxBreed._id + 1 : 1;
-//     const newBreed = new Breed({ _id: newId, name, img, id_type });
-//     const savedBreed = await newBreed.save();
-//     await BreedType.findByIdAndUpdate(id_type, { $push: { array: savedBreed._id } });
+    // Upload hình ảnh lên Cloudinary
+    const result = await new Promise((resolve, reject) => {
+      cloudinary.v2.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
+        if (error) {
+          reject(new Error('Cloudinary upload failed'));
+        } else {
+          resolve(result);
+        }
+      }).end(img.buffer);
+    });
 
-//     res.status(201).json(savedBreed);
-//   } catch (error) {
-//     console.error('Error adding breed:', error);
-//     res.status(500).json({ error: "Internal server error" });
-//   }
-// });
+    // Lấy URL hình ảnh từ kết quả upload
+    const imgUrl = (result as cloudinary.UploadApiResponse).secure_url;
 
-// Sử dụng multer để xử lý file upload trong PUT route
+    // Tạo và lưu giống mới vào cơ sở dữ liệu
+    const maxBreed = await Breed.findOne().sort({ _id: -1 });
+    const newId = maxBreed?._id ? maxBreed._id + 1 : 1;
+    const newBreed = new Breed({ _id: newId, name, img: imgUrl, id_type });
+    const savedBreed = await newBreed.save();
+    await BreedType.findByIdAndUpdate(id_type, { $push: { array: savedBreed._id } });
+
+    res.status(201).json(savedBreed);
+  } catch (error) {
+    console.error('Error adding breed:', error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// Route PUT để cập nhật giống
 router.put("/:id", upload.single('img'), async (req, res) => {
   const breedId = req.params.id;
   const { name, id_type } = req.body;
-  const img = req.file?.path; // Đường dẫn đến file hình ảnh
+  const img = req.file;
 
   try {
-    // Tìm thông tin Breed cũ
     const existingBreed = await Breed.findById(breedId);
     if (!existingBreed) {
       return res.status(404).json({ error: 'Breed not found' });
@@ -103,10 +96,27 @@ router.put("/:id", upload.single('img'), async (req, res) => {
       );
     }
 
-    // Cập nhật Breed mới
+    let imgUrl = existingBreed.img;
+
+    if (img) {
+      // Upload hình ảnh mới lên Cloudinary
+      const result = await new Promise((resolve, reject) => {
+        cloudinary.v2.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
+          if (error) {
+            reject(new Error('Cloudinary upload failed'));
+          } else {
+            resolve(result);
+          }
+        }).end(img.buffer);
+      });
+
+      imgUrl = (result as cloudinary.UploadApiResponse).secure_url;
+    }
+
+    // Cập nhật Breed mới vào cơ sở dữ liệu
     const updatedBreed = await Breed.findByIdAndUpdate(
       breedId,
-      { name, img: img || existingBreed.img, id_type },
+      { name, img: imgUrl, id_type },
       { new: true }
     );
 
@@ -120,7 +130,6 @@ router.put("/:id", upload.single('img'), async (req, res) => {
       { $addToSet: { array: breedId } }
     );
 
-    // Trả về kết quả
     res.status(200).json({ message: 'Breed updated successfully', breed: updatedBreed });
   } catch (error) {
     console.error('Error updating breed:', error);
@@ -128,7 +137,7 @@ router.put("/:id", upload.single('img'), async (req, res) => {
   }
 });
 
-
+// Route DELETE để xóa giống
 router.delete("/:id", async (req, res) => {
   try {
     const breedId = req.params.id;
@@ -137,7 +146,6 @@ router.delete("/:id", async (req, res) => {
       return res.status(404).json({ error: 'Breed not found' });
     }
 
-    // Xoá breedId khỏi array của BreedType liên quan
     await BreedType.updateOne(
       { array: breedId },
       { $pull: { array: breedId } }

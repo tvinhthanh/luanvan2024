@@ -132,11 +132,11 @@ const getNextRecordId = async (): Promise<string> => {
 };
 
 
-router.get('/by-pet/:petId', async (req, res) => {
-  const { petId } = req.params;
+router.get('/:vetId/:petId', async (req, res) => {
+  const { petId , vetId } = req.params;
 
   try {
-    const records = await Record.find({ petId });
+    const records = await Record.find({vetId, petId });
     res.json(records);
   } catch (error) {
     console.error("Error fetching records by pet:", error);

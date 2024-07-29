@@ -1,22 +1,21 @@
-import { ApexOptions } from 'apexcharts';
-import React, { useState, useEffect } from 'react';
-import ReactApexChart from 'react-apexcharts';
-import * as apiClient from '../../../api-client'; // Import hàm fetch dữ liệu
+import { ApexOptions } from "apexcharts";
+import React, { useState, useEffect } from "react";
+import ReactApexChart from "react-apexcharts";
 
-const options: ApexOptions = {
+const initialOptions: ApexOptions = {
   legend: {
     show: false,
-    position: 'top',
-    horizontalAlign: 'left',
+    position: "top",
+    horizontalAlign: "left",
   },
-  colors: ['#3C50E0', '#80CAEE'],
+  colors: ["#3C50E0", "#80CAEE"],
   chart: {
-    fontFamily: 'Satoshi, sans-serif',
+    fontFamily: "Satoshi, sans-serif",
     height: 335,
-    type: 'area',
+    type: "area",
     dropShadow: {
       enabled: true,
-      color: '#623CEA14',
+      color: "#623CEA14",
       top: 10,
       blur: 4,
       left: 0,
@@ -46,7 +45,7 @@ const options: ApexOptions = {
   ],
   stroke: {
     width: [2, 2],
-    curve: 'straight',
+    curve: "straight",
   },
   grid: {
     xaxis: {
@@ -65,8 +64,8 @@ const options: ApexOptions = {
   },
   markers: {
     size: 4,
-    colors: '#fff',
-    strokeColors: ['#3056D3', '#80CAEE'],
+    colors: "#fff",
+    strokeColors: ["#3056D3", "#80CAEE"],
     strokeWidth: 3,
     strokeOpacity: 0.9,
     strokeDashArray: 0,
@@ -78,8 +77,8 @@ const options: ApexOptions = {
     },
   },
   xaxis: {
-    type: 'category',
-    categories: [], // Sẽ được cập nhật sau khi fetch dữ liệu
+    type: "category",
+    categories: [], // sẽ cập nhật từ API
     axisBorder: {
       show: false,
     },
@@ -90,11 +89,11 @@ const options: ApexOptions = {
   yaxis: {
     title: {
       style: {
-        fontSize: '0px',
+        fontSize: "0px",
       },
     },
     min: 0,
-    max: 100,
+    max: 100, // có thể thay đổi theo dữ liệu thực tế
   },
 };
 
@@ -109,52 +108,34 @@ const ChartOne: React.FC = () => {
   const [state, setState] = useState<ChartOneState>({
     series: [
       {
-        name: 'Total Revenue',
+        name: "Invoices",
         data: [],
       },
     ],
   });
-  const [categories, setCategories] = useState<string[]>([]);
 
-  const transformDataForChart = (invoices: any) => {
-    const categories = invoices.map((invoice: any) => invoice.date); // Giả sử `date` là trường chứa ngày tháng
-    const seriesData = invoices.map((invoice: any) => invoice.total); // Giả sử `total` là tổng tiền của hóa đơn
-  
-    return {
-      categories,
-      seriesData,
-    };
-  };
+  const [options, setOptions] = useState<ApexOptions>(initialOptions);
 
-  const fetchData = async (type: 'day' | 'week' | 'month' = 'month') => {
-    try {
-      const invoices = await apiClient.fetchInvoices2(type);
-      const transformedData = transformDataForChart(invoices);
-      setCategories(transformedData.categories);
-      setState({
-        series: [
-          {
-            name: 'Total Revenue',
-            data: transformedData.seriesData,
-          },
-        ],
-      });
-    } catch (error) {
-      console.error('Error fetching invoices:', error);
-    }
+  const fetchData = async (type: "day" | "week" | "month") => {
+    const response = await fetch(`http://localhost:3000/api/invoices?type=${type}`);
+    const data = await response.json();
+
+    const seriesData = [{ name: "Invoices", data: [data.count] }];
+    const categories = [type.charAt(0).toUpperCase() + type.slice(1)];
+
+    setState({ series: seriesData });
+    setOptions((prevOptions) => ({
+      ...prevOptions,
+      xaxis: {
+        ...prevOptions.xaxis,
+        categories: categories,
+      },
+    }));
   };
 
   useEffect(() => {
-    fetchData();
+    fetchData("day");
   }, []);
-
-  const handleReset = () => {
-    fetchData('month'); // Fetch dữ liệu theo tháng
-  };
-
-  const handleFilter = (type: 'day' | 'week' | 'month') => {
-    fetchData(type); // Fetch dữ liệu theo ngày, tuần hoặc tháng
-  };
 
   return (
     <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
@@ -181,16 +162,22 @@ const ChartOne: React.FC = () => {
         </div>
         <div className="flex w-full max-w-45 justify-end">
           <div className="inline-flex items-center rounded-md bg-whiter p-1.5 dark:bg-meta-4">
-            <button className="rounded bg-white py-1 px-3 text-xs font-medium text-black shadow-card hover:bg-white hover:shadow-card dark:bg-boxdark dark:text-white dark:hover:bg-boxdark" onClick={handleReset}>
-              Reset
-            </button>
-            <button className="rounded py-1 px-3 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark" onClick={() => handleFilter('day')}>
+            <button
+              className="rounded bg-white py-1 px-3 text-xs font-medium text-black shadow-card hover:bg-white hover:shadow-card dark:bg-boxdark dark:text-white dark:hover:bg-boxdark"
+              onClick={() => fetchData("day")}
+            >
               Day
             </button>
-            <button className="rounded py-1 px-3 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark" onClick={() => handleFilter('week')}>
+            <button
+              className="rounded py-1 px-3 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark"
+              onClick={() => fetchData("week")}
+            >
               Week
             </button>
-            <button className="rounded py-1 px-3 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark" onClick={() => handleFilter('month')}>
+            <button
+              className="rounded py-1 px-3 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark"
+              onClick={() => fetchData("month")}
+            >
               Month
             </button>
           </div>
@@ -200,7 +187,7 @@ const ChartOne: React.FC = () => {
       <div>
         <div id="chartOne" className="-ml-5">
           <ReactApexChart
-            options={{ ...options, xaxis: { ...options.xaxis, categories } }}
+            options={options}
             series={state.series}
             type="area"
             height={350}

@@ -43,6 +43,36 @@ router.get("/:email", async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+// Cập nhật thông tin của pet
+router.put("/:id", async (req, res) => {
+  const petId = req.params.id;
+  const { weight } = req.body;
+
+  // Xác thực dữ liệu đầu vào
+  if (typeof weight !== 'number' || weight <= 0) {
+    return res.status(400).json({ error: 'Invalid weight value' });
+  }
+
+  try {
+    // Tìm pet và cập nhật cân nặng
+    const updatedPet = await Pet.findByIdAndUpdate(
+      petId,
+      { weight },
+      { new: true } // Trả về đối tượng đã được cập nhật
+    );
+
+    if (!updatedPet) {
+      return res.status(404).json({ error: 'Pet not found' });
+    }
+
+    res.status(200).json(updatedPet);
+  } catch (error) {
+    console.error('Error updating pet weight:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Endpoint to display details of a pet
 router.get("/detail/:pet_id", async (req, res) => {
   const petId = req.params.pet_id;

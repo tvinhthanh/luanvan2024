@@ -137,4 +137,53 @@ router.delete('/:id', async (req: Request, res: Response) => {
   }
 });
 
+// API endpoint để lấy số hóa đơn trong khoảng thời gian tùy chọn
+router.get('/api/invoices', async (req, res) => {
+  try {
+    const { type } = req.query;
+    let matchCondition;
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (type === 'day') {
+      matchCondition = {
+        date: {
+          $gte: today,
+          $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000),
+        },
+      };
+    } else if (type === 'week') {
+      const weekStart = new Date(today);
+      weekStart.setDate(today.getDate() - today.getDay());
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 7);
+
+      matchCondition = {
+        date: {
+          $gte: weekStart,
+          $lt: weekEnd,
+        },
+      };
+    } else if (type === 'month') {
+      const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+      const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+
+      matchCondition = {
+        date: {
+          $gte: monthStart,
+          $lt: monthEnd,
+        },
+      };
+    } else {
+      return res.status(400).send({ message: 'Invalid type' });
+    }
+
+    const invoiceCount = await Invoice.countDocuments(matchCondition);
+    res.json({ count: invoiceCount });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ message: 'Internal Server Error' });
+  }
+});
 export default router;
