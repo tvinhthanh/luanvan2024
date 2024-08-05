@@ -301,7 +301,7 @@ router.get("/booking/showPetDetail/:vet_id/:pet_id/:schedule_id", async (req, re
       nameCustomer: ownerInfo.name,
       petName: petInfo.name,
       age: petInfo.age,
-      weigh: petInfo.weigh,
+      weigh: petInfo.weight,
       status: petSchedule.status,
       note: petSchedule.note,
       breed_type: breedInfo ? breedInfo.name : "Unknown", // Thêm thông tin về breed_type vào kết quả trả về
@@ -350,7 +350,7 @@ router.get("/booking/showPetDetail/:vet_id/:pet_id", async (req, res) => {
       nameCustomer: ownerInfo.name,
       petName: petInfo.name,
       age: petInfo.age,
-      weigh: petInfo.weigh,
+      weigh: petInfo.weight,
       status: petSchedule.status,
       note: petSchedule.note,
       breed_type: breedInfo ? breedInfo.name : "Unknown", // Thêm thông tin về breed_type vào kết quả trả về

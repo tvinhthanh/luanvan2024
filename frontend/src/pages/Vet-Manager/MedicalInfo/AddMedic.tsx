@@ -99,13 +99,13 @@ const AddMedicalRecord: React.FC = () => {
         petId,
         ownerId,
         vetId: id_vet,
-        recordId,
         visitDate: new Date(visitDate),
         reasonForVisit,
         symptoms,
         diagnosis,
         treatmentPlan,
         medications,
+        bookingsId: "",
         notes,
         hasInvoice: false,
       };
@@ -186,7 +186,7 @@ const AddMedicalRecord: React.FC = () => {
             />
           </div>
         )}
-        {/* <div>
+        <div>
           <label className="block text-sm font-medium text-gray-700">Vet ID</label>
           <input
             type="text"
@@ -194,7 +194,7 @@ const AddMedicalRecord: React.FC = () => {
             readOnly
             className="mt-1 block w-full border border-gray-300 rounded-md p-2"
           />
-        </div> */}
+        </div>
         <div>
           <label className="block text-sm font-medium text-gray-700">Reason for Visit</label>
           <input

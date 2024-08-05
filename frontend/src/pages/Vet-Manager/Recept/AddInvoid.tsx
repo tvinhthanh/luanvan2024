@@ -26,6 +26,9 @@ const AddInvoice: React.FC = () => {
     }
   );
 
+  // Filter services to only show available ones
+  const availableServices = services?.filter(service => service.available) || [];
+
   // Fetch medications using medicalRecord.medications IDs
   const medicationQueries = useQueries(
     (medicalRecord.medications || []).map((medicationId) => ({
@@ -73,7 +76,7 @@ const AddInvoice: React.FC = () => {
 
     // Calculate total for selected services
     selectedServices.forEach((serviceId) => {
-      const selectedService = services?.find(
+      const selectedService = availableServices.find(
         (service) => service._id === serviceId
       );
       if (selectedService) {
@@ -88,7 +91,7 @@ const AddInvoice: React.FC = () => {
     const total = Number(calculateTotal());
 
     const selectedServiceObjects = selectedServices.map((serviceId) => {
-      const selectedService = services?.find((service) => service._id === serviceId);
+      const selectedService = availableServices.find((service) => service._id === serviceId);
       return selectedService ? { _id: selectedService._id } : null;
     }).filter(Boolean) as ServiceType[];
 
@@ -98,8 +101,6 @@ const AddInvoice: React.FC = () => {
 
     const invoiceData: InvoiceType = {
       medicalRecordId: medicalRecord._id,
-      ownerId: medicalRecord.ownerId, // Assuming ownerId is available in medicalRecord
-      petName: pet.name,
       medications: medicationObjects, // Ensure _id is converted to string
       services: selectedServiceObjects, // Ensure _id is converted to string
       vetId: id_vet,
@@ -128,7 +129,7 @@ const AddInvoice: React.FC = () => {
         <strong>Pet Name:</strong> {pet.name}
       </p>
       <p>
-        <strong>Owner Name:</strong> {ownerId}
+        <strong>Owner Name:</strong> {medicalRecord.ownerId}
       </p>
       <p>
         <strong>Visit Date:</strong> {new Date(medicalRecord.visitDate).toLocaleDateString()}
@@ -147,12 +148,6 @@ const AddInvoice: React.FC = () => {
                 <strong>Name:</strong> {medication.name}
               </p>
               <p>
-                <strong>Dosage:</strong> {medication.dosage}
-              </p>
-              <p>
-                <strong>Instructions:</strong> {medication.instructions}
-              </p>
-              <p>
                 <strong>Price:</strong> ${parseFloat(medication.price.toString()).toFixed(2)}
               </p>
             </li>
@@ -164,7 +159,7 @@ const AddInvoice: React.FC = () => {
       <div className="mt-4">
         <h4 className="font-bold">Additional Services:</h4>
         <ServicesList 
-          services={services || []}
+          services={availableServices}
           selectedServices={selectedServices}
           handleServiceSelection={handleServiceSelection}
         />

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useMemo } from "react";
 import Toast from "../components/Toast";
 import { useQuery } from "react-query";
 import * as apiClient from "../api-client";
@@ -19,6 +19,7 @@ type AppContext = {
   stripePromise: Promise<Stripe | null>;
   userId: string;
   id_vet: string;
+  vet: VetCType | null; // Added vet to context
 };
 
 const AppContext = React.createContext<AppContext | undefined>(undefined);
@@ -55,20 +56,22 @@ export const AppContextProvider = ({
 
   // Assuming vetData is an array and using the first vet's _id
   const id_vet = vetData ? vetData[0]?._id || "" : "";
+  const vet = vetData ? vetData[0] : null; // Set vet
+
+  const contextValue = useMemo(() => ({
+    showToast: (toastMessage: ToastMessage) => {
+      setToast(toastMessage);
+    },
+    isLoggedIn: !isError,
+    userRole: tokenData?.isAdmin || null,
+    stripePromise,
+    userId: tokenData?.userId || "",
+    id_vet,
+    vet // Add vet to context
+  }), [isError, tokenData, vetData, stripePromise]);
 
   return (
-    <AppContext.Provider
-      value={{
-        showToast: (toastMessage) => {
-          setToast(toastMessage);
-        },
-        isLoggedIn: !isError,
-        userRole: tokenData?.isAdmin || null,
-        stripePromise,
-        userId: tokenData?.userId || "",
-        id_vet,
-      }}
-    >
+    <AppContext.Provider value={contextValue}>
       {toast && (
         <Toast
           message={toast.message}

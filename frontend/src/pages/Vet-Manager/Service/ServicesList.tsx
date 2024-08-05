@@ -1,18 +1,30 @@
 import React from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
+import { useNavigate } from "react-router-dom";
 import * as apiClient from "../../../api-client";
 import { ServiceType } from "../../../../../backend/src/shared/types"; // Assuming ServiceType is imported from shared types
+import { useAppContext } from "../../../contexts/AppContext";
 
 interface ServicesListProps {
   vetId: string;
 }
 
 const ServicesList: React.FC<ServicesListProps> = ({ vetId }) => {
-  const { data: services, isLoading, error } = useQuery<ServiceType[]>(["fetchServicesForVet", vetId], () => apiClient.fetchServicesForVet(vetId), {
-    onError: (err) => {
-      console.error(`Error fetching services for vet ${vetId}:`, err);
-    },
-  });
+  const navigate = useNavigate();
+const {id_vet} = useAppContext();
+  const {
+    data: services,
+    isLoading,
+    error,
+  } = useQuery<ServiceType[]>(
+    ["fetchServicesForVet", vetId],
+    () => apiClient.fetchServicesForVet(vetId),
+    {
+      onError: (err) => {
+        console.error(`Error fetching services for vet ${vetId}:`, err);
+      },
+    }
+  );
 
   const queryClient = useQueryClient();
 
@@ -36,6 +48,10 @@ const ServicesList: React.FC<ServicesListProps> = ({ vetId }) => {
     }
   };
 
+  const handleUpdate = (service: ServiceType) => {
+    navigate(`/edit-service/${service._id}`, { state: { service } });
+  };
+
   if (isLoading) {
     return <span>Loading services...</span>;
   }
@@ -50,11 +66,21 @@ const ServicesList: React.FC<ServicesListProps> = ({ vetId }) => {
         <table className="min-w-full bg-white border border-gray-200">
           <thead>
             <tr>
-              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Name</th>
-              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Price</th>
-              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Duration</th>
-              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Availability</th>
-              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Actions</th>
+              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">
+                Name
+              </th>
+              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">
+                Price
+              </th>
+              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">
+                Duration
+              </th>
+              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">
+                Availability
+              </th>
+              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">
+                Actions
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -63,15 +89,18 @@ const ServicesList: React.FC<ServicesListProps> = ({ vetId }) => {
                 <td className="px-4 py-2 border-b">{service.name}</td>
                 <td className="px-4 py-2 border-b">{service.price}$</td>
                 <td className="px-4 py-2 border-b">{service.duration}</td>
-                <td className="px-4 py-2 border-b">{service.available ? "Available" : "Not Available"}</td>
+                <td className="px-4 py-2 border-b">
+                  {service.available ? "Available" : "Not Available"}
+                </td>
                 <td className="px-4 py-2 border-b">
                   <button
+                    onClick={() => handleUpdate(service)}
                     className="mr-2 px-2 py-1 bg-blue-500 text-white rounded"
                   >
                     Edit
                   </button>
                   <button
-                    onClick={() => handleDelete(service._id)} // Call handleDelete with service._id
+                    onClick={() => handleDelete(service._id)}
                     className="px-2 py-1 bg-red-500 text-white rounded"
                   >
                     Delete

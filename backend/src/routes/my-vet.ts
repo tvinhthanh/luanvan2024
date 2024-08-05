@@ -19,7 +19,7 @@ const upload = multer({
 router.post('/', verifyToken, upload.array('imageFiles', 1), async (req: Request, res: Response) => {
   try {
     const imageFiles = req.files as Express.Multer.File[];
-    const { name, address, phone, description, userId } = req.body;
+    const { name, address, phone, description, userId, type } = req.body;
 
     if (!name || !address || !phone || !description || !userId) {
       return res.status(400).json({ error: 'Missing required fields.' });
@@ -32,6 +32,7 @@ router.post('/', verifyToken, upload.array('imageFiles', 1), async (req: Request
     const vet = new Vet({
       _id: uuidv4(),
       name,
+      type : false,
       address,
       description,
       phone,

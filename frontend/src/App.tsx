@@ -43,6 +43,8 @@ import CreateInvoice from "./pages/Vet-Manager/Recept/AddInvoid";
 import ManagerBooking from "./pages/Vet-Manager/Booking/ManagerBooking";
 import EditMed from "./pages/Vet-Manager/Medications/EditMed";
 import ManagerInvoice from "./pages/Vet-Manager/Recept/ManagerInvoid";
+import EditService from "./pages/Vet-Manager/Service/EditService";
+import AddMedicalRecordWithBookId from "./pages/Vet-Manager/MedicalInfo/AddMedicwithBookingsId";
 
 const App = () => {
   const { isLoggedIn, userRole, id_vet } = useAppContext();
@@ -151,11 +153,27 @@ const App = () => {
                 </Layout>
               }
             />
+             <Route
+              path="/add-record/:recordId"
+              element={
+                <Layout>
+                  <AddRecords />
+                </Layout>
+              }
+            />
             <Route
               path="/add-medical"
               element={
                 <Layout>
                   <AddMedicalRecord />
+                </Layout>
+              }
+            />
+            <Route
+              path="/add-medical/:bookingsId"
+              element={
+                <Layout>
+                  <AddMedicalRecordWithBookId />
                 </Layout>
               }
             />
@@ -343,6 +361,14 @@ const App = () => {
               element={
                 <Layout>
                   <AddService />
+                </Layout>
+              }
+            />
+            <Route
+              path="/edit-service/:serId"
+              element={
+                <Layout>
+                  <EditService />
                 </Layout>
               }
             />

@@ -2,7 +2,11 @@ import React, { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import * as apiClient from "../../../api-client";
-import { BookingType, PetType, OwnerType } from "../../../../../backend/src/shared/types";
+import {
+  BookingType,
+  PetType,
+  OwnerType,
+} from "../../../../../backend/src/shared/types";
 
 const DetailBooking: React.FC = () => {
   const { bookingId } = useParams<{ bookingId: string }>(); // Lấy bookingId từ params của URL
@@ -10,10 +14,16 @@ const DetailBooking: React.FC = () => {
   const navigate = useNavigate(); // Hook to navigate
 
   // State cho trạng thái booking
-  const [selectedStatus, setSelectedStatus] = useState<number | undefined>(undefined);
+  const [selectedStatus, setSelectedStatus] = useState<number | undefined>(
+    undefined
+  );
 
   // Query để fetch chi tiết booking
-  const { data: booking, isLoading, error } = useQuery<BookingType>(
+  const {
+    data: booking,
+    isLoading,
+    error,
+  } = useQuery<BookingType>(
     ["fetchBooking", bookingId],
     () => apiClient.fetchBookingById(bookingId || ""),
     {
@@ -35,9 +45,16 @@ const DetailBooking: React.FC = () => {
   );
 
   // Query để fetch owner thông tin
-  const { data: owner, isLoading: ownerLoading, error: ownerError } = useQuery<OwnerType | undefined>(
+  const {
+    data: owner,
+    isLoading: ownerLoading,
+    error: ownerError,
+  } = useQuery<OwnerType | undefined>(
     ["fetchOwner", booking?.ownerId],
-    () => (booking?.ownerId ? apiClient.fetchOwnerById(booking.ownerId) : Promise.resolve(undefined)),
+    () =>
+      booking?.ownerId
+        ? apiClient.fetchOwnerById(booking.ownerId)
+        : Promise.resolve(undefined),
     {
       enabled: !!booking?.ownerId, // Chỉ fetch khi ownerId có giá trị
       onError: (err) => {
@@ -51,9 +68,8 @@ const DetailBooking: React.FC = () => {
     (newStatus: number) => apiClient.updateBookingStatus(bookingId!, newStatus),
     {
       onSuccess: () => {
-        queryClient.invalidateQueries(["fetchBooking", bookingId]); 
-        navigate('/my-booking');
-
+        queryClient.invalidateQueries(["fetchBooking", bookingId]);
+        navigate("/my-booking");
       },
       onError: (err) => {
         console.error("Error updating booking status:", err);
@@ -115,19 +131,16 @@ const DetailBooking: React.FC = () => {
             Chủ nhân: {owner ? owner.name : "Không tìm thấy"}
           </p>
           <p className="mt-2">
-            <strong>Ngày:</strong>{" "}
-            {new Date(booking.date).toLocaleDateString()}
-            <strong> Giờ:</strong>{" "}
-            {new Date(booking.date).toLocaleTimeString()}
+            <strong>Ngày:</strong> {new Date(booking.date).toLocaleDateString()}
+            <strong> Giờ:</strong> {new Date(booking.date).toLocaleTimeString()}
           </p>
           <p>
-            <strong>Trạng thái:</strong>{" "}
-            {getStatusText(booking.status)}
+            <strong>Trạng thái:</strong> {getStatusText(booking.status)}
           </p>
           <p>
-            <strong>Số điện thoại chủ nhân:</strong> {booking.phoneOwner || "Không có số điện thoại"}
+            <strong>Số điện thoại chủ nhân:</strong>{" "}
+            {booking.phoneOwner || "Không có số điện thoại"}
           </p>
-
           {/* Dropdown để chọn trạng thái mới */}
           <form onSubmit={handleSubmit} className="mt-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -152,10 +165,9 @@ const DetailBooking: React.FC = () => {
               Cập nhật
             </button>
           </form>
-
           {/* Nút chuyển sang trang AddMedic.tsx */}
           <Link
-            to={`/add-medical`} // Đường dẫn đến trang AddMedic.tsx với bookingId làm params
+            to={`/add-medical/${bookingId}`} // Include bookingId in the route
             className="bg-blue-500 text-white px-4 py-2 rounded mt-4 inline-block"
           >
             Tạo bệnh án

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import * as apiClient from '../../../api-client'; // Import your API client functions
 import { useAppContext } from '../../../contexts/AppContext';
+import { useNavigate } from 'react-router-dom';
 
 const AddVet: React.FC = () => {
   const { userId } = useAppContext();
@@ -9,6 +10,7 @@ const AddVet: React.FC = () => {
   const [phone, setPhone] = useState('');
   const [imageUrls, setImg] = useState<File | null>(null);
   const [description, setDescription] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -21,7 +23,7 @@ const AddVet: React.FC = () => {
     try {
       await apiClient.addMyVet(name, phone, address, imageUrls, description, userId);
       alert('Vet added successfully!');
-      resetForm();
+      navigate(`/my-vet`); // Redirect to invoice page after creation
     } catch (error) {
       console.error('Error adding vet:', error);
       alert('Failed to add vet');
@@ -36,13 +38,7 @@ const AddVet: React.FC = () => {
     }
   };
 
-  const resetForm = () => {
-    setName('');
-    setAddress('');
-    setPhone('');
-    setImg(null);
-    setDescription('');
-  };
+
 
   return (
     <div className="max-w-4xl mx-auto py-8">

@@ -2,38 +2,34 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import * as apiClient from "../../../api-client";
-import { RecordType, PetType, OwnerType } from "../../../../../backend/src/shared/types";
+import { PetType, OwnerType, MedicType } from "../../../../../backend/src/shared/types";
 import { useAppContext } from "../../../contexts/AppContext";
 import MyVetInfo from "../Vet/VetInfo";
-import { FaSearch } from "react-icons/fa"; // Import biểu tượng kính lúp
+import { FaSearch } from "react-icons/fa";
 
 const ManagerRecord: React.FC = () => {
   const { id_vet } = useAppContext();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // State for search query and filtered records
   const [searchQuery, setSearchQuery] = useState("");
-  const [filteredRecords, setFilteredRecords] = useState<RecordType[]>([]);
+  const [aggregatedRecords, setAggregatedRecords] = useState<{ petName: string; ownerName: string; petId: string; ownerId: string; count: number }[]>([]);
   const [namesMap, setNamesMap] = useState<{ [key: string]: string }>({});
   const [loadingNames, setLoadingNames] = useState(true);
 
-  // Fetching records for the current vet using react-query
-  const { data: records = [], isLoading, error } = useQuery<RecordType[]>(
+  const { data: records = [], isLoading, error } = useQuery<MedicType[]>(
     "fetchRecordForVet",
-    () => apiClient.fetchRecordForVet(id_vet),
+    () => apiClient.fetchMedicalRecordsByVetId(id_vet),
     {
       onError: (err) => {
         console.error("Error fetching records:", err);
       },
       onSuccess: (data) => {
-        // Set initial filtered records based on search query
-        setFilteredRecords(data);
+        aggregateRecords(data);
       }
     }
   );
 
-  // Mutation to delete a record
   const deleteRecordMutation = useMutation(
     (recordId: string) => apiClient.deleteRecordById(recordId),
     {
@@ -46,7 +42,6 @@ const ManagerRecord: React.FC = () => {
     }
   );
 
-  // Function to fetch and update namesMap
   useEffect(() => {
     const fetchNames = async () => {
       try {
@@ -76,53 +71,69 @@ const ManagerRecord: React.FC = () => {
     fetchNames();
   }, []);
 
-  // Update filtered records when records or searchQuery change
   useEffect(() => {
+    aggregateRecords(records);
+  }, [records, searchQuery, namesMap, id_vet]);
+
+  const aggregateRecords = (records: MedicType[]) => {
     if (records.length > 0) {
-      const results = records.filter(record => {
+      const petMap: { [key: string]: { petName: string; ownerName: string; petId: string; ownerId: string; count: number } } = {};
+
+      records.forEach(record => {
         const petName = namesMap[record.petId] || `Pet ${record.petId}`;
         const ownerName = namesMap[record.ownerId] || `Owner ${record.ownerId}`;
-        return petName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-               ownerName.toLowerCase().includes(searchQuery.toLowerCase());
+        if (!petMap[record.petId]) {
+          petMap[record.petId] = { petName, ownerName, petId: record.petId, ownerId: record.ownerId, count: 0 };
+        }
+        if (record.vetId === id_vet) {
+          petMap[record.petId].count += 1;
+        }
       });
-      setFilteredRecords(results);
-    }
-  }, [records, searchQuery, namesMap]);
 
-  // Handle search input change
+      const results = Object.values(petMap).filter(pet =>
+        pet.petName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        pet.ownerName.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+
+      setAggregatedRecords(results);
+    }
+  };
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
   if (isLoading || loadingNames) {
-    return <span>Loading...</span>;
+    return <div className="text-center text-gray-600">Loading...</div>;
   }
 
   if (error) {
-    return <span>Error loading records</span>;
+    return <div className="text-center text-red-500">Error loading records</div>;
   }
 
-  // Handle delete button click
   const handleDelete = (recordId: string) => {
     if (window.confirm("Are you sure you want to delete this record?")) {
       deleteRecordMutation.mutate(recordId);
     }
   };
 
+  const handleAdd = () => {
+    navigate(`/add-medical`);
+  };
+
   return (
     <div className="container mx-auto p-4">
       <MyVetInfo />
-      <br />
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">Manager Records</h1>
-        <Link to="/add-record">
-          <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            Add Record
-          </button>
-        </Link>
-      </div>
-      <div className="flex items-center mb-4">
-        <div className="relative w-full max-w-md">
+      <div className="my-6">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-2xl font-bold">Manager Records</h1>
+          <Link to="/add-medical">
+            <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+              Add Record
+            </button>
+          </Link>
+        </div>
+        <div className="relative max-w-md mb-4">
           <input
             type="text"
             value={searchQuery}
@@ -132,51 +143,54 @@ const ManagerRecord: React.FC = () => {
           />
           <FaSearch className="absolute top-2 left-2 text-gray-500" />
         </div>
-      </div>
-      <div className="mt-4">
-        <table className="min-w-full bg-white border-collapse overflow-hidden border border-gray-300 rounded-lg shadow-md">
-          <thead className="bg-gray-100 text-gray-700">
-            <tr>
-              <th className="py-2 px-4 border-b border-gray-300">ID</th>
-              <th className="py-2 px-4 border-b border-gray-300">Pet Name</th>
-              <th className="py-2 px-4 border-b border-gray-300">Owner Name</th>
-              <th className="py-2 px-4 border-b border-gray-300">Medical Records</th>
-              <th className="py-2 px-4 border-b border-gray-300">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="text-gray-600">
-            {filteredRecords.map((record) => (
-              <tr key={record._id}>
-                <td className="py-2 px-4 border-b border-gray-300">{record._id}</td>
-                <td className="py-2 px-4 border-b border-gray-300">{namesMap[record.petId] || `Pet ${record.petId}`}</td>
-                <td className="py-2 px-4 border-b border-gray-300">{namesMap[record.ownerId] || `Owner ${record.ownerId}`}</td>
-                <td className="py-2 px-4 border-b border-gray-300">{record.medicId?.length || 0}</td>
-                <td className="py-2 px-4 border-b border-gray-300">
-                  <button
-                    className="text-blue-500 hover:underline"
-                    onClick={() =>
-                      navigate(`/details-record`, {
-                        state: {
-                          recordId: record._id,
-                          petId: record.petId || `Pet ${record.petId}`,
-                          ownerId: record.ownerId || `Owner ${record.ownerId}`,
-                        },
-                      })
-                    }
-                  >
-                    View Details
-                  </button>
-                  <button
-                    className="text-red-500 hover:underline ml-4"
-                    onClick={() => handleDelete(record._id)}
-                  >
-                    Delete
-                  </button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border-collapse border border-gray-300 rounded-lg shadow-md">
+            <thead className="bg-gray-100 text-gray-700">
+              <tr>
+                <th className="py-2 px-4 border-b border-gray-300">Tên thú cưng</th>
+                <th className="py-2 px-4 border-b border-gray-300">Tên chủ nhân</th>
+                <th className="py-2 px-4 border-b border-gray-300">Số lần đi khám</th>
+                <th className="py-2 px-4 border-b border-gray-300">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="text-gray-600">
+              {aggregatedRecords.map((record, index) => (
+                <tr key={index}>
+                  <td className="py-2 px-4 border-b border-gray-300">{record.petName}</td>
+                  <td className="py-2 px-4 border-b border-gray-300">{record.ownerName}</td>
+                  <td className="py-2 px-4 border-b border-gray-300">{record.count}</td>
+                  <td className="py-2 px-4 border-b border-gray-300">
+                    <button
+                      className="text-blue-500 hover:underline mr-4"
+                      onClick={() =>
+                        navigate(`/details-record`, {
+                          state: {
+                            petId: record.petId,
+                            ownerId: record.ownerId,
+                          },
+                        })
+                      }
+                    >
+                      Chi tiết
+                    </button>
+                    <button
+                      className="text-red-500 hover:underline mr-4"
+                      onClick={() => handleDelete(record.petId)} // Assuming petId is used for deletion
+                    >
+                      Xoá
+                    </button>
+                    <button
+                      className="text-green-500 hover:underline"
+                      onClick={handleAdd}
+                    >
+                      Thêm phiếu khám
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

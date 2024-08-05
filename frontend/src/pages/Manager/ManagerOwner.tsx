@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import * as apiClient from "../../api-client";
 import OwnerDetails from '../../components/detail/ownerDetail';
-import ManagerUser from "./ManagerUser";
 
 const ManagerOwner = () => {
   const queryClient = useQueryClient();
@@ -36,7 +35,7 @@ const ManagerOwner = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SĐT</th>
+                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">SĐT</th> */}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
@@ -45,7 +44,7 @@ const ManagerOwner = () => {
               {owners.map((owner: any) => (
                 <tr key={owner._id} onClick={() => handleRowClick(owner)} className="cursor-pointer hover:bg-gray-100">
                   <td className="px-6 py-4 whitespace-nowrap">{owner.name}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{owner.phone}</td>
+                  {/* <td className="px-6 py-4 whitespace-nowrap">{owner.phone}</td> */}
                   <td className="px-6 py-4 whitespace-nowrap">{owner.email}</td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <button

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient, useQueries } from "react-query";
 import * as apiClient from "../../../api-client";
@@ -9,6 +9,7 @@ const MedicalRecordDetail: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  // Fetch medical record
   const {
     data: medicalRecord,
     isLoading: isRecordLoading,
@@ -24,6 +25,7 @@ const MedicalRecordDetail: React.FC = () => {
     }
   );
 
+  // Fetch pet information
   const {
     data: pet,
     isLoading: isPetLoading,
@@ -39,6 +41,7 @@ const MedicalRecordDetail: React.FC = () => {
     }
   );
 
+  // Fetch owner information
   const {
     data: owner,
     isLoading: isOwnerLoading,
@@ -54,6 +57,7 @@ const MedicalRecordDetail: React.FC = () => {
     }
   );
 
+  // Handle deleting medical record
   const deleteMedicalRecordMutation = useMutation(
     (recordId: string) => apiClient.deleteMedicalRecord(recordId),
     {
@@ -67,6 +71,7 @@ const MedicalRecordDetail: React.FC = () => {
     }
   );
 
+  // Fetch medications
   const medicationQueries = useQueries(
     (medicalRecord?.medications || []).map((medicationId) => ({
       queryKey: ["fetchMedication", medicationId],
@@ -94,11 +99,11 @@ const MedicalRecordDetail: React.FC = () => {
 
   const handleCreateInvoice = async () => {
     if (!medicalRecord || !recordId || !owner || !pet) return;
-  
+
     try {
       // Ensure medications are an array of strings
       const medications = medicalRecord.medications.map((medId) => medId.toString());
-  
+
       navigate(`/create-invoice`, { state: { medicalRecord: { ...medicalRecord, medications }, pet, ownerId: owner._id } });
     } catch (error) {
       console.error("Error creating invoice:", error);
@@ -124,32 +129,32 @@ const MedicalRecordDetail: React.FC = () => {
   return (
     <div className="border border-gray-200 p-4 rounded-lg shadow-md">
       <h3 className="text-lg font-bold">
-        Medical Record of {pet.name}
+        Phiếu khám của {pet.name}
       </h3>
       <p>
-        <strong>Visit Date:</strong>{" "}
+        <strong>Ngày:</strong>{" "}
         {new Date(medicalRecord.visitDate).toLocaleDateString()}
       </p>
       <p>
-        <strong>Reason for Visit:</strong> {medicalRecord.reasonForVisit}
+        <strong>Chủ nhân:</strong> {owner.name}
       </p>
       <p>
-        <strong>Symptoms:</strong> {medicalRecord.symptoms}
+        <strong>Lí do khám:</strong> {medicalRecord.reasonForVisit}
       </p>
       <p>
-        <strong>Diagnosis:</strong> {medicalRecord.diagnosis}
+        <strong>Chuẩn đoán:</strong> {medicalRecord.symptoms}
       </p>
       <p>
-        <strong>Treatment Plan:</strong> {medicalRecord.treatmentPlan}
+        <strong>Triệu chứng:</strong> {medicalRecord.diagnosis}
+      </p>
+      <p>
+        <strong>Kế hoạch điều trị:</strong> {medicalRecord.treatmentPlan}
       </p>
       {medicalRecord.notes && (
         <p>
           <strong>Notes:</strong> {medicalRecord.notes}
         </p>
       )}
-      <p>
-        <strong>Record ID:</strong> {medicalRecord._id}
-      </p>
       <div className="mt-4">
         <h4 className="font-bold">Medications:</h4>
         <ul>
@@ -159,31 +164,36 @@ const MedicalRecordDetail: React.FC = () => {
                 <strong>Name:</strong> {medication.name}
               </p>
               <p>
-                <strong>Dosage:</strong> {medication.dosage}
-              </p>
-              <p>
-                <strong>Instructions:</strong> {medication.instructions}
-              </p>
-              <p>
                 <strong>Price:</strong> ${parseFloat(medication.price.toString()).toFixed(2)}
+              </p>
+              <p>
+                <strong>--------------------</strong>
               </p>
             </li>
           ))}
         </ul>
       </div>
-      <button
-        onClick={handleDelete}
-        className="bg-red-500 text-white px-4 py-2 rounded-md mt-4"
-      >
-        Delete Medical Record
-      </button>
-      <button
-        onClick={handleCreateInvoice}
-        className={`bg-green-500 text-white px-4 py-2 rounded-md mt-4 ml-2 ${medicalRecord.hasInvoice ? 'opacity-50 cursor-not-allowed' : ''}`}
-        disabled={medicalRecord.hasInvoice ? true : undefined}
-      >
-        Create Invoice
-      </button>
+      <div className="mt-4 flex space-x-2">
+        <button
+          onClick={handleDelete}
+          className="bg-red-500 text-white px-4 py-2 rounded-md"
+        >
+          Delete Medical Record
+        </button>
+        <button
+          onClick={handleCreateInvoice}
+          className={`bg-green-500 text-white px-4 py-2 rounded-md ${medicalRecord.hasInvoice ? 'opacity-50 cursor-not-allowed' : ''}`}
+          disabled={medicalRecord.hasInvoice ? true : undefined}
+        >
+          Create Invoice
+        </button>
+        <button
+          onClick={() => navigate("/medical-record")}
+          className="bg-blue-500 text-white px-4 py-2 rounded-md"
+        >
+          Quay lại
+        </button>
+      </div>
     </div>
   );
 };

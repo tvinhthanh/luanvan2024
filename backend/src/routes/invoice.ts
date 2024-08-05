@@ -1,14 +1,26 @@
 import express, { Request, Response } from 'express';
 import mongoose from 'mongoose';
 import Invoice from '../models/invoice';
-import medicalRecord from '../models/medical';
+import MedicalRecord from '../models/medical'; // Corrected model import
 import verifyToken from '../middleware/auth';
+import Medication from '../models/medications';
+import Service from '../models/service';
 
 const router = express.Router();
 
+// Fixing the demSoThuocDaDung function
+const demSoThuocDaDung = async (medId: string) => {
+  try {
+    const count = await Invoice.countDocuments({ medications: { $elemMatch: { _id: medId } } });
+    return count;
+  } catch (err) {
+    console.log(err);
+    return null; // Ensure function returns null on error
+  }
+};
 
-router.post('/', verifyToken, async (req, res) => {
-  const { medicalRecordId, ownerId, vetId, petName, medications, services, total, createAt } = req.body;
+router.post('/', verifyToken, async (req: Request, res: Response) => {
+  const { medicalRecordId, vetId, medications, services, total, createAt } = req.body;
 
   try {
     // Validate medications array
@@ -28,9 +40,7 @@ router.post('/', verifyToken, async (req, res) => {
     // Create new invoice object
     const newInvoice = new Invoice({
       medicalRecordId,
-      ownerId,
       vetId,
-      petName,
       medications: mappedMedications,
       services: mappedServices,
       createAt: new Date(createAt),
@@ -40,15 +50,38 @@ router.post('/', verifyToken, async (req, res) => {
     // Save invoice to database
     const savedInvoice = await newInvoice.save();
 
-    // Log the saved invoice for debugging
-    console.log('Saved Invoice:', savedInvoice);
-
     // Update medical record to indicate it has an invoice
-    const updatedMedicalRecord = await medicalRecord.findOneAndUpdate(
-      { _id: medicalRecordId },
+    await MedicalRecord.findByIdAndUpdate(
+      medicalRecordId,
       { hasInvoice: true },
       { new: true }
     );
+
+    // Update medications quantities and time
+    for (const med of medications) {
+      await Medication.findByIdAndUpdate(
+        med._id,
+        { $inc: { quantity: -1 } }, // Ensure quantity and time are numeric
+        { new: true, runValidators: true } // Ensure the update is returned and validation is run
+      );
+    }
+    for (const med of medications) {
+      await Medication.findByIdAndUpdate(
+        med._id,
+        { $inc: { time: 1 } }, // Ensure quantity and time are numeric
+        { new: true, runValidators: true } // Ensure the update is returned and validation is run
+
+      );
+    }
+    // Update services time
+    for (const serv of services) {
+      await Service.findByIdAndUpdate(
+        serv._id,
+        { $inc: { time: 1 } }, // Ensure time is numeric
+        { new: true, runValidators: true } // Ensure the update is returned and validation is run
+
+      );
+    }
 
     // Respond with the saved invoice object
     res.status(201).json(savedInvoice);
@@ -58,9 +91,8 @@ router.post('/', verifyToken, async (req, res) => {
   }
 });
 
-  
-// Route để lấy tất cả các hóa đơn dựa trên vetId
-router.get('/:vetId', async (req : Request, res : Response ) => {
+// Route to get all invoices based on vetId
+router.get('/:vetId', async (req: Request, res: Response) => {
   const { vetId } = req.params;
   if (!vetId) {
     return res.status(400).json({ error: 'Vet ID is required' });
@@ -73,7 +105,8 @@ router.get('/:vetId', async (req : Request, res : Response ) => {
     res.status(500).json({ error: 'Error fetching invoices' });
   }
 });
-// Route để lấy danh sách tất cả các hóa đơn
+
+// Route to get all invoices
 router.get('/', async (req: Request, res: Response) => {
   try {
     const invoices = await Invoice.find().populate('medications').populate('services');
@@ -83,7 +116,7 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
-// Route để lấy thông tin chi tiết của một hóa đơn theo ID
+// Route to get invoice details by ID
 router.get('/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
 
@@ -98,7 +131,7 @@ router.get('/:id', async (req: Request, res: Response) => {
   }
 });
 
-// Route để cập nhật thông tin của một hóa đơn theo ID
+// Route to update invoice details by ID
 router.put('/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
   const { medicalRecordId, ownerName, petName, medications, services, total } = req.body;
@@ -120,7 +153,7 @@ router.put('/:id', async (req: Request, res: Response) => {
   }
 });
 
-// Route để xóa một hóa đơn theo ID
+// Route to delete an invoice by ID
 router.delete('/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
 
@@ -137,8 +170,8 @@ router.delete('/:id', async (req: Request, res: Response) => {
   }
 });
 
-// API endpoint để lấy số hóa đơn trong khoảng thời gian tùy chọn
-router.get('/api/invoices', async (req, res) => {
+// API endpoint to get invoice count based on date range
+router.get('/total', async (req: Request, res: Response) => {
   try {
     const { type } = req.query;
     let matchCondition;
@@ -148,7 +181,7 @@ router.get('/api/invoices', async (req, res) => {
 
     if (type === 'day') {
       matchCondition = {
-        date: {
+        createAt: {
           $gte: today,
           $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000),
         },
@@ -160,7 +193,7 @@ router.get('/api/invoices', async (req, res) => {
       weekEnd.setDate(weekEnd.getDate() + 7);
 
       matchCondition = {
-        date: {
+        createAt: {
           $gte: weekStart,
           $lt: weekEnd,
         },
@@ -170,7 +203,7 @@ router.get('/api/invoices', async (req, res) => {
       const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 1);
 
       matchCondition = {
-        date: {
+        createAt: {
           $gte: monthStart,
           $lt: monthEnd,
         },
@@ -178,7 +211,6 @@ router.get('/api/invoices', async (req, res) => {
     } else {
       return res.status(400).send({ message: 'Invalid type' });
     }
-
     const invoiceCount = await Invoice.countDocuments(matchCondition);
     res.json({ count: invoiceCount });
   } catch (error) {
@@ -186,4 +218,22 @@ router.get('/api/invoices', async (req, res) => {
     res.status(500).send({ message: 'Internal Server Error' });
   }
 });
+
+// Route to get medication usage count
+router.get('/medications/:medId', async (req: Request, res: Response) => {
+  const { medId } = req.params;
+
+  try {
+    const count = await demSoThuocDaDung(medId);
+    if (count !== null) {
+      res.status(200).json({ count, medId });
+    } else {
+      res.status(500).json({ error: 'Error counting documents' });
+    }
+  } catch (error) {
+    console.error('Error getting medication count:', error);
+    res.status(500).json({ error: 'Error getting medication count' });
+  }
+});
+
 export default router;

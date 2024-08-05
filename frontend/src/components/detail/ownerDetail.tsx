@@ -37,7 +37,6 @@ const OwnerDetails: React.FC<OwnerDetailsProps> = ({ owner, onClose }) => {
       <div className="owner-details">
         <div className="owner-details-content">
           <h2 className="text-xl font-bold mb-4">Owner Details</h2>
-          <p><strong>ID:</strong> {owner._id}</p>
           <p><strong>Name:</strong> {owner.name}</p>
           <p><strong>Email:</strong> {owner.email}</p>
           <p><strong>Phone:</strong> {owner.phone}</p>

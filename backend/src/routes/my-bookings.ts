@@ -81,9 +81,11 @@ router.get("/:bookingId", verifyToken, async (req: Request, res: Response) => {
 // POST a new booking
 router.post('/', verifyToken, async (req: Request, res: Response) => {
   const { vetId, ownerId, petId, phoneOwner, date, status } = req.body;
+  
   try {
+    // Create a new booking instance
     const newBooking = new Booking({
-      _id: uuidv4(),
+      _id: uuidv4(), // Generate a unique ID for the booking
       ownerId,
       petId,
       phoneOwner,
@@ -91,14 +93,23 @@ router.post('/', verifyToken, async (req: Request, res: Response) => {
       status,
       vetId
     });
+
+    // Save the new booking to the database
     await newBooking.save();
+
+    // Find the vet and add the new booking to their bookings
     const vet = await Vet.findById(vetId);
     if (!vet) {
       return res.status(404).json({ error: 'Vet not found' });
     }
-    vet.booking.push(newBooking);
-    await vet.save();
+    
+    // Check if booking is already in vet's bookings array
+    if (!vet.booking.includes(newBooking._id)) {
+      vet.booking.push(newBooking._id);
+      await vet.save();
+    }
 
+    // Respond with the newly created booking
     res.status(201).json(newBooking);
   } catch (error) {
     console.error('Error creating booking:', error);

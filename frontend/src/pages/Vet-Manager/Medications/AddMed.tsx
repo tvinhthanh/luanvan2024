@@ -13,7 +13,8 @@ const AddMed: React.FC = () => {
   const [name, setName] = useState<string>("");
   const [dosage, setDosage] = useState<string>("");
   const [instructions, setInstructions] = useState<string>("");
-  const [price, setPrice] = useState<string>("0");
+  const [price, setPrice] = useState<number>(0);
+  const [quantity, setQuantity] = useState<number>(0);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<"SUCCESS" | "ERROR">("SUCCESS");
 
@@ -35,13 +36,14 @@ const AddMed: React.FC = () => {
   );
 
   const addMedicationMutation = useMutation(
-    () => apiClient.addMedications(name, price, dosage, instructions, id_vet),
+    () => apiClient.addMedications(name, price, dosage, instructions, id_vet, quantity),
     {
       onSuccess: () => {
         setToastMessage("Medication added successfully!");
         setToastType("SUCCESS");
         setName("");
-        setPrice("0");
+        setPrice(0);
+        setQuantity(0);
         setDosage("");
         setInstructions("");
         navigate('/my-vet/med'); // Redirect to /my-vet/medication after success
@@ -127,7 +129,21 @@ const AddMed: React.FC = () => {
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             placeholder="Enter price"
             value={price}
-            onChange={(e) => setPrice(e.target.value)}
+            onChange={(e) => setPrice(Number(e.target.value))}
+            required
+          />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="price" className="block text-gray-700 font-bold mb-2">
+            Số lượng
+          </label>
+          <input
+            type="number"
+            id="quantity"
+            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+            placeholder="Enter quantity"
+            value={quantity}
+            onChange={(e) => setQuantity(Number(e.target.value))}
             required
           />
         </div>

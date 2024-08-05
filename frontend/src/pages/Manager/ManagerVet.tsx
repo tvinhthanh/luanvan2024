@@ -21,11 +21,25 @@ const ManagerVet: React.FC = () => {
     },
   });
 
+  // Mutation for updating a vet
+  const updateVetMutation = useMutation(apiClient.updateVetType, {
+    onSuccess: () => {
+      // Invalidate and refetch the vets after successful update
+      queryClient.invalidateQueries("fetchVets");
+    },
+  });
+
   // Handling vet delete
   const handleDelete = (vetId: string) => {
     if (window.confirm("Are you sure you want to delete this vet?")) {
       deleteVetMutation.mutate(vetId);
     }
+  };
+
+  // Handling vet update
+  const handleUpdate = (vet: VetCType) => {
+    const updatedVet = { ...vet, type: !vet.type };
+    updateVetMutation.mutate(updatedVet);
   };
 
   // Display loading state
@@ -52,7 +66,10 @@ const ManagerVet: React.FC = () => {
               Địa Chỉ
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Last Updated
+              Ngày tạo
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Trạng thái
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
@@ -74,6 +91,24 @@ const ManagerVet: React.FC = () => {
                   : "N/A"}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
+                <span
+                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    vet.type ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  {vet.type ? "ON" : "OFF"}
+                </span>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap flex space-x-2">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleUpdate(vet);
+                  }}
+                  className="inline-flex items-center px-2 py-1 bg-blue-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-blue-500 active:bg-blue-700 focus:outline-none focus:border-blue-700 focus:ring focus:ring-blue-200 disabled:opacity-25 transition"
+                >
+                  Update
+                </button>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();

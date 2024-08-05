@@ -58,6 +58,28 @@ const BookingsForVet: React.FC<Props> = ({ vetId }) => {
     ? bookings.filter((booking) => booking.status === filterStatus)
     : bookings;
 
+  // Separate bookings with status 0 or 4
+  const bookingsToShowLast = filteredBookings.filter(
+    (booking) => booking.status === 0 || booking.status === 4
+  );
+
+  const bookingsToSort = filteredBookings.filter(
+    (booking) => booking.status !== 0 && booking.status !== 4
+  );
+
+  // Sort remaining bookings by status and date
+  const sortedBookings = [...bookingsToSort].sort((a, b) => {
+    if (a.status !== b.status) {
+      return a.status - b.status; // Sort by status ascending
+    }
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+    return dateB - dateA; // Sort by date descending
+  });
+
+  // Combine sorted bookings with bookings to show last
+  const finalBookings = [...sortedBookings, ...bookingsToShowLast];
+
   const getStatusText = (status: number) => {
     switch (status) {
       case 1:
@@ -84,16 +106,6 @@ const BookingsForVet: React.FC<Props> = ({ vetId }) => {
     }
   };
 
-  // Sắp xếp theo trạng thái và sau đó theo ngày
-  const sortedBookings = [...filteredBookings].sort((a, b) => {
-    if (a.status !== b.status) {
-      return a.status - b.status; // Sắp xếp theo trạng thái tăng dần
-    }
-    const dateA = new Date(a.date).getTime();
-    const dateB = new Date(b.date).getTime();
-    return dateB - dateA; // Sắp xếp theo ngày giảm dần
-  });
-
   return (
     <div className="space-y-3">
       {/* Combobox for status filter */}
@@ -111,10 +123,11 @@ const BookingsForVet: React.FC<Props> = ({ vetId }) => {
           <option value="1">Pending</option>
           <option value="2">Confirmed</option>
           <option value="3">Completed</option>
+          <option value="4">Custom Status</option>
         </select>
       </div>
 
-      {sortedBookings.map((booking) => {
+      {finalBookings.map((booking) => {
         const owner = owners.find((owner) => owner._id === booking.ownerId);
         const isCompleted = booking.status === 3; // Check if booking status is Completed
         const statusColor = getStatusColor(booking.status);
@@ -145,6 +158,9 @@ const BookingsForVet: React.FC<Props> = ({ vetId }) => {
                 <p>
                   <strong>Phone:</strong> {owner ? owner.phone : booking.phoneOwner}
                 </p>
+                <p>
+                <strong>Time Update:</strong> {new Date(booking.updatedAt).toLocaleDateString()} - {new Date(booking.updatedAt).toLocaleTimeString()}
+                  </p>
               </div>
             ) : (
               <Link to={`/bookings/${booking._id}`} className="text-black-500">

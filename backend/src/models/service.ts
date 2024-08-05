@@ -7,9 +7,14 @@ const serviceSchema = new mongoose.Schema({
   price: { type: String, required: true },
   duration: { type: String }, // Ví dụ: "30 minutes", "1 hour"
   available: { type: Boolean, default: true }, // Trạng thái có sẵn
-  id_vet: {type: String, ref: 'Vet', required: true}
+  time: { type: Number, default: 0 },
+  id_vet: { type: String, ref: "Vet", required: true },
 });
 
-const Service = mongoose.model<ServiceType>("service", serviceSchema, "service");
+const Service = mongoose.model<ServiceType>(
+  "service",
+  serviceSchema,
+  "service"
+);
 
 export default Service;

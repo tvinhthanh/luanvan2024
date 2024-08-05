@@ -17,7 +17,8 @@ const EditMed: React.FC = () => {
   const [name, setName] = useState(medication.name);
   const [dosage, setDosage] = useState(medication.dosage);
   const [instructions, setInstructions] = useState(medication.instructions);
-  const [price, setPrice] = useState(medication.price.toString());
+  const [price, setPrice] = useState<number>(medication.price); // Price as number
+  const [quantity, setQuantity] = useState<number>(medication.price); // Price as number
   const [error, setError] = useState<string | null>(null);
 
   // Function to handle form submission
@@ -31,8 +32,9 @@ const EditMed: React.FC = () => {
         name,
         dosage,
         instructions,
-        price: price,
+        price, // Price as number
         vetId: id_vet,
+        quantity,
       };
       await apiClient.updateMedication(updatedMedication);
       // Show success toast and navigate back
@@ -75,7 +77,14 @@ const EditMed: React.FC = () => {
           type="number"
           placeholder="Price"
           value={price}
-          onChange={(e) => setPrice(e.target.value)}
+          onChange={(e) => setPrice(Number(e.target.value))} // Convert string to number
+          className="border border-gray-300 rounded-md p-2"
+        />
+         <input
+          type="number"
+          placeholder="Quantity"
+          value={quantity}
+          onChange={(e) => setQuantity(Number(e.target.value))} // Convert string to number
           className="border border-gray-300 rounded-md p-2"
         />
         <button

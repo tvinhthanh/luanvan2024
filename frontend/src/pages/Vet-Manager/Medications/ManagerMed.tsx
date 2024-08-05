@@ -64,6 +64,7 @@ const ManageMedications: React.FC = () => {
               <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Liều lượng</th>
               <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Hướng dẫn sử dụng</th>
               <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Giá</th>
+              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Số lượng</th>
               <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Actions</th>
             </tr>
           </thead>
@@ -74,6 +75,7 @@ const ManageMedications: React.FC = () => {
                 <td className="px-4 py-2 border-b">{medication.dosage}</td>
                 <td className="px-4 py-2 border-b">{medication.instructions}</td>
                 <td className="px-4 py-2 border-b">{medication.price}$</td>
+                <td className="px-4 py-2 border-b">{medication.quantity}</td>
                 <td className="px-4 py-2 border-b">
                   <Link
                     to= {`/edit-med/${medication._id}`}

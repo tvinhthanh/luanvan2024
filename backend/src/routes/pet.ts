@@ -45,21 +45,15 @@ router.get("/:email", async (req, res) => {
 });
 
 // Cập nhật thông tin của pet
-router.put("/:id", async (req, res) => {
-  const petId = req.params.id;
+router.put("/:petId/weight", async (req, res) => {
+  const petId = req.params.petId;
   const { weight } = req.body;
-
-  // Xác thực dữ liệu đầu vào
-  if (typeof weight !== 'number' || weight <= 0) {
-    return res.status(400).json({ error: 'Invalid weight value' });
-  }
-
   try {
-    // Tìm pet và cập nhật cân nặng
+    // Find pet and update weight
     const updatedPet = await Pet.findByIdAndUpdate(
       petId,
-      { weight },
-      { new: true } // Trả về đối tượng đã được cập nhật
+      { weight }, // Ensure weight is kept as a number
+      { new: true } // Return the updated document
     );
 
     if (!updatedPet) {
@@ -72,6 +66,7 @@ router.put("/:id", async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 // Endpoint to display details of a pet
 router.get("/detail/:pet_id", async (req, res) => {
@@ -134,7 +129,7 @@ router.put("/update/:userId/:petId", async (req: Request, res: Response) => {
 
     existingPet.name = name;
     existingPet.age = age;
-    existingPet.weigh = weight;
+    existingPet.weight = weight;
     existingPet.sex = sex;
     existingPet.img = img;
     await existingPet.save();
@@ -167,7 +162,7 @@ router.delete("/delete/:id", async (req, res) => {
 // Other endpoints
 router.get("/", getAllPets);
 router.post("/", createPet);
-router.put("/:id", updatePet);
+// router.put("/:id", updatePet);
 router.delete("/:id", deletePet);
 
 export default router;

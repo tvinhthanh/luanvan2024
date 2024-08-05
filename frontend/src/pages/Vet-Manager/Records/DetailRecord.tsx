@@ -5,27 +5,14 @@ import * as apiClient from "../../../api-client";
 import MyVetInfo from "../Vet/VetInfo";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import MedicationName from "./MedicationsName";
+import { useAppContext } from "../../../contexts/AppContext";
 
-// const MedicationName: React.FC<{ medicationIds: string[] }> = ({ medicationIds }) => {
-//   const firstMedicationId = medicationIds[0];
-//   const { data: medication, error, isLoading } = useQuery(
-//     ["fetchMedication", firstMedicationId],
-//     () => apiClient.fetchMedicationsById(firstMedicationId),
-//     {
-//       enabled: !!firstMedicationId, // Query only if firstMedicationId exists
-//     }
-//   );
-
-//   if (isLoading) return <span>Loading...</span>;
-//   if (error) return <span>Error fetching medication name</span>;
-
-//   return <span>{medication?.name || "Unknown Medication"}</span>;
-// };
 const DetailRecords: React.FC = () => {
+  const { id_vet } = useAppContext();
   const location = useLocation();
   const { petId, ownerId } = location.state || {};
 
-  const [newWeight, setNewWeight] = useState<string | number>("");
+  const [newWeight, setNewWeight] = useState<number>(0);
   const [isEditingWeight, setIsEditingWeight] = useState<boolean>(false);
 
   const { data: pet, error: petError, isLoading: petLoading } = useQuery<PetType>(
@@ -39,14 +26,14 @@ const DetailRecords: React.FC = () => {
   );
 
   const { data: medicalRecords, error: medicalRecordsError, isLoading: medicalRecordsLoading } = useQuery<MedicType[]>(
-    ["fetchMedicalRecords", petId],
-    () => apiClient.fetchMedicalRecordsByPet(petId)
+    ["fetchMedicalRecords", petId, id_vet],
+    () => apiClient.fetchMedicalRecordsByPetandVet(petId, id_vet)
   );
 
   const queryClient = useQueryClient();
 
   const mutation = useMutation(
-    (updatedWeight: string | number) => apiClient.updatePetWeight(petId, updatedWeight),
+    (updatedWeight: number) => apiClient.updatePetWeight(petId, updatedWeight),
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["fetchPet", petId]);
@@ -87,27 +74,13 @@ const DetailRecords: React.FC = () => {
       </div>
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="bg-white shadow-md rounded-lg p-6 col-span-1 mb-6">
-          <p>
-            <strong>Tên:</strong> {pet?.name || "N/A"}
-          </p>
-          <p>
-            <strong>Tuổi:</strong> {pet?.age || "N/A"}
-          </p>
-          <p>
-            <strong>Giống:</strong> {pet?.breed_type || "N/A"}
-          </p>
-          <p>
-            <strong>Loại:</strong> {pet?.breed_id || "N/A"}
-          </p>
-          <p>
-            <strong>Cân nặng:</strong> {pet?.weight || "N/A"}
-          </p>
-          <p>
-            <strong>Giới tính:</strong> {pet?.sex || "N/A"}
-          </p>
-          <p>
-            <strong>Hình ảnh:</strong> {pet?.img || "N/A"}
-          </p>
+          <p><strong>Tên:</strong> {pet?.name || "N/A"}</p>
+          <p><strong>Tuổi:</strong> {pet?.age || "N/A"}</p>
+          <p><strong>Giống:</strong> {pet?.breed_type || "N/A"}</p>
+          {/* <p><strong>Loại:</strong> {pet?.breed_id || "N/A"}</p> */}
+          <p><strong>Cân nặng:</strong> {pet?.weight || "N/A"}</p>
+          <p><strong>Giới tính:</strong> {pet?.sex || "N/A"}</p>
+          <p><strong>Hình ảnh:</strong> {pet?.img || "N/A"}</p>
           <button
             className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
             onClick={() => setIsEditingWeight(true)}
@@ -120,7 +93,7 @@ const DetailRecords: React.FC = () => {
               <input
                 type="number"
                 value={newWeight}
-                onChange={(e) => setNewWeight(e.target.value)}
+                onChange={(e) => setNewWeight(Number(e.target.value))}
                 className="border rounded p-2"
                 placeholder="Nhập cân nặng mới"
                 required
@@ -165,13 +138,7 @@ const DetailRecords: React.FC = () => {
                   <td className="py-2 px-4">{record.notes}</td>
                 </tr>
               ))}
-              {medicalRecordsError && (
-                <tr>
-                  <td className="py-2 px-4" colSpan={5}>
-                    Error fetching medical records
-                  </td>
-                </tr>
-              )}
+
               {!medicalRecordsLoading && !medicalRecords && !medicalRecordsError && (
                 <tr>
                   <td className="py-2 px-4" colSpan={5}>

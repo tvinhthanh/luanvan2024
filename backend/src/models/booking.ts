@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const bookingSchema = new mongoose.Schema(
   {
-    _id: {type: String, required: true},
+    _id: { type: String, required: true },
     vetId: { type: String, ref: "Vet", required: true },
     ownerId: { type: String, ref: "Owner", required: false },
     petId: { type: String, ref: "Pet", required: false },

@@ -16,7 +16,6 @@ import medicalRecordRoutes from "./routes/medicrecord";
 import serviceRoutes from "./routes/service";
 import vetRoutes from "./routes/vet";
 import bookingsRoutes from "./routes/bookings";
-import recordsRoutes from "./routes/records";
 import medicationsRoutes from "./routes/medications";
 import invoiceRoutes from "./routes/invoice";
 
@@ -61,7 +60,6 @@ app.use("/api/vet", vetRoutes);
 app.use('/api/medical-records', medicalRecordRoutes);
 app.use('/api/service', serviceRoutes);
 app.use('/api/bookings', bookingsRoutes);
-app.use('/api/records',recordsRoutes)
 app.use('/api/medications',medicationsRoutes)
 app.use('/api/invoices',invoiceRoutes)
 

@@ -1,7 +1,37 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { useAppContext } from "../../../contexts/AppContext";
 
 const Vet: React.FC = () => {
+  const { vet, userId } = useAppContext(); // Now vet is available in context
+  if (!vet || vet.user_id != userId) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full text-center">
+          <p className="text-lg font-medium text-gray-900">
+            Vui lòng tạo thông tin phòng khám trước.
+            <div className="text-center mt-4">
+              <p className="text-xl text-gray-600">No Vets found</p>
+              <Link to="/add-vet" className="text-blue-500 hover:underline">
+                Add Vet
+              </Link>
+            </div>
+          </p>
+        </div>
+      </div>
+    );
+  }
+  if (!vet.type) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md w-full text-center">
+          <p className="text-lg font-medium text-gray-900">
+            Liên hệ admin hệ thống để phòng khám bạn hoạt động.
+          </p>
+        </div>
+      </div>
+    );
+  }
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl w-full space-y-8">
@@ -104,7 +134,7 @@ const Vet: React.FC = () => {
           </Link>
 
           <Link
-            to="/my-booking"// Use id_vet from useAppContext
+            to="/my-booking" // Use id_vet from useAppContext
             className="block p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
           >
             <div className="flex items-center space-x-4">

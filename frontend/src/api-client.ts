@@ -5,10 +5,11 @@ import {
   InvoiceType,
   MedicType,
   MedicationType,
+  MedicationsChart,
   OwnerType,
-  Pet,
   PetType,
   RecordType,
+  ServiceChart,
   ServiceType,
   UserType,
   VetCType,
@@ -198,12 +199,12 @@ export const deleteOwner = async (ownerId: string) => {
   return response.json();
 };
 export const updatePetWeight = async (petId: string, weight: number) => {
-  const response = await fetch(`${API_BASE_URL}/api/pet/${petId}`, {
+  const response = await fetch(`${API_BASE_URL}/api/pet/${petId}/weight`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ weight }),
+    body: JSON.stringify({ weight: weight }),
   });
 
   if (!response.ok) {
@@ -361,7 +362,21 @@ export const addMyVet = async (
     throw new Error('Failed to add vet');
   }
 };
+export const updateVetType = async (vet: VetCType) => {
+  const response = await fetch(`${API_BASE_URL}/api/vet/${vet._id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ type: vet.type }),
+  });
 
+  if (!response.ok) {
+    throw new Error('Failed to update vet');
+  }
+
+  return await response.json();
+};
 export const deleteVet = async (vetId: string) => {
   const response = await fetch(`${API_BASE_URL}/api/vet/${vetId}`, {
     method: "DELETE",
@@ -992,6 +1007,26 @@ export const fetchMedicalRecordsByPet = async (petId: string): Promise<RecordTyp
     throw new Error(`Error fetching records: ${error}`);
   }
 };
+export const fetchMedicalRecordsByPetandVet = async (petId: string, vetId:string): Promise<MedicType[]> => {
+  try {
+    // Gửi yêu cầu GET đến API endpoint của backend
+    const response = await fetch(`${API_BASE_URL}/api/medical-records/${vetId}/${petId}`);
+
+    // Kiểm tra nếu phản hồi thành công (status code 200-299)
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
+    }
+
+    // Phân tích nội dung JSON từ phản hồi
+    const data = await response.json();
+
+    // Trả về dữ liệu đã phân tích, giả sử đây là một mảng các đối tượng RecordType
+    return data as MedicType[];
+  } catch (error) {
+    // Ném ra lỗi nếu có bất kỳ lỗi mạng hoặc lỗi phân tích nào xảy ra
+    throw new Error(`Error fetching records: ${error}`);
+  }
+};
 
 export const fetchRecordsByPet = async (petId: string, vet_id: string,): Promise<RecordType[]> => {
   try {
@@ -1118,10 +1153,11 @@ export async function fetchMedicationsByIds(medId: string[]): Promise<Medication
 
 export const addMedications = async (
   name: string,
-  price: string,
+  price: number,
   dosage: string,
   instructions: string,
-  vetId: string
+  vetId: string,
+  quantity: number,
 ) => {
   const response = await fetch(`${API_BASE_URL}/api/medications/${vetId}`, {
     method: "POST",
@@ -1129,7 +1165,7 @@ export const addMedications = async (
       "Content-Type": "application/json",
     },
     credentials: "include", // Ensure cookies are sent with the request
-    body: JSON.stringify({ name, price, dosage, instructions, vetId }),
+    body: JSON.stringify({ name, price, dosage, instructions, vetId, quantity }),
   });
 
   if (!response.ok) {
@@ -1159,7 +1195,7 @@ export const updateMedication = async (medication: MedicationType): Promise<Medi
     body: JSON.stringify(medication),
   });
   if (!response.ok) {
-    throw new Error("Failed to update service");
+    throw new Error("Failed to update medications");
   }
   return response.json();
 };
@@ -1242,6 +1278,19 @@ export const deleteInvoice = async (id: string) => {
   return response.json();
 };
 
+
+export const fetchMedicalRecordsByMedicId = async (medicId: string[]): Promise<InvoiceType[]> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/invoices/${medicId}}`,{
+    method: 'GET',
+      credentials: 'include',
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error fetching invoices:', error);
+    throw error;
+  }
+};
 export const fetchInvoicesForVet = async (vetId: string): Promise<InvoiceType[]> => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/invoices/${vetId}`, {
@@ -1253,4 +1302,34 @@ export const fetchInvoicesForVet = async (vetId: string): Promise<InvoiceType[]>
     console.error('Error fetching invoices:', error);
     throw error;
   }
+};
+export const fetchServiceChart = async (vetId: string): Promise<ServiceChart> => {
+  const response = await fetch(`${API_BASE_URL}/api/service/${vetId}/chart`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include", // Include credentials if needed (e.g., cookies)
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch vets");
+  }
+
+  return response.json();
+};
+export const fetchMedicationChart = async (vetId: string): Promise<MedicationsChart> => {
+  const response = await fetch(`${API_BASE_URL}/api/medications/${vetId}/chart`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include", // Include credentials if needed (e.g., cookies)
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch vets");
+  }
+
+  return response.json();
 };

@@ -4,8 +4,8 @@ import vet from '../models/vet';
 import verifyToken from '../middleware/auth';
 import Medic from '../models/medical';
 import Vet from '../models/vet';
-import Record from '../models/records';
 import Pet from '../models/pet';
+import Booking from '../models/booking';
 const { v4: uuidv4 } = require('uuid');
 
 
@@ -93,12 +93,12 @@ router.delete('/detail/:medicId', async (req: Request, res: Response) => {
   }
 });
 //create
-router.post('/',verifyToken, async (req: Request, res: Response) => {
+router.post('/', verifyToken, async (req: Request, res: Response) => {
   try {
-    const { recordId, vetId, petId, ownerId, visitDate, reasonForVisit, symptoms, diagnosis, treatmentPlan, medications, notes } = req.body;
+    const { vetId, petId, ownerId, bookingsId, visitDate, reasonForVisit, symptoms, diagnosis, treatmentPlan, medications, notes } = req.body;
 
     // Validate required fields
-    if (!recordId || !vetId || !petId || !ownerId || !reasonForVisit) {
+    if ( !vetId || !petId || !ownerId || !reasonForVisit) {
       return res.status(400).json({ error: 'Missing required fields.' });
     }
 
@@ -106,27 +106,19 @@ router.post('/',verifyToken, async (req: Request, res: Response) => {
     if (!Array.isArray(medications) || medications.some(med => typeof med !== 'object' || !med._id)) {
       return res.status(400).json({ error: 'Invalid medications array.' });
     }
-
-    // Check if the pet has an existing medical record
-    const existingRecord = await Record.findOne({ petId });
-
-    if (!existingRecord) {
-      return res.status(400).json({ error: "Pet doesn't have a medical record. Please create one first." });
-    }
-
     // Create a new instance of MedicalRecord
     const newMedicalRecord = new medicalRecord({
       _id: uuidv4(), // Generate a new UUID for the medical record
       petId,
       ownerId,
       vetId,
-      recordId,
-      visitDate: new Date(),
+      visitDate:  new Date(), // Use provided visitDate or current date
       reasonForVisit,
       symptoms,
       diagnosis,
       treatmentPlan,
       medications,
+      bookingsId,
       notes,
     });
 
@@ -155,20 +147,20 @@ router.post('/',verifyToken, async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Vet not found' });
     }
 
-    // Optionally, update medicalRecords array for the specific record (if needed)
-    const updatedRecord = await Record.findByIdAndUpdate(
-      recordId,
-      { $push: { medicId: savedMedicalRecord._id } },
+    // Update the Booking status to "4"
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      bookingsId,
+      { status: "3" },
       { new: true }
     );
 
-    if (!updatedRecord) {
-      return res.status(404).json({ error: 'Record not found' });
+    if (!updatedBooking) {
+      return res.status(404).json({ error: 'Booking not found' });
     }
 
     // Return the saved MedicalRecord
     res.status(201).json(savedMedicalRecord);
-    
+
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal server error' });
@@ -183,6 +175,17 @@ router.get('/all', verifyToken, async (req: Request, res: Response) => {
     res.status(200).json(medics);
   } catch (error) {
     console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+router.get('/:vetId/:petId', async (req, res) => {
+  const { petId , vetId } = req.params;
+
+  try {
+    const records = await medicalRecord.find({vetId, petId });
+    res.json(records);
+  } catch (error) {
+    console.error("Error fetching records by pet:", error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

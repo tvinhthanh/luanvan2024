@@ -49,6 +49,7 @@ export interface BookingType {
   phoneOwner: string;
   date: Date;
   status: number;
+  updatedAt: Date;
 }
 
 export interface OwnerType {
@@ -111,7 +112,7 @@ export interface ServiceType {
   _id: string;
   name: string;
   price: number;
-  duration: number;
+  duration: string;
   available: boolean;
   id_vet: string;
 }
@@ -129,12 +130,12 @@ export interface ServiceType {
 //   booking?: any[];
 // };
 export interface VetCType {
-  [x: string]: any;
   _id: string;
   name: string;
   address: string;
   phone: string;
   service: string[];
+  type: boolean;
   user_id: string;
   createdAt: Date;
   imageUrls: string[];
@@ -150,7 +151,6 @@ export interface MedicType {
   petId: string;
   ownerId: string;
   vetId: string;
-  recordId : string;
   visitDate: Date;
   reasonForVisit: string;
   symptoms: string;
@@ -159,6 +159,7 @@ export interface MedicType {
   notes?: string;
   medications: MedicationType[]; // Add this line
   hasInvoice: Boolean;
+  bookingsId: string;
 }
 
 export interface MedicationType {
@@ -166,7 +167,8 @@ export interface MedicationType {
   name: string;
   dosage: string;
   instructions: string;
-  price: string;
+  price: number;
+  quantity: number;
   vetId: string;
 }
 
@@ -181,11 +183,19 @@ export interface RecordType{
 export interface InvoiceType {
   _id: string;
   medicalRecordId: string;
-  ownerId: string;
-  petName: string;
-  vetId: string;
   medications: MedicationType[]; // Assuming IDs of medications associated with the invoice
   services: ServiceType[]; // Assuming IDs of services associated with the invoice
   total: number;
+  vetId: string;
   createdAt: Date;
+}
+export interface ServiceChart{
+  _id: string;
+  name:string;
+  time:number;
+}
+export interface MedicationsChart{
+  _id:string;
+  name:string;
+  time:number;
 }

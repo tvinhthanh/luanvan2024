@@ -8,54 +8,81 @@ import Medication from '../models/medications';
 
 const router = express.Router();
 
-// Create a new medication for a vet
-router.post('/:vetId', verifyToken, async (req, res) => {
-    const vetId = req.params.vetId; // Extract vetId from the URL parameter
-    
-    try {
-      const { name, dosage, instructions, price } = req.body;
-      const lastMedication = await Medication.findOne({}).sort({ _id: -1 }).limit(1);
+// Function to generate the next medication ID
+const generateNextMedicationId = async (): Promise<string> => {
+  try {
+    const lastMedication = await Medication.findOne({}).sort({ _id: -1 }).limit(1);
+    let nextId = 1;
 
-    let newMedicationId;
     if (lastMedication) {
-      // Lấy _id cuối cùng và tăng lên 1
-      newMedicationId = lastMedication._id + 1;
-    } else {
-      // Nếu không có medication nào trong database
-      newMedicationId = 1;
+      // Extract numeric part and increment
+      const lastId = lastMedication._id as string;
+      const match = lastId.match(/^med(\d+)$/);
+      if (match) {
+        nextId = parseInt(match[1], 10) + 1;
+      }
     }
-      // Check if medication with the same name already exists for the vet
-      const existingMedication = await Medication.findOne({ name, vetId });
-      if (existingMedication) {
-        return res.status(400).json({ error: 'Medication with this name already exists for this vet.' });
-      }
-  
-      // Create a new medication instance
-      const newMedication = new Medication({ _id: newMedicationId, name, dosage, instructions, price, vetId });
-  
-      // Save the new medication to the database
-      const savedMedication = await newMedication.save();
-  
-      // Add the medication to Vet's medications array
-      const vet = await Vet.findById(vetId);
-      if (!vet) {
-        return res.status(404).json({ error: 'Vet not found' });
-      }
-      vet.medications.push(savedMedication);
+
+    return `med${nextId}`;
+  } catch (error) {
+    console.error('Error generating medication ID:', error);
+    throw new Error('Error generating medication ID');
+  }
+};
+
+// Create a new medication for a vet
+router.post('/:vetId', verifyToken, async (req: Request, res: Response) => {
+  const vetId = req.params.vetId;
+
+  try {
+    const { name, dosage, instructions, price, quantity } = req.body;
+    const newMedicationId = await generateNextMedicationId();
+
+    // Check if medication with the same name already exists for the vet
+    const existingMedication = await Medication.findOne({ name, vetId });
+    if (existingMedication) {
+      return res.status(400).json({ error: 'Medication with this name already exists for this vet.' });
+    }
+
+    // Create a new medication instance
+    const newMedication = new Medication({ _id: newMedicationId, name, dosage, instructions, price, quantity, vetId });
+
+    // Save the new medication to the database
+    const savedMedication = await newMedication.save();
+
+    // Add the medication to Vet's medications array
+    const vet = await Vet.findById(vetId);
+    if (!vet) {
+      return res.status(404).json({ error: 'Vet not found' });
+    }
+    
+    // Check if the medication is already in the vet's medications array
+    if (!vet.medications.includes(savedMedication._id)) {
+      vet.medications.push(savedMedication._id);
       await vet.save();
-  
-      // Respond with the saved medication object
-      res.status(201).json(savedMedication);
-    } catch (error) {
-      console.error('Error creating medication:', error);
-      res.status(500).json({ error: 'Internal server error' });
     }
-  });
+
+    // Respond with the saved medication object
+    res.status(201).json(savedMedication);
+  } catch (error) {
+    console.error('Error creating medication:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+router.get('/:vetId/chart', async (req: Request, res: Response) => {
+  const { vetId } = req.params;
+  try {
+    const medications = await Medication.find({ vetId }, 'name time');
+    res.status(200).json(medications);
+  } catch (error) {
+    console.error('Error fetching medications:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 // Get all medications for a specific vet
 router.get('/:vetId', verifyToken, async (req, res) => {
   const { vetId } = req.params;
-
   try {
     const medications = await Medication.find({ vetId });
     res.status(200).json(medications);
@@ -91,33 +118,38 @@ router.get('/med/:id', verifyToken, async (req, res) => {
 });
 
 // Update a medication by id
-router.put('/:id', verifyToken, async (req, res) => {
+router.put('/:id', verifyToken, async (req: Request, res: Response) => {
   const { id } = req.params;
-  const { name, dosage, instructions, price, vetId } = req.body;
+  const { name, dosage, instructions, price, vetId, quantity } = req.body;
 
   try {
     const updatedMedication = await Medication.findByIdAndUpdate(
       id,
-      { name, dosage, instructions, price,vetId },
+      { name, dosage, instructions, price, vetId, quantity },
       { new: true }
     );
 
     if (!updatedMedication) {
       return res.status(404).json({ message: 'Medication not found' });
     }
-      // Add the medication to Vet's medications array
-      const vet = await Vet.findById(vetId);
-      if (!vet) {
-        return res.status(404).json({ error: 'Vet not found' });
-      }
-      vet.medications.push(updatedMedication);
-      await vet.save();
+
+    // Optionally, update Vet's medications array if needed
+    const vet = await Vet.findById(vetId);
+    if (!vet) {
+      return res.status(404).json({ error: 'Vet not found' });
+    }
+    // Remove the old medication reference if needed before adding updated one
+    vet.medications = vet.medications.filter(med => med.toString() !== id);
+    vet.medications.push(updatedMedication._id);
+    await vet.save();
+
     res.status(200).json(updatedMedication);
   } catch (error) {
     console.error('Error updating medication:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 // Delete a medication by id
 router.delete('/:id', verifyToken, async (req, res) => {

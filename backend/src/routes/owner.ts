@@ -155,7 +155,7 @@ router.put("/pet/update/:userId/:petId", async (req: Request, res: Response) => 
     // Cập nhật thông tin thú cưng
     existingPet.name = name;
     existingPet.age = age;
-    existingPet.weigh = weigh;
+    existingPet.weight = weigh;
     existingPet.sex = sex;
     existingPet.img = img;
     await existingPet.save();

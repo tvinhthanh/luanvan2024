@@ -72,9 +72,9 @@ const ManagerBooking: React.FC<Props> = ({ vetId }) => {
 
   const getStatusText = (status: number) => {
     switch (status) {
-      case 0:
-        return <span className="text-yellow-500">Đang chờ xác nhận</span>;
       case 1:
+        return <span className="text-yellow-500">Đang chờ xác nhận</span>;
+      case 0:
         return <span className="text-red-500">Từ chối</span>;
       case 2:
         return <span className="text-green-500">Đã xác nhận</span>;
@@ -98,8 +98,8 @@ const ManagerBooking: React.FC<Props> = ({ vetId }) => {
           className="mr-4 border border-gray-300 rounded p-2"
         >
           <option value="">All Statuses</option>
-          <option value="0">Đang chờ xác nhận</option>
-          <option value="1">Từ chối</option>
+          <option value="1">Đang chờ xác nhận</option>
+          {/* <option value="0">Từ chối</option> */}
           <option value="2">Đã xác nhận</option>
           <option value="3">Hoàn thành</option>
         </select>
@@ -116,12 +116,12 @@ const ManagerBooking: React.FC<Props> = ({ vetId }) => {
       <table className="min-w-full bg-white border border-gray-200">
         <thead>
           <tr>
-            <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Date</th>
-            <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Time</th>
-            <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Status</th>
-            <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Phone</th>
-            <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Pet</th>
-            <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Action</th>
+            <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Thời gian</th>
+            <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Cập nhật lúc</th>
+            <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Trạng thái</th>
+            <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Số điện thoại</th>
+            <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Thú cưng</th>
+            <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Chức năng</th>
           </tr>
         </thead>
         <tbody>
@@ -134,8 +134,8 @@ const ManagerBooking: React.FC<Props> = ({ vetId }) => {
 
             return (
               <tr key={booking._id}>
-                <td className="px-4 py-2 border-b">{new Date(booking.date).toLocaleDateString()}</td>
-                <td className="px-4 py-2 border-b">{new Date(booking.date).toLocaleTimeString()}</td>
+                <td className="px-4 py-2 border-b">{new Date(booking.date).toLocaleDateString()} : {new Date(booking.date).toLocaleTimeString()}</td>
+                <td className="px-4 py-2 border-b">{new Date(booking.updatedAt).toLocaleDateString()} : {new Date(booking.updatedAt).toLocaleTimeString()}</td>
                 <td className="px-4 py-2 border-b">{getStatusText(booking.status)}</td>
                 <td className="px-4 py-2 border-b">{owner ? owner.phone : booking.phoneOwner}</td>
                 <td className="px-4 py-2 border-b">{pet ? pet.name : "Pet not found"}</td>

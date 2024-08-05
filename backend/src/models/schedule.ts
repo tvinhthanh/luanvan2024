@@ -7,7 +7,7 @@ const scheduleSchema = new mongoose.Schema({
   pet_id: { type: String, required: true },
   note: { type: String, required: true },
   datetime: { type: Date, required: true },
-  status: { type: String, required: true }
+  status: { type: String, required: true },
 });
 
 const Schedule = mongoose.model("schedule", scheduleSchema, "schedule");

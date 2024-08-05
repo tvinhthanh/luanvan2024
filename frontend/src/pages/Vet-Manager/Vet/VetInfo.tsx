@@ -6,7 +6,7 @@ import { useAppContext } from "../../../contexts/AppContext";
 
 
 const MyVetInfo: React.FC = () => {
-  const { userId, id_vet } = useAppContext();
+  const { userId} = useAppContext();
 
   // Query to fetch vet information
   const {
@@ -38,10 +38,10 @@ const MyVetInfo: React.FC = () => {
           <h2 className="text-xl font-bold">{vet.name}</h2>
           <p className="text-gray-600">{vet.description}</p>
           <p className="mt-2">
-            <strong>Location:</strong> {vet.address}
+            <strong>Địa chỉ:</strong> {vet.address}
           </p>
           <p>
-            <strong>Contact:</strong> {vet.phone}
+            <strong>Số điện thoại:</strong> {vet.phone}
           </p>
         </div>
       ))}

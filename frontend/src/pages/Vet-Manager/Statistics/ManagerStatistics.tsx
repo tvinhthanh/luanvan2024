@@ -1,18 +1,21 @@
 import { ApexOptions } from "apexcharts";
 import React, { useState, useEffect } from "react";
 import ReactApexChart from "react-apexcharts";
+import * as apiClient from "../../../api-client"; // Ensure the path is correct
+import { useAppContext } from "../../../contexts/AppContext";
 
-const initialOptions: ApexOptions = {
+// ApexCharts configuration
+const options: ApexOptions = {
   legend: {
-    show: false,
+    show: true,
     position: "top",
     horizontalAlign: "left",
   },
-  colors: ["#3C50E0", "#80CAEE"],
+  colors: ["#3C50E0", "#FF4560"], // Different colors for services and medications
   chart: {
     fontFamily: "Satoshi, sans-serif",
     height: 335,
-    type: "area",
+    type: "bar",
     dropShadow: {
       enabled: true,
       color: "#623CEA14",
@@ -44,8 +47,8 @@ const initialOptions: ApexOptions = {
     },
   ],
   stroke: {
-    width: [2, 2],
-    curve: "straight",
+    width: [2],
+    curve: "smooth",
   },
   grid: {
     xaxis: {
@@ -65,12 +68,11 @@ const initialOptions: ApexOptions = {
   markers: {
     size: 4,
     colors: "#fff",
-    strokeColors: ["#3056D3", "#80CAEE"],
+    strokeColors: ["#3056D3"],
     strokeWidth: 3,
     strokeOpacity: 0.9,
     strokeDashArray: 0,
     fillOpacity: 1,
-    discrete: [],
     hover: {
       size: undefined,
       sizeOffset: 5,
@@ -78,7 +80,7 @@ const initialOptions: ApexOptions = {
   },
   xaxis: {
     type: "category",
-    categories: [], // sẽ cập nhật từ API
+    categories: [], // Will be updated with service and medication names
     axisBorder: {
       show: false,
     },
@@ -93,106 +95,152 @@ const initialOptions: ApexOptions = {
       },
     },
     min: 0,
-    max: 100, // có thể thay đổi theo dữ liệu thực tế
+    max: 1000, // Adjust based on expected maximum values
   },
 };
 
-interface ChartOneState {
-  series: {
-    name: string;
-    data: number[];
-  }[];
+// Define interfaces for service and medication data
+export interface ServiceType {
+  name: string;
+  time: number;
+}
+
+export interface MedicationType {
+  name: string;
+  time: number;
 }
 
 const ChartOne: React.FC = () => {
-  const [state, setState] = useState<ChartOneState>({
+  const [chartType, setChartType] = useState<'both' | 'service' | 'medications'>('both');
+  const [state, setState] = useState<{ series: { name: string; data: number[]; colName: string[] }[] }>({
     series: [
-      {
-        name: "Invoices",
-        data: [],
-      },
+      { name: "Service Time", data: [], colName: [] },
+      { name: "Medication time", data: [], colName: [] }
     ],
   });
+  const [categories, setCategories] = useState<string[]>([]);
+  const { id_vet } = useAppContext();
 
-  const [options, setOptions] = useState<ApexOptions>(initialOptions);
+  const fetchChartData = async () => {
+    try {
+      const serviceData = await apiClient.fetchServiceChart(id_vet);
+      const medicationData = await apiClient.fetchMedicationChart(id_vet);
 
-  const fetchData = async (type: "day" | "week" | "month") => {
-    const response = await fetch(`http://localhost:3000/api/invoices?type=${type}`);
-    const data = await response.json();
+      console.log('Service Data:', serviceData);
+      console.log('Medication Data:', medicationData);
 
-    const seriesData = [{ name: "Invoices", data: [data.count] }];
-    const categories = [type.charAt(0).toUpperCase() + type.slice(1)];
+      const serviceNames = serviceData.map((service: ServiceType) => service.name);
+      const serviceTimes = serviceData.map((service: ServiceType) => service.time);
 
-    setState({ series: seriesData });
-    setOptions((prevOptions) => ({
-      ...prevOptions,
-      xaxis: {
-        ...prevOptions.xaxis,
-        categories: categories,
-      },
-    }));
+      const medicationNames = medicationData.map((medication: MedicationType) => medication.name);
+      const medicationtimes = medicationData.map((medication: MedicationType) => medication.time);
+
+      // Combine and deduplicate categories
+      const allCategories = Array.from(new Set([...serviceNames, ...medicationNames]));
+
+      const serviceDataMapped = allCategories.map(cat => serviceTimes[serviceNames.indexOf(cat)] || 0);
+      const medicationDataMapped = allCategories.map(cat => medicationtimes[medicationNames.indexOf(cat)] || 0);
+
+      console.log('All Categories:', allCategories);
+      console.log('Service Data Mapped:', serviceDataMapped);
+      console.log('Medication Data Mapped:', medicationDataMapped);
+
+      setCategories(allCategories);
+      setState({
+        series: [
+          {
+            name: "Service Time",
+            data: serviceDataMapped,
+            colName: serviceNames
+
+          },
+          {
+            name: "Medication time",
+            data: medicationDataMapped,
+            colName: medicationNames
+          }
+        ],
+      });
+    } catch (error) {
+      console.error("Error fetching chart data:", error);
+    }
   };
 
   useEffect(() => {
-    fetchData("day");
+    fetchChartData();
   }, []);
+
+  const filteredSeries = () => {
+    switch (chartType) {
+      case 'service':
+        return [
+          { name: "Service Time", data: state.series[0].data }
+        ];
+      case 'medications':
+        return [
+          { name: "Medication time", data: state.series[1].data }
+        ];
+      case 'both':
+        return [
+          { name: "both", data: [...state.series[0].data, ...state.series[1].data] }
+        ];
+      default:
+        return state.series;
+    }
+  };
+
+  const changeChartType = (name: any) => {
+    setChartType(name);
+    switch(name){
+      case 'service':
+        setCategories(state.series[0].colName);
+        break;
+      case 'medications': 
+        setCategories(state.series[1].colName);
+        break;
+      case 'both':
+        setCategories([...state.series[0].colName, ...state.series[1].colName]);
+        break;
+    }
+
+  }
 
   return (
     <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
-      <div className="flex flex-wrap items-start justify-between gap-3 sm:flex-nowrap">
-        <div className="flex w-full flex-wrap gap-3 sm:gap-5">
-          <div className="flex min-w-47.5">
-            <span className="mt-1 mr-2 flex h-4 w-full max-w-4 items-center justify-center rounded-full border border-primary">
-              <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-primary"></span>
-            </span>
-            <div className="w-full">
-              <p className="font-semibold text-primary">Total Revenue</p>
-              <p className="text-sm font-medium">12.04.2022 - 12.05.2022</p>
-            </div>
-          </div>
-          <div className="flex min-w-47.5">
-            <span className="mt-1 mr-2 flex h-4 w-full max-w-4 items-center justify-center rounded-full border border-secondary">
-              <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-secondary"></span>
-            </span>
-            <div className="w-full">
-              <p className="font-semibold text-secondary">Total Sales</p>
-              <p className="text-sm font-medium">12.04.2022 - 12.05.2022</p>
-            </div>
-          </div>
-        </div>
-        <div className="flex w-full max-w-45 justify-end">
-          <div className="inline-flex items-center rounded-md bg-whiter p-1.5 dark:bg-meta-4">
-            <button
-              className="rounded bg-white py-1 px-3 text-xs font-medium text-black shadow-card hover:bg-white hover:shadow-card dark:bg-boxdark dark:text-white dark:hover:bg-boxdark"
-              onClick={() => fetchData("day")}
-            >
-              Day
-            </button>
-            <button
-              className="rounded py-1 px-3 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark"
-              onClick={() => fetchData("week")}
-            >
-              Week
-            </button>
-            <button
-              className="rounded py-1 px-3 text-xs font-medium text-black hover:bg-white hover:shadow-card dark:text-white dark:hover:bg-boxdark"
-              onClick={() => fetchData("month")}
-            >
-              Month
-            </button>
-          </div>
-        </div>
+      <div className="flex justify-center gap-4 mb-4">
+        <button
+          className={`px-4 py-2 rounded-md ${chartType === 'service' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          onClick={() => changeChartType('service')}
+        >
+          Service
+        </button>
+        <button
+          className={`px-4 py-2 rounded-md ${chartType === 'medications' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          onClick={() => changeChartType('medications')}
+        >
+          Medications
+        </button>
+        <button
+          className={`px-4 py-2 rounded-md ${chartType === 'both' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+          onClick={() => changeChartType('both')}
+        >
+          Both
+        </button>
       </div>
 
       <div>
-        <div id="chartOne" className="-ml-5">
-          <ReactApexChart
-            options={options}
-            series={state.series}
-            type="area"
-            height={350}
-          />
-        </div>
+        <ReactApexChart
+          options={{
+            ...options,
+            xaxis: {
+              ...options.xaxis,
+              categories: categories,
+            },
+          }}
+          series={filteredSeries()}
+          type="bar"
+          height={350}
+        />
       </div>
     </div>
   );

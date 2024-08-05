@@ -88,13 +88,13 @@ const ManagerUser = () => {
   if (error) {
     return <div>Error loading users</div>;
   }
+
+  // Filter out admin users
   const nonAdminUsers = users.filter((user: any) => !user.isAdmin);
 
   return (
     <div className="p-4">
-            <ManagerOwner />
-
-      <h1 className="text-2xl font-bold mb-4">Quản lý phòng khám</h1>
+      <ManagerOwner />
 
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
@@ -105,9 +105,9 @@ const ManagerUser = () => {
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Email
             </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+            {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Is Admin
-            </th>
+            </th> */}
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Actions
             </th>
@@ -124,39 +124,36 @@ const ManagerUser = () => {
                 {user.firstName} {user.lastName}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">{user.email}</td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              {/* <td className="px-6 py-4 whitespace-nowrap">
                 {user.isAdmin ? "Admin" : "Host"}
-              </td>
+              </td> */}
               <td className="px-6 py-4 whitespace-nowrap">
-                {!user.isAdmin && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(user._id);
-                    }}
-                    className="inline-flex items-center px-2 py-1 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:border-red-700 focus:ring focus:ring-red-200 disabled:opacity-25 transition"
-                  >
-                    Delete
-                  </button>
-                )}
-                {/* {!user.isAdmin && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleEdit(user._id);
-                    }}
-                    className="inline-flex items-center px-2 py-1 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:border-red-700 focus:ring focus:ring-red-200 disabled:opacity-25 transition"
-                  >
-                    Reset Password
-                  </button>
-                )} */}
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(user._id);
+                  }}
+                  className="inline-flex items-center px-2 py-1 bg-red-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-red-500 active:bg-red-700 focus:outline-none focus:border-red-700 focus:ring focus:ring-red-200 disabled:opacity-25 transition"
+                >
+                  Delete
+                </button>
+                {/* Uncomment the following block if you want to enable edit functionality */}
+                {/* <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEdit(user);
+                  }}
+                  className="inline-flex items-center px-2 py-1 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 active:bg-green-700 focus:outline-none focus:border-green-700 focus:ring focus:ring-green-200 disabled:opacity-25 transition"
+                >
+                  Edit
+                </button> */}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
       {/* Modal for displaying user details */}
-      {showDetail && (
+      {showDetail && selectedUser && !selectedUser.isAdmin && (
         <UserDetail user={selectedUser} onClose={handleCloseDetail} />
       )}
     </div>

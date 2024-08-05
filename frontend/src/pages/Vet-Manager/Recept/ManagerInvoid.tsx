@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "react-query";
-import { InvoiceType, OwnerType, PetType } from "../../../../../backend/src/shared/types";
+import { InvoiceType, OwnerType, PetType, MedicType } from "../../../../../backend/src/shared/types";
 import * as apiClient from "../../../api-client";
 import { useAppContext } from "../../../contexts/AppContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,10 +9,11 @@ import { faTrash } from "@fortawesome/free-solid-svg-icons";
 const ManagerInvoice: React.FC = () => {
   const { id_vet } = useAppContext();
   const queryClient = useQueryClient();
-  const [ownerNames, setOwnerNames] = useState<{ [key: string]: string }>({});
+  const [namesMap, setNamesMap] = useState<{ [key: string]: string }>({});
+  const [recordsMap, setRecordsMap] = useState<{ [key: string]: MedicType }>({});
 
   // Fetch invoices query
-  const { data: invoices = [], isLoading, error } = useQuery<InvoiceType[]>(
+  const { data: invoices = [], isLoading: isLoadingInvoices, error: invoicesError } = useQuery<InvoiceType[]>(
     "fetchInvoices",
     () => apiClient.fetchInvoicesForVet(id_vet),
     {
@@ -21,17 +22,33 @@ const ManagerInvoice: React.FC = () => {
       },
     }
   );
-  const [namesMap, setNamesMap] = useState<{ [key: string]: string }>({});
 
-  // Effect to fetch and store owner names
+  // Fetch medical records query
+  const { data: medicalRecords = [], isLoading: isLoadingRecords, error: recordsError } = useQuery<MedicType[]>(
+    "fetchMedicalRecords",
+    () => apiClient.fetchMedicalRecordsByVetId(id_vet),
+    {
+      onError: (err) => {
+        console.error("Error fetching medical records:", err);
+      },
+      onSuccess: (data) => {
+        // Map medical records for quick lookup
+        const map = data.reduce((acc: { [key: string]: MedicType }, record: MedicType) => {
+          acc[record._id] = record;
+          return acc;
+        }, {});
+        setRecordsMap(map);
+      },
+    }
+  );
+
+  // Effect to fetch and store names
   useEffect(() => {
     const fetchNames = async () => {
       try {
-        // Fetch pets and owners
         const petsResponse = await apiClient.fetchpet();
         const ownersResponse = await apiClient.fetchOwner();
 
-        // Map IDs to names
         const petNames = petsResponse.reduce((acc: { [key: string]: string }, pet: PetType) => {
           acc[pet._id] = pet.name;
           return acc;
@@ -41,7 +58,6 @@ const ManagerInvoice: React.FC = () => {
           return acc;
         }, {});
 
-        // Merge all mappings into one namesMap
         setNamesMap({ ...petNames, ...ownerNames });
       } catch (error) {
         console.error("Error fetching names:", error);
@@ -76,10 +92,10 @@ const ManagerInvoice: React.FC = () => {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold">Quản Lý Hóa Đơn</h1>
 
-      {isLoading ? (
+      {isLoadingInvoices || isLoadingRecords ? (
         <span>Loading...</span>
-      ) : error ? (
-        <span>Error loading invoices</span>
+      ) : invoicesError || recordsError ? (
+        <span>Error loading data</span>
       ) : invoices.length > 0 ? (
         <table className="min-w-full bg-white border border-gray-200 mt-4">
           <thead>
@@ -87,28 +103,33 @@ const ManagerInvoice: React.FC = () => {
               <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Pet Name</th>
               <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Owner Name</th>
               <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Date</th>
+              <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Time</th>
               <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Total</th>
               <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">Actions</th>
             </tr>
           </thead>
           <tbody>
-            {invoices.map((invoice) => (
-              <tr key={invoice._id}>
-                <td className="px-4 py-2 border-b">{invoice.petName}</td>
-                <td className="py-2 px-4 border-b border-gray-300">{namesMap[invoice.ownerId] || `Owner ${invoice.ownerId}`}</td>
-                <td className="px-4 py-2 border-b">{new Date(invoice.createdAt).toLocaleDateString()}</td>
-                <td className="px-4 py-2 border-b">${invoice.total.toFixed(2)}</td>
-                <td className="px-4 py-2 border-b">
-                  <button
-                    onClick={() => handleDelete(invoice._id)}
-                    className="px-2 py-1 bg-red-500 text-white rounded"
-                  >
-                    <FontAwesomeIcon icon={faTrash} className="mr-1" />
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
+            {invoices.map((invoice) => {
+              const record = recordsMap[invoice.medicalRecordId];
+              return (
+                <tr key={invoice._id}>
+                  <td className="px-4 py-2 border-b">{record ? namesMap[record.petId] || `Pet ${record.petId}` : 'Unknown'}</td>
+                  <td className="py-2 px-4 border-b border-gray-300">{record ? namesMap[record.ownerId] || `Owner ${record.ownerId}` : 'Unknown'}</td>
+                  <td className="px-4 py-2 border-b">{new Date(invoice.createdAt).toLocaleDateString()}</td>
+                  <td className="px-4 py-2 border-b">{new Date(invoice.createdAt).toLocaleTimeString()}</td>
+                  <td className="px-4 py-2 border-b">${invoice.total.toFixed(2)}</td>
+                  <td className="px-4 py-2 border-b">
+                    <button
+                      onClick={() => handleDelete(invoice._id)}
+                      className="px-2 py-1 bg-red-500 text-white rounded"
+                    >
+                      <FontAwesomeIcon icon={faTrash} className="mr-1" />
+                      Delete
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       ) : (
