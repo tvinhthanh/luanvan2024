@@ -124,4 +124,15 @@ router.delete('/:id',verifyToken, async (req: Request, res: Response) => {
     res.status(500).json({ message: error.message });
   }
 });
+// Show all services available true follow vet_id
+router.get("/show/:id_vet", async (req, res) => {
+  const id_vet = req.params.id_vet;
+  try {
+    const services = await ServiceType.find({ id_vet, available: true });
+    res.status(200).json(services);
+  } catch (error) {
+    console.error('Error fetching services:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 export default router;
