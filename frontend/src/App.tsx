@@ -45,6 +45,9 @@ import EditMed from "./pages/Vet-Manager/Medications/EditMed";
 import ManagerInvoice from "./pages/Vet-Manager/Recept/ManagerInvoid";
 import EditService from "./pages/Vet-Manager/Service/EditService";
 import AddMedicalRecordWithBookId from "./pages/Vet-Manager/MedicalInfo/AddMedicwithBookingsId";
+import StatisticsBookings from "./pages/Vet-Manager/Statistics/StatisticsBookings";
+import StatisticsInvoice from "./pages/Vet-Manager/Statistics/StatisticsInvoid";
+import StatisticsMedical from "./pages/Vet-Manager/Statistics/StatisticsMedical";
 
 const App = () => {
   const { isLoggedIn, userRole, id_vet } = useAppContext();
@@ -377,6 +380,30 @@ const App = () => {
               element={
                 <Layout>
                   <ManagerStatistics />
+                </Layout>
+              }
+            />
+            <Route
+              path="/manager-statistics/bookings"
+              element={
+                <Layout>
+                  <StatisticsBookings />
+                </Layout>
+              }
+            />
+            <Route
+              path="/manager-statistics/invoice"
+              element={
+                <Layout>
+                  <StatisticsInvoice />
+                </Layout>
+              }
+            />
+            <Route
+              path="/manager-statistics/medical"
+              element={
+                <Layout>
+                  <StatisticsMedical />
                 </Layout>
               }
             />

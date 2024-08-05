@@ -1,7 +1,6 @@
 import express, { Request, Response } from "express";
 import Pet from "../models/pet";  // Ensure the Pet model is correctly defined
 import Owner from "../models/owner"; // Ensure the Owner model is correctly defined
-import { createPet, deletePet, getAllPets, updatePet } from "../controller/petController";
 
 const router = express.Router();
 
@@ -160,9 +159,45 @@ router.delete("/delete/:id", async (req, res) => {
 });
 
 // Other endpoints
-router.get("/", getAllPets);
-router.post("/", createPet);
-// router.put("/:id", updatePet);
-router.delete("/:id", deletePet);
-
+router.get("/", async (req: Request, res: Response) => {
+  try {
+    const pets = await Pet.find();
+    res.status(200).json(pets);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch pets" });
+  }
+});
+// POST create a new pet
+router.post("/", async (req: Request, res: Response) => {
+  const { name, type, age, weight, breed_id, owner_id, sex, breed_type, img } = req.body;
+  try {
+    const newPet = new Pet({ name, type, age, weight, breed_id, owner_id, sex, breed_type, img });
+    await newPet.save();
+    res.status(201).json(newPet);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to create pet" });
+  }
+});
+// PUT update an existing pet by id
+router.put("/:id", async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { name, type, age, weight, breed_id, owner_id, sex, breed_type, img } = req.body;
+  try {
+    const updateData: any = { name, type, age, weight, breed_id, owner_id, sex, breed_type, img };
+    const updatedPet = await Pet.findByIdAndUpdate(id, updateData, { new: true });
+    res.status(200).json(updatedPet);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update pet" });
+  }
+});
+// DELETE a pet by id
+router.delete("/:id", async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    await Pet.findByIdAndDelete(id);
+    res.status(200).json({ message: "Pet deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to delete pet" });
+  }
+});
 export default router;

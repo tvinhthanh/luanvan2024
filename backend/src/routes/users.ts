@@ -1,16 +1,13 @@
 import express, { Request, Response } from "express";
 import User from "../models/user";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 import { check, validationResult } from "express-validator";
 import verifyToken from "../middleware/auth";
-import {
-  getAllUsers,
-  createUser,
-  updateUser,
-  deleteUser,
-} from "../controller/userController";
 
 const router = express.Router();
+const saltRounds = 10;
+
 
 router.get("/me", verifyToken, async (req: Request, res: Response) => {
   const userId = req.userId;
@@ -27,10 +24,56 @@ router.get("/me", verifyToken, async (req: Request, res: Response) => {
   }
 });
 
-router.get("/", getAllUsers);
-router.post("/", createUser);
-router.put("/:id", updateUser);
-router.delete("/:id", deleteUser);
+// Get all users
+router.get("/", async (req: Request, res: Response) => {
+  try {
+    const users = await User.find();
+    res.status(200).json(users);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to fetch users" });
+  }
+});
+
+// Create a new user
+router.post("/", async (req: Request, res: Response) => {
+  const { name, email, password } = req.body;
+  try {
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const newUser = new User({ name, email, password: hashedPassword });
+    await newUser.save();
+    res.status(201).json(newUser);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to create user" });
+  }
+});
+
+// Update a user by id
+router.put("/:id", async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { name, email, password } = req.body;
+  try {
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { name, email, password: hashedPassword },
+      { new: true }
+    );
+    res.status(200).json(updatedUser);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to update user" });
+  }
+});
+
+// Delete a user by id
+router.delete("/:id", async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    await User.findByIdAndDelete(id);
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to delete user" });
+  }
+});
 
 router.post(
   "/register",

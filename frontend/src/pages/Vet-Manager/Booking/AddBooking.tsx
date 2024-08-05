@@ -152,8 +152,8 @@ const AddBooking: React.FC = () => {
             className="mt-1 block w-full border border-gray-300 rounded-md p-2"
             required
           >
-            <option value={2}>Confirmed</option>
-            <option value={3}>Completed</option>
+            <option value={3}>Confirmed</option>
+            {/* <option value={4}>Completed</option> */}
           </select>
         </div>
         <button

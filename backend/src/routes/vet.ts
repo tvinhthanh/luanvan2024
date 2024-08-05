@@ -5,12 +5,10 @@ import cloudinary from "cloudinary";
 import verifyToken from "../middleware/auth";
 import { body } from "express-validator";
 import { VetType } from "../shared/types";
-import vetController from "../controller/vetController";
 
 const router = express.Router();
 const upload = multer(); // Initialize multer middleware
 
-//router.post('/', verifyToken, upload.single('image'), vetController.createMyVet);
 
 // Get all vets
 router.get("/", async (req, res) => {
@@ -105,4 +103,39 @@ router.patch('/:id', async (req, res) => {
     res.status(500).json({ message: 'Failed to update vet' });
   }
 });
+const uploadImage = async (file: Express.Multer.File) => {
+  const image = file;
+  const base64Image = Buffer.from(image.buffer).toString("base64");
+  const dataURI = `data:${image.mimetype};base64,${base64Image}`;
+
+  const uploadResponse = await cloudinary.v2.uploader.upload(dataURI);
+  return uploadResponse.url;
+};
+
+// Create a new vet
+router.post("/", upload.single("image"), async (req: Request, res: Response) => {
+  try {
+    const existingVet = await Vet.findOne({ user_id: req.userId });
+
+    if (existingVet) {
+      return res.status(409).json({ message: "User vet already exists" });
+    }
+
+    const imageUrl = req.file ? await uploadImage(req.file as Express.Multer.File) : "";
+
+    const vet = new Vet({
+      ...req.body,
+      user_id: req.userId,
+      imageUrls: imageUrl ? [imageUrl] : [],
+      lastUpdated: new Date(),
+    });
+
+    await vet.save();
+    res.status(201).send(vet);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Something went wrong" });
+  }
+});
+
 export default router;
