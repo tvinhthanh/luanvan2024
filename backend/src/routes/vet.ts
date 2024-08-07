@@ -10,10 +10,10 @@ const router = express.Router();
 const upload = multer(); // Initialize multer middleware
 
 
-// Get all vets
+// Get all vets with type true
 router.get("/", async (req, res) => {
   try {
-    const vets = await Vet.find();
+    const vets = await Vet.find({ type: true });
     res.status(200).json(vets);
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch vets" });
@@ -137,5 +137,4 @@ router.post("/", upload.single("image"), async (req: Request, res: Response) => 
     res.status(500).json({ message: "Something went wrong" });
   }
 });
-
 export default router;

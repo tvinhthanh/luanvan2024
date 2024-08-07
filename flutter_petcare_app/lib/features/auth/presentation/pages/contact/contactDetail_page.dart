@@ -120,8 +120,8 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(12),
                       image: DecorationImage(
-                        image: AssetImage(
-                            'assets/Image/${widget.clinicName['image']}'),
+                        image: NetworkImage(
+                            '${widget.clinicName['image']}'),
                         fit: BoxFit.cover,
                       ),
                     ),

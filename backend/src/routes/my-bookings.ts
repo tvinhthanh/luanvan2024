@@ -3,6 +3,8 @@ import verifyToken from "../middleware/auth";
 import { VetCType, BookingType } from "../shared/types";
 import Vet from "../models/vet";
 import Booking from "../models/booking";
+import UsersApp from "../models/usersApp";
+import mongoose from "mongoose";
 const { v4: uuidv4 } = require('uuid');
 
 const router = express.Router();
@@ -114,6 +116,97 @@ router.post('/', verifyToken, async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error creating booking:', error);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Endpoint to add new booking
+router.post('/add/:vetID/:email/:petID', async (req: Request, res: Response) => {
+  try {
+    const { vetID, email, petID } = req.params;
+    const { note, date, status } = req.body;
+
+    // Find user by email to get _id and phone
+    const user = await UsersApp.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Create a new Booking instance
+    const newBooking = new Booking({
+      _id: new mongoose.Types.ObjectId().toHexString(),
+      vetId: vetID,
+      ownerId: user._id,
+      petId: petID,
+      date,
+      note,
+      phoneOwner: user.phone,
+      status: 1, // Default status to 1 (Pending)
+    });
+
+    // Save the new booking to the database
+    const savedBooking = await newBooking.save();
+
+    // Respond with the saved booking object
+    res.status(201).json(savedBooking);
+  } catch (error) {
+    // Handle errors
+    console.error('Error adding booking:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Endpoint để hiển thị lịch hẹn theo vetId và petId
+router.get('/appointments/:petId/:vetId', async (req, res) => {
+  const { petId, vetId } = req.params;
+
+  try {
+    const bookings = await Booking.find({ petId, vetId });
+
+    if (!bookings.length) {
+      return res.status(404).json({ message: 'No bookings found for the given petId and vetId.' });
+    }
+
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Endpoint hiển thị lịch hẹn cho calendar
+router.get('/appointments/calendar/:email', async (req: Request, res: Response) => {
+  const email: string = req.params.email;
+
+  console.log(`Fetching appointments for user with email: ${email}`);
+
+  try {
+    // Find the user by email
+    const user = await UsersApp.findOne({ email });
+
+    if (!user) {
+      console.log(`User not found for email: ${email}`);
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    console.log(`User found: ${user}`);
+
+    // Fetch bookings using the ownerId from the user
+    const bookings = await Booking.find({ ownerId: user._id }).populate('vetId', 'name'); // Populate vetId with name
+
+    // Check if there are no bookings found
+    if (bookings.length === 0) {
+      console.log(`No bookings found for user: ${user._id}`);
+      return res.status(404).json({ message: 'No bookings found for the given user.' });
+    }
+
+    console.log(`Bookings found:`, bookings);
+
+    // Return the bookings if found
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 export default router;

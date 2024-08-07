@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_petcare_app/core/theme/app_pallete.dart';
-import 'package:flutter_petcare_app/features/auth/presentation/pages/booking/bookingDetail_page.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/pages/contact/contactDetail_page.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/pages/loginSignup/login_page.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/widgets/custom_drawer.dart';
@@ -33,7 +32,7 @@ class _ContactPageState extends State<ContactPage> {
 
   Future<void> fetchClinics() async {
     final url = Uri.parse(
-        'http://${Ip.serverIP}:3000/api/my-vet/show'); // Replace with your backend URL
+        'http://${Ip.serverIP}:3000/api/vet');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -175,8 +174,8 @@ class _ContactPageState extends State<ContactPage> {
                               children: [
                                 CircleAvatar(
                                   radius: 30.0,
-                                  backgroundImage: AssetImage(
-                                      'assets/Image/${clinic['image']}'),
+                                  backgroundImage: NetworkImage(
+                                      '${clinic['image']}'),
                                 ),
                               ],
                             ),

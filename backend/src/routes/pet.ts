@@ -1,45 +1,49 @@
 import express, { Request, Response } from "express";
-import Pet from "../models/pet";  // Ensure the Pet model is correctly defined
-import Owner from "../models/owner"; // Ensure the Owner model is correctly defined
+import Pet from "../models/pet";
+import mongoose from "mongoose";
+import Medic from "../models/medical";
 
 const router = express.Router();
 
-// Function to get the next sequential pet ID
-const getNextId = async () => {
-  try {
-    const maxPet = await Pet.findOne().sort({ _id: -1 }).limit(1);
-    if (maxPet) {
-      const currentId = parseInt(maxPet._id) + 1;
-      return currentId.toString();
-    } else {
-      return "1";
-    }
-  } catch (error) {
-    console.error("Error getting next pet ID:", error);
-    throw error;
-  }
-};
-
-// Endpoint to display all pets of an owner
-router.get("/show/:owner_id", async (req, res) => {
-  const owner_id = req.params.owner_id;
-  try {
-    const ownerPets = await Pet.find({ owner_id });
-    res.status(200).json(ownerPets);
-  } catch (error) {
-    console.error("Error fetching pets:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-router.get("/:email", async (req, res) => {
+// Endpoint hiển thị toàn bộ pet theo tài khoản
+router.get('/:email', async (req, res) => {
   const email = req.params.email;
   try {
+    // Find all pets associated with the given email
     const ownerPets = await Pet.find({ email });
     res.status(200).json(ownerPets);
   } catch (error) {
-    console.error("Error fetching pets:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Error fetching pets:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Endpoint thêm một thú cưng theo tài khoản
+router.post('/add/:email', async (req, res) => {
+  try {
+    const { email } = req.params;
+    const { name, age, weight, breed_id, sex, breed_type, img, medic_id, record_id } = req.body;
+
+    const newPet = new Pet({
+      _id: new mongoose.Types.ObjectId().toHexString(),
+      name,
+      age,
+      weight,
+      breed_id,
+      email,
+      sex,
+      breed_type,
+      img,
+      medic_id,
+      record_id
+    });
+
+    await newPet.save();
+
+    res.status(201).json({ message: 'Pet added successfully', pet: newPet });
+  } catch (error) {
+    console.error('Error adding pet:', error);
+    res.status(500).json({ message: 'Failed to add pet' });
   }
 });
 
@@ -67,94 +71,47 @@ router.put("/:petId/weight", async (req, res) => {
 });
 
 
-// Endpoint to display details of a pet
-router.get("/detail/:pet_id", async (req, res) => {
-  const petId = req.params.pet_id;
+// Endpoint cập nhật thông tin Pet
+router.put('/update/:id', async (req, res) => {
+  const petId = req.params.id;
   try {
-    const foundPet = await Pet.findById(petId);
-    if (foundPet) {
-      res.status(200).json(foundPet);
-    } else {
-      res.status(404).json({ error: "Pet not found" });
-    }
-  } catch (error) {
-    console.error("Error fetching pet:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
+    const { name, age, weight, sex, img } = req.body;
 
-// Endpoint to add a new pet
-router.post("/add/:owner_id", async (req, res) => {
-  const { name, age, weight, breed_id, sex, breed_type, img } = req.body;
-  const owner_id = req.params.owner_id;
-  try {
-    const nextId = await getNextId();
+    // Tìm thú cưng dựa trên _id trong cơ sở dữ liệu
+    const existingPet = await Pet.findById(petId);
 
-    const existingOwner = await Owner.findById(owner_id);
-    if (!existingOwner) {
-      return res.status(404).json({ error: "Owner not found" });
-    }
-
-    const newPet = new Pet({
-      _id: nextId,
-      name,
-      age,
-      weight,
-      breed_id,
-      owner_id,
-      sex,
-      breed_type,
-      img,
-    });
-    await newPet.save();
-
-    res.status(201).json({ message: "Adding pet successful" });
-  } catch (error) {
-    console.error("Error adding pet:", error);
-    res.status(500).json({ error: "Internal server error" });
-  }
-});
-
-// Endpoint to update pet information
-router.put("/update/:userId/:petId", async (req: Request, res: Response) => {
-  const { userId, petId } = req.params;
-  const { name, age, weight, sex, img } = req.body;
-
-  try {
-    const existingPet = await Pet.findOne({ _id: petId, owner_id: userId });
+    // Kiểm tra nếu không tìm thấy thú cưng
     if (!existingPet) {
-      return res.status(404).json({ error: "Pet not found" });
+      return res.status(404).json({ error: 'Pet not found' });
     }
 
+    // Cập nhật thông tin thú cưng
     existingPet.name = name;
     existingPet.age = age;
     existingPet.weight = weight;
     existingPet.sex = sex;
     existingPet.img = img;
+
+    // Lưu thông tin cập nhật vào cơ sở dữ liệu
     await existingPet.save();
 
-    res.status(200).json({ message: "Pet updated successfully" });
+    // Trả về thông báo cập nhật thành công và thông tin thú cưng đã được cập nhật
+    res.status(200).json({ message: 'Updating pet successful', pet: existingPet });
   } catch (error) {
-    console.error("Error updating pet:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Error updating pet:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
+// Endpoint to get bookings with vet names by petId
+router.get('/showContacts/:idPet', async (req, res) => {
+  const { idPet } = req.params;
 
-// Endpoint to delete a pet
-router.delete("/delete/:id", async (req, res) => {
-  const petId = req.params.id;
   try {
-    const existingPet = await Pet.findById(petId);
-    if (!existingPet) {
-      return res.status(404).json({ error: "Pet not found" });
-    }
-
-    await Pet.deleteOne({ _id: petId });
-
-    res.status(200).json({ message: "Deleting pet successful" });
+    const bookings = await Medic.find({ petId: idPet }).populate('vetId', 'name');
+    res.status(200).json(bookings);
   } catch (error) {
-    console.error("Error deleting pet:", error);
-    res.status(500).json({ error: "Internal server error" });
+    console.error('Error fetching bookings:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 

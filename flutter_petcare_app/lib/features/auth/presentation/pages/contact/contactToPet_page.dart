@@ -33,7 +33,7 @@ class _ContactToPetPageState extends State<ContactToPetPage> {
 
   Future<void> fetchClinics() async {
     final url = Uri.parse(
-        'http://${Ip.serverIP}:3000/api/my-vet/show'); // Replace with your backend URL
+        'http://${Ip.serverIP}:3000/api/vet');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -41,6 +41,7 @@ class _ContactToPetPageState extends State<ContactToPetPage> {
         setState(() {
           clinics = data
               .map((clinic) => {
+                    '_id': clinic['_id'],
                     'name': clinic['name'],
                     'address': clinic['address'],
                     'phone': clinic['phone'],
@@ -174,8 +175,8 @@ class _ContactToPetPageState extends State<ContactToPetPage> {
                               children: [
                                 CircleAvatar(
                                   radius: 30.0,
-                                  backgroundImage: AssetImage(
-                                      'assets/Image/${clinic['image']}'),
+                                  backgroundImage: NetworkImage(
+                                      '${clinic['image']}'),
                                 ),
                               ],
                             ),
