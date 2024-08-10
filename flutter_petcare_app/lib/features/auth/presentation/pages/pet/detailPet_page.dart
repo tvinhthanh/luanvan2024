@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_petcare_app/core/theme/app_pallete.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/pages/contact/contactToPet_page.dart';
@@ -67,7 +66,17 @@ class _DetailPetPageState extends State<DetailPetPage> {
         final List<dynamic> data = jsonDecode(response.body);
 
         setState(() {
-          appointmentHistory = data.map((item) {
+          // Filter out duplicates
+          final uniqueAppointments = <String>{};
+          appointmentHistory = data.where((item) {
+            final idPair = '${item['vetId']['_id']}-${widget.pet['_id']}';
+            if (uniqueAppointments.contains(idPair)) {
+              return false;
+            } else {
+              uniqueAppointments.add(idPair);
+              return true;
+            }
+          }).map((item) {
             return {
               'clinic_id': item['vetId']['_id'],
               'clinic_name': item['vetId']['name'],

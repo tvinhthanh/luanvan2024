@@ -157,4 +157,16 @@ router.delete("/:id", async (req: Request, res: Response) => {
     res.status(500).json({ message: "Failed to delete pet" });
   }
 });
+// Endpoint to get bookings with vet names by petId
+router.get('/showContacts/:idPet', async (req, res) => {
+  const { idPet } = req.params;
+
+  try {
+    const bookings = await Medic.find({ petId: idPet }).populate('vetId', 'name');
+    res.status(200).json(bookings);
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 export default router;
