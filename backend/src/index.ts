@@ -20,6 +20,7 @@ import medicationsRoutes from "./routes/medications";
 import invoiceRoutes from "./routes/invoice";
 import usersAppRoutes from "./routes/usersApp";
 import medicalRoutes from "./routes/medic";
+import scheduleRoutes from "./routes/schedule";
 // import vetRoutes from "./routes/vet";
 import Stripe from "stripe";
 import "dotenv/config";
@@ -65,7 +66,7 @@ app.use('/api/medications',medicationsRoutes);
 app.use('/api/invoices',invoiceRoutes);
 app.use('/api/usersApp',usersAppRoutes);
 app.use('/api/medic', medicalRoutes);
-
+app.use('/api/schedule', scheduleRoutes);
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

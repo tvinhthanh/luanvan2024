@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_petcare_app/core/theme/app_pallete.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/pages/loginSignup/login_page.dart';
@@ -123,7 +124,7 @@ class _PetProfilePageState extends State<PetProfilePage> {
     }
   }
 
-  Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
+    Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -146,7 +147,11 @@ class _PetProfilePageState extends State<PetProfilePage> {
             ),
             TextButton(
               child: Text('Logout'),
-              onPressed: () {
+              onPressed: () async {
+                // Sign out from Firebase
+                await FirebaseAuth.instance.signOut();
+
+                // Navigate to LoginPage
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => LoginPage()),

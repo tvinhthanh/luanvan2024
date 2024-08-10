@@ -4,7 +4,6 @@ import 'package:flutter_petcare_app/core/theme/app_pallete.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/pages/loginSignup/login_page.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/widgets/custom_drawer.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'dart:collection';
 
 class CalendarPage extends StatefulWidget {
   final String? userName;
@@ -22,27 +21,7 @@ class _CalendarPageState extends State<CalendarPage> {
   DateTime? _selectedDay;
   late final ValueNotifier<List<Event>> _selectedEvents;
 
-  final Map<DateTime, List<Event>> _events = {
-    DateTime.utc(2023, 6, 12): [
-      Event('Morning Walk', '09:30'),
-      Event('Flea Medication', '11:00'),
-    ],
-    DateTime.utc(2023, 6, 16): [
-      Event('Shinny Fur Saloon', '16:00'),
-    ],
-    DateTime.utc(2023, 6, 20): [
-      Event('Annual Checkup', '11:00'),
-    ],
-    DateTime.utc(2023, 6, 21): [
-      Event('Park Walk', '16:00'),
-    ],
-    DateTime.utc(2024, 6, 16): [
-      Event('Event Walk', '13:00'),
-    ],
-    DateTime.utc(2024, 7, 16): [
-      Event('Event Walk', '13:00'),
-    ],
-  };
+  final Map<DateTime, List<Event>> _events = {};
 
   @override
   void initState() {
@@ -65,7 +44,7 @@ class _CalendarPageState extends State<CalendarPage> {
     return DateTime.utc(date.year, date.month, date.day);
   }
 
-    Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
+  Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -89,14 +68,164 @@ class _CalendarPageState extends State<CalendarPage> {
             TextButton(
               child: Text('Logout'),
               onPressed: () async {
-                // Sign out from Firebase
                 await FirebaseAuth.instance.signOut();
-
-                // Navigate to LoginPage
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => LoginPage()),
                 );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showAddEventDialog(BuildContext context) async {
+    String title = '';
+    String time = '';
+    String description = '';
+
+    TextEditingController timeController = TextEditingController();
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Add Event'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextField(
+                decoration: InputDecoration(labelText: 'Event Title'),
+                onChanged: (value) {
+                  title = value;
+                },
+              ),
+              TextField(
+                readOnly: true,
+                decoration: InputDecoration(labelText: 'Time'),
+                controller: timeController,
+                onTap: () async {
+                  TimeOfDay? pickedTime = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.now(),
+                  );
+                  if (pickedTime != null) {
+                    time = pickedTime.format(context);
+                    timeController.text = time;
+                  }
+                },
+              ),
+              TextField(
+                decoration: InputDecoration(labelText: 'Description'),
+                onChanged: (value) {
+                  description = value;
+                },
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Confirm'),
+              onPressed: () {
+                setState(() {
+                  final normalizedDate = _normalizeDate(_selectedDay!);
+                  if (_events.containsKey(normalizedDate)) {
+                    _events[normalizedDate]!.add(Event(title, time, description));
+                  } else {
+                    _events[normalizedDate] = [Event(title, time, description)];
+                  }
+                  _selectedEvents.value = _getEventsForDay(_selectedDay!);
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showEditDeleteDialog(BuildContext context, Event event, {required DateTime normalizedDate, required int eventIndex}) async {
+    String newTitle = event.title;
+    String newTime = event.time;
+    String newDescription = event.description;
+
+    TextEditingController timeController = TextEditingController(text: newTime);
+
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Edit Event'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              TextField(
+                decoration: InputDecoration(labelText: 'Event Title'),
+                controller: TextEditingController(text: newTitle),
+                onChanged: (value) {
+                  newTitle = value;
+                },
+              ),
+              TextField(
+                readOnly: true,
+                decoration: InputDecoration(labelText: 'Time'),
+                controller: timeController,
+                onTap: () async {
+                  TimeOfDay? pickedTime = await showTimePicker(
+                    context: context,
+                    initialTime: TimeOfDay.now(),
+                  );
+                  if (pickedTime != null) {
+                    newTime = pickedTime.format(context);
+                    timeController.text = newTime;
+                  }
+                },
+              ),
+              TextField(
+                decoration: InputDecoration(labelText: 'Description'),
+                controller: TextEditingController(text: newDescription),
+                onChanged: (value) {
+                  newDescription = value;
+                },
+              ),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Delete'),
+              onPressed: () {
+                setState(() {
+                  _events[normalizedDate]!.removeAt(eventIndex);
+                  _selectedEvents.value = _getEventsForDay(_selectedDay!);
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Update'),
+              onPressed: () {
+                setState(() {
+                  _events[normalizedDate]![eventIndex] = Event(newTitle, newTime, newDescription);
+                  _selectedEvents.value = _getEventsForDay(_selectedDay!);
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.of(context).pop();
               },
             ),
           ],
@@ -171,6 +300,13 @@ class _CalendarPageState extends State<CalendarPage> {
             eventLoader: _getEventsForDay,
           ),
           const SizedBox(height: 8.0),
+          ElevatedButton(
+            onPressed: () {
+              _showAddEventDialog(context);
+            },
+            child: Text('Add Event'),
+          ),
+          const SizedBox(height: 8.0),
           Expanded(
             child: ValueListenableBuilder<List<Event>>(
               valueListenable: _selectedEvents,
@@ -184,7 +320,18 @@ class _CalendarPageState extends State<CalendarPage> {
                         backgroundImage: AssetImage('assets/Image/user1.png'),
                       ),
                       title: Text(event.title),
-                      subtitle: Text(event.time),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(event.time),
+                          Text(event.description),
+                        ],
+                      ),
+                      onTap: () {
+                        _showEditDeleteDialog(context, event,
+                            normalizedDate: _normalizeDate(_selectedDay!),
+                            eventIndex: index);
+                      },
                     );
                   },
                 );
@@ -201,6 +348,7 @@ class _CalendarPageState extends State<CalendarPage> {
 class Event {
   final String title;
   final String time;
+  final String description;
 
-  Event(this.title, this.time);
+  Event(this.title, this.time, this.description);
 }

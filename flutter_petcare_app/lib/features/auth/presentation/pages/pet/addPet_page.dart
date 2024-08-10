@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/pages/home_page.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/pages/loginSignup/login_page.dart';
@@ -121,11 +122,10 @@ class _AddPetPageState extends State<AddPetPage> {
     );
   }
 
-  Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
+   Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
     return showDialog<void>(
       context: context,
-      barrierDismissible:
-          false, // Ngăn người dùng đóng dialog bằng cách nhấn bên ngoài
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text('Confirm Logout'),
@@ -140,13 +140,17 @@ class _AddPetPageState extends State<AddPetPage> {
             TextButton(
               child: Text('Cancel'),
               onPressed: () {
-                Navigator.of(context).pop(); // Đóng dialog
+                Navigator.of(context).pop();
               },
             ),
             TextButton(
               child: Text('Logout'),
-              onPressed: () {
-                Navigator.push(
+              onPressed: () async {
+                // Sign out from Firebase
+                await FirebaseAuth.instance.signOut();
+
+                // Navigate to LoginPage
+                Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => LoginPage()),
                 );
