@@ -29,5 +29,5 @@ class MyApp extends StatelessWidget {
   }
 }
 class Ip{
-  static const String serverIP = '172.16.0.37';
+  static const String serverIP = '192.168.1.149';
 }

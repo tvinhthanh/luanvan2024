@@ -4,6 +4,7 @@ import 'package:flutter_petcare_app/features/auth/presentation/pages/loginSignup
 import 'package:flutter_petcare_app/features/auth/presentation/pages/pet/detailPet_page.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/widgets/custom_drawer.dart';
 import 'package:flutter_petcare_app/main.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -34,7 +35,8 @@ class _HomePageState extends State<HomePage> {
         isLoading = true;
       });
 
-      final url = Uri.parse('http://${Ip.serverIP}:3000/api/pet/${widget.email}');
+      final url =
+          Uri.parse('http://${Ip.serverIP}:3000/api/pet/${widget.email}');
       try {
         final response = await http.get(url);
         if (response.statusCode == 200) {
@@ -138,7 +140,11 @@ class _HomePageState extends State<HomePage> {
             ),
             TextButton(
               child: Text('Logout'),
-              onPressed: () {
+              onPressed: () async {
+                // Sign out from Firebase
+                await FirebaseAuth.instance.signOut();
+
+                // Navigate to LoginPage
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => LoginPage()),
@@ -156,7 +162,12 @@ class _HomePageState extends State<HomePage> {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => DetailPetPage(pet: pet, email:widget.email, userName: widget.userName,)),
+          MaterialPageRoute(
+              builder: (context) => DetailPetPage(
+                    pet: pet,
+                    email: widget.email,
+                    userName: widget.userName,
+                  )),
         );
       },
       child: Card(
