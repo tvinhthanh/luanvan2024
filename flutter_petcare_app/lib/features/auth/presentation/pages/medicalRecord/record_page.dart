@@ -431,10 +431,12 @@ class _PetProfilePageState extends State<PetProfilePage> {
           default:
             statusText = 'Unknown';
         }
-
         return Card(
           child: ListTile(
-            title: Text('Appointment on $formattedAppointmentDateTime'),
+            title: Text(
+              'Appointment\nDate:$formattedAppointmentDateTime',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
