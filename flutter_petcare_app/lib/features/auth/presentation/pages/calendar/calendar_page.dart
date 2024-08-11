@@ -40,6 +40,26 @@ class _CalendarPageState extends State<CalendarPage> {
     super.dispose();
   }
 
+  Future<String> _getUserIdFromEmail(String email) async {
+    final String url =
+        'http://${Ip.serverIP}:3000/api/usersApp/userInfo/userId/$email'; // Create an endpoint in your backend to fetch user by email
+
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['_id']; // Adjust according to the structure of the response
+      } else {
+        throw Exception('Failed to load user: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error fetching user ID: $e')));
+      return ''; // Return an empty string or handle it as you wish
+    }
+  }
+
   Future<void> _fetchAppointments() async {
     if (widget.email == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -47,7 +67,16 @@ class _CalendarPageState extends State<CalendarPage> {
       );
       return; // Exit early if email is null
     }
+
     final String email = widget.email!;
+    String userId = await _getUserIdFromEmail(email);
+    if (userId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('UserId is null')),
+      );
+      return;
+    }
+
     try {
       final response = await http.get(Uri.parse(
           'http://${Ip.serverIP}:3000/api/schedule/appointments/calendar/$email'));
@@ -56,20 +85,35 @@ class _CalendarPageState extends State<CalendarPage> {
         final List<dynamic> data = json.decode(response.body);
         for (var appointment in data) {
           String title = appointment['vetId']['name'];
-
-          // Parse the date and get only the time formatted as a string
           DateTime eventDate = DateTime.parse(appointment['date']).toLocal();
-          String time = TimeOfDay.fromDateTime(eventDate)
-              .format(context); // Extract just the time
+          String time = TimeOfDay.fromDateTime(eventDate).format(context);
           String description = appointment['note'] ?? '';
+          String bookingId = appointment['_id']; // Extract booking_id
           String type = 'LH'; // Extract type
 
           DateTime normalizedDate = _normalizeDate(eventDate);
 
-          // Add event to the _events map
-          _events
-              .putIfAbsent(normalizedDate, () => [])
-              .add(Event(title, time, description, type));
+          // Check if the event already exists in _events based on booking_id
+          bool eventExists = _events[normalizedDate]?.any((event) =>
+                  event.type == type &&
+                  event.title == title &&
+                  event.description == description &&
+                  appointment['_id'] == bookingId) ??
+              false;
+
+          if (!eventExists) {
+            // Add event to the _events map
+            _events.putIfAbsent(normalizedDate, () => []).add(
+                  Event(title, time, description, type),
+                );
+
+            // Save the appointment to the backend
+            await _saveAppointmentToBackend(userId, bookingId, title,
+                description, eventDate, type); // Pass userId here
+          } else {
+            // Nếu sự kiện đã tồn tại, bạn có thể thêm một thông báo hoặc xử lý khác ở đây
+            print('Event with booking_id $bookingId already exists.');
+          }
         }
         // Update the selected events after fetching
         _selectedEvents.value = _getEventsForDay(_selectedDay!);
@@ -80,6 +124,37 @@ class _CalendarPageState extends State<CalendarPage> {
     } catch (e) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
+  }
+
+  Future<void> _saveAppointmentToBackend(String userId, String bookingId,
+      String title, String description, DateTime eventDate, String type) async {
+    final String url =
+        'http://${Ip.serverIP}:3000/api/schedule/addEvent'; // Replace with your actual endpoint
+    final body = json.encode({
+      'owner_id': userId,
+      'booking_id': bookingId,
+      'title': title,
+      'description': description,
+      'datetime': eventDate.toIso8601String(),
+      'type': type,
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: body,
+      );
+
+      if (response.statusCode != 201) {
+        throw Exception('Failed to save appointment: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving appointment: $e')));
     }
   }
 
@@ -340,7 +415,10 @@ class _CalendarPageState extends State<CalendarPage> {
           style: TextStyle(color: Colors.white),
         ),
       ),
-      drawer: CustomDrawer(userName: widget.userName, email: widget.email,),
+      drawer: CustomDrawer(
+        userName: widget.userName,
+        email: widget.email,
+      ),
       body: Column(
         children: [
           TableCalendar<Event>(

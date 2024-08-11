@@ -1,6 +1,8 @@
 import express, { Request, Response } from "express";
 import Booking from "../models/booking";
 import UsersApp from "../models/usersApp";
+import Schedule from "../models/schedule";
+import mongoose from "mongoose";
 
 const router = express.Router();
 // Endpoint hiển thị lịch hẹn cho calendar
@@ -42,4 +44,39 @@ router.get('/appointments/calendar/:email', async (req: Request, res: Response) 
   }
 });
 
+// POST endpoint để thêm một sự kiện mới
+router.post('/addEvent', async (req, res) => {
+  const { owner_id, booking_id, title, description, datetime, type } = req.body;
+
+  // Kiểm tra dữ liệu đầu vào
+  if (!owner_id || !booking_id || !title || !datetime || !type) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    // Kiểm tra xem booking_id đã tồn tại chưa
+    const existingSchedule = await Schedule.findOne({ booking_id });
+    if (existingSchedule) {
+      return res.status(409).json({ error: 'Booking ID already exists' });
+    }
+
+    // Tạo một instance của Schedule
+    const newSchedule = new Schedule({
+      _id: new mongoose.Types.ObjectId().toString(), // Tạo một ID mới
+      owner_id,
+      booking_id,
+      title,
+      description,
+      datetime,
+      type,
+    });
+
+    // Lưu sự kiện vào cơ sở dữ liệu
+    const savedSchedule = await newSchedule.save();
+    res.status(201).json(savedSchedule);
+  } catch (error) {
+    console.error('Error saving schedule:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 export default router;
