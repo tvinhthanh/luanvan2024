@@ -114,8 +114,8 @@ const ChartOne: React.FC = () => {
   const [chartType, setChartType] = useState<'service' | 'medications'>('service');
   const [state, setState] = useState<{ series: { name: string; data: number[]; colName: string[] }[] }>({
     series: [
-      { name: "Service Time", data: [], colName: [] },
-      { name: "Medication Time", data: [], colName: [] }
+      { name: "Số lần sử dụng", data: [], colName: [] },
+      { name: "Số lần sử dụng", data: [], colName: [] }
     ],
   });
   const [categories, setCategories] = useState<string[]>([]);
@@ -154,12 +154,12 @@ const ChartOne: React.FC = () => {
       setState({
         series: [
           {
-            name: "Service Time",
+            name: "Số lần sử dụng",
             data: serviceDataMapped,
             colName: serviceNames
           },
           {
-            name: "Medication Time",
+            name: "Số lần sử dụng",
             data: medicationDataMapped,
             colName: medicationNames
           }
@@ -183,11 +183,11 @@ const ChartOne: React.FC = () => {
     switch (chartType) {
       case 'service':
         return [
-          { name: "Service Time", data: state.series[0].data }
+          { name: "Số lần sử dụng", data: state.series[0].data }
         ];
       case 'medications':
         return [
-          { name: "Medication Time", data: state.series[1].data }
+          { name: "Số lần sử dụng", data: state.series[1].data }
         ];
       default:
         return [];
@@ -210,13 +210,13 @@ const ChartOne: React.FC = () => {
           className={`px-4 py-2 rounded-md ${chartType === 'service' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
           onClick={() => changeChartType('service')}
         >
-          Service
+          Dịch vụ
         </button>
         <button
           className={`px-4 py-2 rounded-md ${chartType === 'medications' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
           onClick={() => changeChartType('medications')}
         >
-          Medications
+          Thuốc
         </button>
       </div>
 
