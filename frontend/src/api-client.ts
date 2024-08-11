@@ -701,22 +701,6 @@ export const fetchBookingById = async (
     throw error;
   }
 };
-// export const addService = async (name: string, price: string, duration: string, available: boolean, vetId: string) => {
-//   const response = await fetch(`${API_BASE_URL}/api/service/${vetId}`, {
-//     method: 'POST',
-//     headers: {
-//       'Content-Type': 'application/json',
-//     },
-//     credentials: 'include', // Ensure cookies are sent with the request
-//     body: JSON.stringify({ name, price, duration, available, vetId }),
-//   });
-
-//   if (!response.ok) {
-//     throw new Error('Error adding service');
-//   }
-
-//   return response.json();
-// };
 export const addBooking = async (
   newBooking: BookingType
 ): Promise<BookingType> => {
@@ -770,7 +754,27 @@ export const createMedicalRecord = async (medicalRecordData: any) => {
     throw error;
   }
 };
+export const createMedicalRecordWithoutBooking = async (medicalRecordData: any) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/medical-records/o`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(medicalRecordData),
+    });
 
+    if (!response.ok) {
+      throw new Error("Failed to create medical record");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error creating medical record:", error);
+    throw error;
+  }
+};
 // Hàm gọi API để lấy danh sách bản ghi y tế dựa trên vetId
 // API client function to fetch vetId based on userId
 export const fetchVetIdByUserId = async (

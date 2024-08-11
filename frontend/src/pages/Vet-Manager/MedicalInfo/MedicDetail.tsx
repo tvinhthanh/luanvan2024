@@ -90,6 +90,9 @@ const MedicalRecordDetail: React.FC = () => {
   const handleDelete = async () => {
     if (!medicalRecord || !recordId) return;
 
+    const confirmed = window.confirm("Bạn có chắc chắn muốn xoá phiếu khám này không?");
+    if (!confirmed) return;
+
     try {
       await deleteMedicalRecordMutation.mutateAsync(recordId);
     } catch (error) {

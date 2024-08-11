@@ -81,18 +81,20 @@ router.put('/:id', verifyToken, async (req: Request, res: Response) => {
 // Delete a medical record by ID (for vet)
 router.delete('/detail/:medicId', async (req: Request, res: Response) => {
   try {
-    const id = req.params.id;
-    const deletedMedic = await medicalRecord.findOneAndDelete({ id });
+    const { medicId } = req.params; // Extracting the medicId from the route parameters
+    const deletedMedic = await medicalRecord.findOneAndDelete({ _id: medicId }); // Use _id to match MongoDB's default identifier
+
     if (!deletedMedic) {
       return res.status(404).json({ error: 'Medical record not found' });
     }
+
     res.status(200).json({ message: 'Medical record deleted' });
   } catch (error) {
     console.error('Error deleting medical record:', error);
     res.status(500).json({ error: 'Failed to delete medical record' });
   }
 });
-//create
+//create with booking
 router.post('/', verifyToken, async (req: Request, res: Response) => {
   try {
     const { vetId, petId, ownerId, bookingsId, visitDate, reasonForVisit, symptoms, diagnosis, treatmentPlan, medications, notes } = req.body;
@@ -167,7 +169,69 @@ router.post('/', verifyToken, async (req: Request, res: Response) => {
   }
 });
 
+//create without booking
+router.post('/o', verifyToken, async (req: Request, res: Response) => {
+  try {
+    const { vetId, petId, ownerId, bookingsId, visitDate, reasonForVisit, symptoms, diagnosis, treatmentPlan, medications, notes } = req.body;
 
+    // Validate required fields
+    if ( !vetId || !petId || !ownerId || !reasonForVisit) {
+      return res.status(400).json({ error: 'Missing required fields.' });
+    }
+
+    // Validate medications array
+    if (!Array.isArray(medications) || medications.some(med => typeof med !== 'object' || !med._id)) {
+      return res.status(400).json({ error: 'Invalid medications array.' });
+    }
+    // Create a new instance of MedicalRecord
+    const newMedicalRecord = new medicalRecord({
+      _id: uuidv4(), // Generate a new UUID for the medical record
+      petId,
+      ownerId,
+      vetId,
+      visitDate:  new Date(), // Use provided visitDate or current date
+      reasonForVisit,
+      symptoms,
+      diagnosis,
+      treatmentPlan,
+      medications,
+      bookingsId,
+      notes,
+    });
+
+    // Save the new MedicalRecord
+    const savedMedicalRecord = await newMedicalRecord.save();
+
+    // Update medicalRecords array for the pet
+    const updatedPet = await Pet.findByIdAndUpdate(
+      petId,
+      { $push: { medic_id: savedMedicalRecord._id } },
+      { new: true }
+    );
+
+    if (!updatedPet) {
+      return res.status(404).json({ error: 'Pet not found' });
+    }
+
+    // Update medicalRecords array for the vet
+    const updatedVet = await Vet.findByIdAndUpdate(
+      vetId,
+      { $push: { medicalRecords: savedMedicalRecord._id } },
+      { new: true }
+    );
+
+    if (!updatedVet) {
+      return res.status(404).json({ error: 'Vet not found' });
+    }
+
+    // Return the saved MedicalRecord
+    res.status(201).json(savedMedicalRecord);
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 // Get all medical records for the authenticated user (vet)
 router.get('/all', verifyToken, async (req: Request, res: Response) => {
   try {

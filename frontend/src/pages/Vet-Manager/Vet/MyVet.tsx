@@ -4,19 +4,19 @@ import { useAppContext } from "../../../contexts/AppContext";
 
 const Vet: React.FC = () => {
   const { vet, userId } = useAppContext(); // Now vet is available in context
-  if (!vet || vet.user_id != userId) {
+  if (!vet || vet.user_id !== userId) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full text-center">
           <p className="text-lg font-medium text-gray-900">
             Vui lòng tạo thông tin phòng khám trước.
-            <div className="text-center mt-4">
-              <p className="text-xl text-gray-600">No Vets found</p>
-              <Link to="/add-vet" className="text-blue-500 hover:underline">
-                Add Vet
-              </Link>
-            </div>
           </p>
+          <div className="text-center mt-4">
+            <p className="text-xl text-gray-600">No Vets found</p>
+            <Link to="/add-vet" className="text-blue-500 hover:underline">
+              Add Vet
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -107,18 +107,19 @@ const Vet: React.FC = () => {
             <div className="flex items-center space-x-4">
               <div className="flex-shrink-0">
                 <svg
-                  className="h-12 w-12 text-green-500"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+                  className="w-12 h-12 text-green-500 dark:text-white"
                   aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  fill="none"
+                  viewBox="0 0 24 24"
                 >
                   <path
                     stroke="currentColor"
-                    strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth="2"
-                    d="M15 4h3a1 1 0 0 1 1 1v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h3m0 3h6m-3 5h3m-6 0h.01M12 16h3m-6 0h.01M10 3v4h4V3h-4Z"
+                    d="M10 12v1h4v-1m4 7H6a1 1 0 0 1-1-1V9h14v9a1 1 0 0 1-1 1ZM4 5h16a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"
                   />
                 </svg>
               </div>
@@ -132,7 +133,6 @@ const Vet: React.FC = () => {
               </div>
             </div>
           </Link>
-
           <Link
             to="/my-booking" // Use id_vet from useAppContext
             className="block p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
@@ -157,7 +157,6 @@ const Vet: React.FC = () => {
               </div>
             </div>
           </Link>
-
           <Link
             to="/manager-invoice"
             className="block p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
@@ -229,17 +228,20 @@ const Vet: React.FC = () => {
             <div className="flex items-center space-x-4">
               <div className="flex-shrink-0">
                 <svg
-                  className="h-12 w-12 text-blue-500"
-                  fill="none"
+                  className="h-12 w-12"
                   viewBox="0 0 24 24"
-                  aria-hidden="true"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
                 >
                   <path
                     stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
                     strokeWidth="2"
-                    d="M18 9V4a1 1 0 0 0-1-1H8.914a1 1 0 0 0-.707.293L4.293 7.207A1 1 0 0 0 4 7.914V20a1 1 0 0 0 1 1h4M9 3v4a1 1 0 0 1-1 1H4m11 6v4m-2-2h4m3 0a5 5 0 1 1-10 0 5 5 0 0 1 10 0Z"
+                    d="M10.4688 18.4759C9.10334 19.8414 6.88952 19.8414 5.52408 18.4759C4.15864 17.1105 4.15864 14.8967 5.52408 13.5312L8.99734 10.058L13.942 15.0027L10.4688 18.4759ZM15.0027 13.942L18.4759 10.4688C19.8414 9.10334 19.8414 6.88952 18.4759 5.52408C17.1105 4.15864 14.8967 4.15864 13.5312 5.52408L10.058 8.99731L15.0027 13.942ZM4.46342 19.5366C6.41465 21.4878 9.57821 21.4878 11.5294 19.5366L19.5366 11.5294C21.4878 9.57821 21.4878 6.41465 19.5366 4.46342C17.5854 2.51219 14.4218 2.51219 12.4706 4.46342L4.46342 12.4706C2.51219 14.4218 2.51219 17.5854 4.46342 19.5366Z"
+                    fill="#FFFFFF"
+                  />
+                  <path
+                    d="M10.4688 18.4759C9.10334 19.8414 6.88952 19.8414 5.52408 18.4759C4.15864 17.1105 4.15864 14.8967 5.52408 13.5312L8.99734 10.058L13.942 15.0027L10.4688 18.4759Z"
+                    fill="#FFFFFF" // Màu cho nửa viên thuốc
                   />
                 </svg>
               </div>

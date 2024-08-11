@@ -62,24 +62,24 @@ const AddMedicalRecord: React.FC = () => {
     fetchPets();
   }, [ownerEmail]);
 
-  useEffect(() => {
-    const fetchRecords = async () => {
-      try {
-        if (petId && id_vet) {
-          const fetchedRecords: RecordType[] = await apiClient.fetchRecordsByPet(petId,id_vet);
-          setRecordId(fetchedRecords.length === 1 ? fetchedRecords[0]._id : "");
-        } else {
-          setRecordId("");
-        }
-      } catch (error) {
-        console.error("Error fetching records:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchRecords = async () => {
+  //     try {
+  //       if (petId && id_vet) {
+  //         const fetchedRecords: RecordType[] = await apiClient.fetchRecordsByPet(petId,id_vet);
+  //         setRecordId(fetchedRecords.length === 1 ? fetchedRecords[0]._id : "");
+  //       } else {
+  //         setRecordId("");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching records:", error);
+  //     }
+  //   };
 
-    fetchRecords();
-  }, [petId, id_vet]);
+  //   fetchRecords();
+  // }, [petId, id_vet]);
 
-  const addMedicalRecordMutation = useMutation(apiClient.createMedicalRecord, {
+  const addMedicalRecordMutation = useMutation(apiClient.createMedicalRecordWithoutBooking, {
     onSuccess: () => {
       queryClient.invalidateQueries(["fetchMedicalRecordsForVet", id_vet]);
       navigate(`/medical-record`);
@@ -88,7 +88,7 @@ const AddMedicalRecord: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!recordId || !reasonForVisit) {
+    if (!setMedications || !treatmentPlan || !reasonForVisit) {
       alert("Please fill out all required fields.");
       return;
     }
@@ -175,18 +175,7 @@ const AddMedicalRecord: React.FC = () => {
             </select>
           </div>
         )}
-        {petId && (
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Record ID</label>
-            <input
-              type="text"
-              value={recordId}
-              readOnly
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
-            />
-          </div>
-        )}
-        <div>
+        {/* <div>
           <label className="block text-sm font-medium text-gray-700">Vet ID</label>
           <input
             type="text"
@@ -194,7 +183,7 @@ const AddMedicalRecord: React.FC = () => {
             readOnly
             className="mt-1 block w-full border border-gray-300 rounded-md p-2"
           />
-        </div>
+        </div> */}
         <div>
           <label className="block text-sm font-medium text-gray-700">Reason for Visit</label>
           <input

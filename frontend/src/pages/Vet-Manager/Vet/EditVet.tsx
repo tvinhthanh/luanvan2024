@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as apiClient from '../../../api-client';
 import { VetCType } from '../../../../../backend/src/shared/types';
@@ -16,8 +16,16 @@ const EditVet: React.FC = () => {
   const [address, setAddress] = useState(vet.address || '');
   const [phone, setPhone] = useState(vet.phone || '');
   const [description, setDescription] = useState(vet.description || '');
+  const [imageUrls, setImageUrls] = useState<string[]>(vet.imageUrls || []);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Kiểm tra nếu `vet.imageUrls` không phải là một mảng
+    if (!Array.isArray(vet.imageUrls)) {
+      setImageUrls([]);
+    }
+  }, [vet.imageUrls]);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -71,6 +79,16 @@ const EditVet: React.FC = () => {
           onChange={(e) => setPhone(e.target.value)}
           className="border border-gray-300 rounded-md p-2"
         />
+        <div>
+          <p>Current Images:</p>
+          {imageUrls.map((url, index) => (
+            <div key={index}>
+              <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                {url}
+              </a>
+            </div>
+          ))}
+        </div>
         <input
           type="file"
           multiple
