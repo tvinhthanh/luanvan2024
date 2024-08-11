@@ -1,7 +1,7 @@
 import React from "react";
 import { useQuery } from "react-query";
 import * as apiClient from "../../../api-client";
-import { VetCType, MedicType, OwnerType, PetType, MedicationType } from "../../../../../backend/src/shared/types";
+import { VetCType, MedicType, OwnerType, PetType } from "../../../../../backend/src/shared/types";
 import { useAppContext } from "../../../contexts/AppContext";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -11,7 +11,6 @@ import MyVetInfo from "../Vet/VetInfo";
 const MyVetMedic: React.FC = () => {
   const { userId, id_vet } = useAppContext();
 
-  // Query to fetch vet information
   const {
     data: vetData,
     isLoading: isVetLoading,
@@ -39,7 +38,6 @@ const MyVetMedic: React.FC = () => {
       <MyVetInfo />
       <br/>
 
-      {/* Display medical records related to each vet */}
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold mt-5">Medical Records</h2>
         <Link
@@ -55,7 +53,7 @@ const MyVetMedic: React.FC = () => {
         ))}
       </div>
     </div>
-  ); 
+  );
 };
 
 const MedicalOfVet: React.FC<{ id_vet: string }> = ({ id_vet }) => {
@@ -101,11 +99,14 @@ const MedicalOfVet: React.FC<{ id_vet: string }> = ({ id_vet }) => {
     return <span>No medical records found</span>;
   }
 
+  // Sort medical records by visitDate in descending order
+  const sortedMedicalRecords = [...medicalRecords].sort((a, b) => new Date(b.visitDate).getTime() - new Date(a.visitDate).getTime());
+
   return (
     <div className="space-y-3">
-      {medicalRecords?.map((record) => {
-        const owner = owners?.find((owner) => owner._id === record.ownerId);
-        const pet = pets?.find((pet : any) => pet._id === record.petId);
+      {sortedMedicalRecords.map((record) => {
+        const owner = owners.find((owner) => owner._id === record.ownerId);
+        const pet = pets.find((pet) => pet._id === record.petId);
         return (
           <div
             key={record._id}
@@ -133,7 +134,7 @@ const MedicalOfVet: React.FC<{ id_vet: string }> = ({ id_vet }) => {
               <strong>Kế Hoạch Chữa Trị:</strong> {record.treatmentPlan}
             </p>
             <div>
-            <strong>Thuốc: ...</strong>
+              <strong>Thuốc: ...</strong>
             </div>
             {record.notes && (
               <p>

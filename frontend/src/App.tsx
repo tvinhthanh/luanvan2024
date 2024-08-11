@@ -39,15 +39,16 @@ import DetailRecords from "./pages/Vet-Manager/Records/DetailRecord";
 import AddRecords from "./pages/Vet-Manager/Records/AddRecord";
 import ManageMedications from "./pages/Vet-Manager/Medications/ManagerMed";
 import AddMed from "./pages/Vet-Manager/Medications/AddMed";
-import CreateInvoice from "./pages/Vet-Manager/Recept/AddInvoid";
+import CreateInvoice from "./pages/Vet-Manager/Recept/AddInvoice";
 import ManagerBooking from "./pages/Vet-Manager/Booking/ManagerBooking";
 import EditMed from "./pages/Vet-Manager/Medications/EditMed";
-import ManagerInvoice from "./pages/Vet-Manager/Recept/ManagerInvoid";
+import ManagerInvoice from "./pages/Vet-Manager/Recept/ManagerInvoice";
 import EditService from "./pages/Vet-Manager/Service/EditService";
 import AddMedicalRecordWithBookId from "./pages/Vet-Manager/MedicalInfo/AddMedicwithBookingsId";
 import StatisticsBookings from "./pages/Vet-Manager/Statistics/StatisticsBookings";
 import StatisticsInvoice from "./pages/Vet-Manager/Statistics/StatisticsInvoid";
 import StatisticsMedical from "./pages/Vet-Manager/Statistics/StatisticsMedical";
+import ManagerComments from "./pages/Manager/ManagerComments";
 
 const App = () => {
   const { isLoggedIn, userRole, id_vet } = useAppContext();
@@ -90,7 +91,6 @@ const App = () => {
                 </Layout>
               }
             />
-
             <Route
               path="/add-vet"
               element={
@@ -131,7 +131,6 @@ const App = () => {
                 </Layout>
               }
             />
-
             <Route
               path="/record-info"
               element={
@@ -156,7 +155,7 @@ const App = () => {
                 </Layout>
               }
             />
-             <Route
+            <Route
               path="/add-record/:recordId"
               element={
                 <Layout>
@@ -245,6 +244,15 @@ const App = () => {
                 </Layout>
               }
             />
+            <Route
+              path="/manager-cmt"
+              element={
+                <Layout>
+                  {" "}
+                  <ManagerComments />
+                </Layout>
+              }
+            />
           </>
         )}
 
@@ -259,6 +267,15 @@ const App = () => {
                 </Layout>
               }
             />
+              {/* <Route
+              path="/manager-cmt"
+              element={
+                <Layout>
+                  {" "}
+                  <ManagerComments />
+                </Layout>
+              }
+            /> */}
             <Route
               path="/manager-owner"
               element={
@@ -407,6 +424,7 @@ const App = () => {
                 </Layout>
               }
             />
+              
           </>
         )}
         <Route path="*" element={<Navigate to="/" />} />
