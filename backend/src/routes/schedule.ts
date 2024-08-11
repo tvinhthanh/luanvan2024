@@ -20,12 +20,15 @@ router.get('/appointments/calendar/:email', async (req: Request, res: Response) 
 
     console.log(`User found: ${user}`);
 
-    // Fetch bookings using the ownerId from the user
-    const bookings = await Booking.find({ ownerId: user._id }).populate('vetId', 'name'); // Populate vetId with name
+    // Fetch bookings using the ownerId from the user with status = 2 or 3
+    const bookings = await Booking.find({
+      ownerId: user._id,
+      status: { $in: [2, 3] }, // Filter bookings with status 2 or 3
+    }).populate('vetId', 'name'); // Populate vetId with name
 
     // Check if there are no bookings found
     if (bookings.length === 0) {
-      console.log(`No bookings found for user: ${user._id}`);
+      console.log(`No bookings found for user: ${user._id} with status 2 or 3`);
       return res.status(404).json({ message: 'No bookings found for the given user.' });
     }
 
