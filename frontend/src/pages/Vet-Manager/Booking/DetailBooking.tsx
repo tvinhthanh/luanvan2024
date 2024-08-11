@@ -2,11 +2,7 @@ import React, { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import * as apiClient from "../../../api-client";
-import {
-  BookingType,
-  PetType,
-  OwnerType,
-} from "../../../../../backend/src/shared/types";
+import { BookingType, PetType, OwnerType } from "../../../../../backend/src/shared/types";
 
 const DetailBooking: React.FC = () => {
   const { bookingId } = useParams<{ bookingId: string }>(); // Lấy bookingId từ params của URL
@@ -14,16 +10,10 @@ const DetailBooking: React.FC = () => {
   const navigate = useNavigate(); // Hook to navigate
 
   // State cho trạng thái booking
-  const [selectedStatus, setSelectedStatus] = useState<number | undefined>(
-    undefined
-  );
+  const [selectedStatus, setSelectedStatus] = useState<number | undefined>(undefined);
 
   // Query để fetch chi tiết booking
-  const {
-    data: booking,
-    isLoading,
-    error,
-  } = useQuery<BookingType>(
+  const { data: booking, isLoading: bookingLoading, error: bookingError } = useQuery<BookingType>(
     ["fetchBooking", bookingId],
     () => apiClient.fetchBookingById(bookingId || ""),
     {
@@ -34,9 +24,9 @@ const DetailBooking: React.FC = () => {
   );
 
   // Query để fetch danh sách pets
-  const { data: pets = [] } = useQuery<PetType[]>(
+  const { data: pets = [], isLoading: petsLoading, error: petsError } = useQuery<PetType[]>(
     "fetchPets",
-    () => apiClient.fetchpet(), // Thay đổi thành API call để lấy danh sách pets
+    () => apiClient.fetchpet(), // API call để lấy danh sách pets
     {
       onError: (err) => {
         console.error("Error fetching pets:", err);
@@ -44,25 +34,23 @@ const DetailBooking: React.FC = () => {
     }
   );
 
-  // Query để fetch owner thông tin
-  const {
-    data: owner,
-    isLoading: ownerLoading,
-    error: ownerError,
-  } = useQuery<OwnerType | undefined>(
-    ["fetchOwner", booking?.ownerId],
+  // Find the pet associated with the booking
+  const pet = pets.find((pet) => pet._id === booking?.petId);
+
+  // Query để fetch owner thông tin dựa trên gmail của pet
+  const { data: owner, isLoading: ownerLoading, error: ownerError } = useQuery<OwnerType | undefined>(
+    ["fetchOwnerByEmail", pet?.email],
     () =>
-      booking?.ownerId
-        ? apiClient.fetchOwnerById(booking.ownerId)
+      pet?.email
+        ? apiClient.fetchOwnerById(pet.email) // API call để lấy thông tin owner dựa trên gmail của pet
         : Promise.resolve(undefined),
     {
-      enabled: !!booking?.ownerId, // Chỉ fetch khi ownerId có giá trị
+      enabled: !!pet?.email, // Chỉ fetch khi gmail của pet có giá trị
       onError: (err) => {
-        console.error("Error fetching owner details:", err);
+        console.error("Error fetching owner details by pet gmail:", err);
       },
     }
   );
-
   // Mutation để cập nhật trạng thái
   const updateBookingStatus = useMutation(
     (newStatus: number) => apiClient.updateBookingStatus(bookingId!, newStatus),
@@ -90,11 +78,11 @@ const DetailBooking: React.FC = () => {
     }
   };
 
-  if (isLoading || ownerLoading) {
+  if (bookingLoading || petsLoading || ownerLoading) {
     return <span>Đang tải...</span>;
   }
 
-  if (error || ownerError) {
+  if (bookingError || petsError || ownerError) {
     return <span>Lỗi khi tải chi tiết booking</span>;
   }
 
@@ -111,6 +99,8 @@ const DetailBooking: React.FC = () => {
     }
   };
 
+  const petName = pet?.name || "Không tìm thấy";
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-between items-center mb-4">
@@ -122,13 +112,9 @@ const DetailBooking: React.FC = () => {
       {booking && (
         <div className="border border-gray-200 p-4 rounded-lg shadow-md">
           {/* Hiển thị tên của pet */}
-          {pets.length > 0 && (
-            <h2 className="text-xl font-bold">
-              {pets.find((pet) => pet._id === booking.petId)?.name}
-            </h2>
-          )}
+          <h2 className="text-xl font-bold">{petName}</h2>
           <p className="text-gray-600">
-            Chủ nhân: {owner ? owner.name : "Không tìm thấy"}
+            Chủ nhân: {pet?.email || "Không tìm thấy"}
           </p>
           <p className="mt-2">
             <strong>Ngày:</strong> {new Date(booking.date).toLocaleDateString()}

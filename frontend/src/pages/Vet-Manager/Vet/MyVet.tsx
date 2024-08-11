@@ -104,21 +104,21 @@ const Vet: React.FC = () => {
             to="/record-info"
             className="block p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"
           >
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 bg-white">
+              {" "}
               <div className="flex-shrink-0">
                 <svg
-                  className="w-12 h-12 text-green-500 dark:text-white"
+                  className="w-12 h-12 text-green-500"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  fill="none"
                   viewBox="0 0 24 24"
+                  fill="none" 
                 >
                   <path
                     stroke="currentColor"
-                    strokeLinejoin="round"
                     strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
                     d="M10 12v1h4v-1m4 7H6a1 1 0 0 1-1-1V9h14v9a1 1 0 0 1-1 1ZM4 5h16a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"
                   />
                 </svg>
@@ -133,6 +133,7 @@ const Vet: React.FC = () => {
               </div>
             </div>
           </Link>
+
           <Link
             to="/my-booking" // Use id_vet from useAppContext
             className="block p-6 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300"

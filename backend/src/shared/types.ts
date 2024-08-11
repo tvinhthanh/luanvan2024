@@ -68,7 +68,7 @@ export interface PetType {
   age: string;
   weight: string;
   breed_id: string;
-  gmail: string;
+  email: string;
   sex: string;
   breed_type: string;
   img: string;
