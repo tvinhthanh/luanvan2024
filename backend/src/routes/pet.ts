@@ -30,17 +30,21 @@ router.get('/detail/:ownerId', async (req, res) => {
   }
 });
 //get pet detail
-// router.get('/detail/:ownerId', async (req, res) => {
-//   const ownerId = req.params.ownerId;
-//   try {
-//     // Find all pets associated with the given email
-//     const ownerPets = await Pet.find({ ownerId });
-//     res.status(200).json(ownerPets);
-//   } catch (error) {
-//     console.error('Error fetching pets:', error);
-//     res.status(500).json({ error: 'Internal server error' });
-//   }
-// });
+router.get('/details/:petId', async (req, res) => {
+  const { petId } = req.params; // Extract petId from route parameters
+  try {
+    // Find the pet associated with the given petId
+    const pet = await Pet.findOne({ _id: petId }); // Use findOne for a single document
+    if (!pet) {
+      return res.status(404).json({ error: 'Pet not found' }); // Handle case where pet is not found
+    }
+    res.status(200).json(pet); // Return the pet details
+  } catch (error) {
+    console.error('Error fetching pet:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Endpoint thêm một thú cưng theo tài khoản
 router.post('/add/:email', async (req, res) => {
   try {

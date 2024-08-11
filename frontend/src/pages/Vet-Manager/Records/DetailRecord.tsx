@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { PetType, OwnerType, MedicType } from "../../../../../backend/src/shared/types";
 import * as apiClient from "../../../api-client";
@@ -15,19 +15,25 @@ const DetailRecords: React.FC = () => {
   const [newWeight, setNewWeight] = useState<number>(0);
   const [isEditingWeight, setIsEditingWeight] = useState<boolean>(false);
 
+  // Fetch pet information
   const { data: pet, error: petError, isLoading: petLoading } = useQuery<PetType>(
     ["fetchPet", petId],
-    () => apiClient.fetchPetById(petId)
+    () => apiClient.fetchPetById(petId),
+    { enabled: !!petId }
   );
 
+  // Fetch owner information
   const { data: owner, error: ownerError, isLoading: ownerLoading } = useQuery<OwnerType>(
     ["fetchOwner", ownerId],
-    () => apiClient.fetchOwnerById(ownerId)
+    () => apiClient.fetchOwnerById(ownerId),
+    { enabled: !!ownerId }
   );
 
+  // Fetch medical records
   const { data: medicalRecords, error: medicalRecordsError, isLoading: medicalRecordsLoading } = useQuery<MedicType[]>(
     ["fetchMedicalRecords", petId, id_vet],
-    () => apiClient.fetchMedicalRecordsByPetandVet(petId, id_vet)
+    () => apiClient.fetchMedicalRecordsByPetandVet(petId, id_vet),
+    { enabled: !!petId && !!id_vet }
   );
 
   const queryClient = useQueryClient();
@@ -52,8 +58,21 @@ const DetailRecords: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-  }, [pet, owner, medicalRecords]);
+  if (petLoading || ownerLoading || medicalRecordsLoading) {
+    return <div>Loading...</div>;
+  }
+console.log(petId)
+  if (petError || !pet) {
+    return <div>Error loading pet information</div>;
+  }
+
+  if (ownerError || !owner) {
+    return <div>Error loading owner information</div>;
+  }
+
+  if (medicalRecordsError || !medicalRecords) {
+    return <div>Error loading medical records</div>;
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-4 grid gap-6">
@@ -61,9 +80,11 @@ const DetailRecords: React.FC = () => {
         <div className="bg-white shadow-md rounded-lg p-6">
           <h2 className="text-2xl font-semibold mb-2">
             <div className="container mx-auto p-4">
-              <p className="mx-auto">
-                {pet?.img || "N/A"}
-              </p>
+              {pet.img ? (
+                <img src={pet.img} alt={pet.name} className="w-full h-auto rounded" />
+              ) : (
+                <p>No image available</p>
+              )}
             </div>
           </h2>
         </div>
@@ -78,12 +99,11 @@ const DetailRecords: React.FC = () => {
           <p><strong>Giống:</strong> {pet?.breed_type || "N/A"}</p>
           <p><strong>Cân nặng:</strong> {pet?.weight || "N/A"}</p>
           <p><strong>Giới tính:</strong> {pet?.sex || "N/A"}</p>
-          <p><strong>Hình ảnh:</strong> {pet?.img || "N/A"}</p>
           <button
             className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
             onClick={() => setIsEditingWeight(true)}
           >
-            Sửa cân nặng
+            Sửa Cân Nặng
           </button>
 
           {isEditingWeight && (
@@ -93,51 +113,51 @@ const DetailRecords: React.FC = () => {
                 value={newWeight}
                 onChange={(e) => setNewWeight(Number(e.target.value))}
                 className="border rounded p-2"
-                placeholder="Nhập cân nặng mới"
+                placeholder="Enter new weight"
                 required
               />
               <button
                 type="submit"
                 className="ml-2 px-4 py-2 bg-green-500 text-white rounded"
               >
-                Cập nhật
+                Update
               </button>
               <button
                 type="button"
                 onClick={() => setIsEditingWeight(false)}
                 className="ml-2 px-4 py-2 bg-red-500 text-white rounded"
               >
-                Hủy
+                Cancel
               </button>
             </form>
           )}
         </div>
         <div className="bg-white shadow-md rounded-lg p-6 col-span-3 mb-6">
-          <h2 className="text-2xl font-semibold mb-2">Lịch sử bệnh án</h2>
+          <h2 className="text-2xl font-semibold mb-2">Medical History</h2>
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-100">
               <tr>
-                <th className="py-2 px-4">Ngày khám</th>
-                <th className="py-2 px-4">Thuốc</th>
-                <th className="py-2 px-4">Lí do</th>
-                <th className="py-2 px-4">Kế hoạch điều trị</th>
+                <th className="py-2 px-4">Date</th>
+                <th className="py-2 px-4">Medications</th>
+                <th className="py-2 px-4">Reason</th>
+                <th className="py-2 px-4">Treatment Plan</th>
                 <th className="py-2 px-4">Notes</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {medicalRecords?.map((record: MedicType) => (
-                <tr key={record._id}>
-                  <td className="py-2 px-4">{new Date(record.visitDate).toLocaleDateString()}</td>
-                  <td className="py-2 px-4">
-                    <MedicationName medicationIds={record.medications} />
-                  </td>
-                  <td className="py-2 px-4">{record.reasonForVisit}</td>
-                  <td className="py-2 px-4">{record.treatmentPlan}</td>
-                  <td className="py-2 px-4">{record.notes}</td>
-                </tr>
-              ))}
-
-              {!medicalRecordsLoading && !medicalRecords && !medicalRecordsError && (
+              {medicalRecords.length > 0 ? (
+                medicalRecords.map((record: MedicType) => (
+                  <tr key={record._id}>
+                    <td className="py-2 px-4">{new Date(record.visitDate).toLocaleDateString()}</td>
+                    <td className="py-2 px-4">
+                      <MedicationName medicationIds={record.medications} />
+                    </td>
+                    <td className="py-2 px-4">{record.reasonForVisit}</td>
+                    <td className="py-2 px-4">{record.treatmentPlan}</td>
+                    <td className="py-2 px-4">{record.notes}</td>
+                  </tr>
+                ))
+              ) : (
                 <tr>
                   <td className="py-2 px-4" colSpan={5}>
                     No medical records found

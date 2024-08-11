@@ -40,7 +40,6 @@ const MedicalRecordDetail: React.FC = () => {
       },
     }
   );
-
   // Fetch owner information
   const {
     data: owner,
@@ -56,7 +55,7 @@ const MedicalRecordDetail: React.FC = () => {
       },
     }
   );
-
+console.log(owner)
   // Handle deleting medical record
   const deleteMedicalRecordMutation = useMutation(
     (recordId: string) => apiClient.deleteMedicalRecord(recordId),

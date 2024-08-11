@@ -966,7 +966,7 @@ export const deleteRecordById = async (recordId: string): Promise<void> => {
 };
 export const fetchPetById = async (petId: string): Promise<PetType> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/pet/detail/${petId}`);
+    const response = await fetch(`${API_BASE_URL}/api/pet/details/${petId}`);
     if (!response.ok) {
       throw new Error("Failed to fetch records by pet.");
     }
