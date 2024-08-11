@@ -106,6 +106,21 @@ router.put(
     }
   }
 );
+// lấy ra userID
+router.get('/userInfo/userId/:email', async (req, res) => {
+  const { email } = req.params;
 
+  try {
+    const user = await UsersApp.findOne({ email });
+    if (user) {
+      res.status(200).json(user);
+    } else {
+      res.status(404).json({ error: 'User not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching user:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 export default router;

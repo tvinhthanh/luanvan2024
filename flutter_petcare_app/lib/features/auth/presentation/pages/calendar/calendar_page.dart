@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'package:flutter_petcare_app/main.dart';
+import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_petcare_app/core/theme/app_pallete.dart';
@@ -28,6 +31,7 @@ class _CalendarPageState extends State<CalendarPage> {
     super.initState();
     _selectedDay = _focusedDay;
     _selectedEvents = ValueNotifier(_getEventsForDay(_selectedDay!));
+    _fetchAppointments(); // Fetch appointments on initialization
   }
 
   @override
@@ -35,6 +39,38 @@ class _CalendarPageState extends State<CalendarPage> {
     _selectedEvents.dispose();
     super.dispose();
   }
+
+  Future<void> _fetchAppointments() async {
+  final String email = widget.email!;
+  try {
+    final response = await http.get(Uri.parse('http://${Ip.serverIP}:3000/api/schedule/appointments/calendar/$email'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      for (var appointment in data) {
+        String title = appointment['vetId']['name'];
+        
+        // Parse the date and get only the time formatted as a string
+        DateTime eventDate = DateTime.parse(appointment['date']).toLocal();
+        String time = TimeOfDay.fromDateTime(eventDate).format(context); // Extract just the time
+        String description = appointment['note'] ?? '';
+        String type = 'LH'; // Extract type
+
+        DateTime normalizedDate = _normalizeDate(eventDate);
+
+        // Add event to the _events map
+        _events.putIfAbsent(normalizedDate, () => []).add(Event(title, time, description, type));
+      }
+      // Update the selected events after fetching
+      _selectedEvents.value = _getEventsForDay(_selectedDay!);
+    } else {
+      throw Exception('Failed to load appointments: ${response.reasonPhrase}');
+    }
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+  }
+}
+
 
   List<Event> _getEventsForDay(DateTime day) {
     return _events[_normalizeDate(day)] ?? [];
@@ -138,11 +174,7 @@ class _CalendarPageState extends State<CalendarPage> {
               onPressed: () {
                 setState(() {
                   final normalizedDate = _normalizeDate(_selectedDay!);
-                  if (_events.containsKey(normalizedDate)) {
-                    _events[normalizedDate]!.add(Event(title, time, description));
-                  } else {
-                    _events[normalizedDate] = [Event(title, time, description)];
-                  }
+                  _events.putIfAbsent(normalizedDate, () => []).add(Event(title, time, description, '')); // Set default type
                   _selectedEvents.value = _getEventsForDay(_selectedDay!);
                 });
                 Navigator.of(context).pop();
@@ -154,7 +186,37 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 
-  Future<void> _showEditDeleteDialog(BuildContext context, Event event, {required DateTime normalizedDate, required int eventIndex}) async {
+ Future<void> _showEditDeleteDialog(BuildContext context, Event event, {required DateTime normalizedDate, required int eventIndex}) async {
+  if (event.type == 'LH') {
+    // If the type is 'LH', show only event details
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Event Details'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start, // Align content to the start (left)
+            children: <Widget>[
+              Text('Title: ${event.title}'),
+              Text('Time: ${event.time}'),
+              Text('Description: ${event.description}'),
+            ],
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Close'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+    // For other types, show edit/delete options
     String newTitle = event.title;
     String newTime = event.time;
     String newDescription = event.description;
@@ -216,7 +278,7 @@ class _CalendarPageState extends State<CalendarPage> {
               child: Text('Update'),
               onPressed: () {
                 setState(() {
-                  _events[normalizedDate]![eventIndex] = Event(newTitle, newTime, newDescription);
+                  _events[normalizedDate]![eventIndex] = Event(newTitle, newTime, newDescription, event.type);
                   _selectedEvents.value = _getEventsForDay(_selectedDay!);
                 });
                 Navigator.of(context).pop();
@@ -250,7 +312,7 @@ class _CalendarPageState extends State<CalendarPage> {
         actions: [
           IconButton(
             icon: Icon(
-              Icons.exit_to_app_outlined,
+              Icons.exit_to_app,
               color: Colors.white,
             ),
             onPressed: () {
@@ -258,89 +320,99 @@ class _CalendarPageState extends State<CalendarPage> {
             },
           ),
         ],
+        title: Text(
+          'Calendar',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
+      drawer: CustomDrawer(userName: widget.userName),
       body: Column(
         children: [
-          TableCalendar(
-            firstDay: DateTime.utc(2020, 10, 16),
-            lastDay: DateTime.utc(2030, 3, 14),
+          TableCalendar<Event>(
+            firstDay: DateTime.now().subtract(Duration(days: 365)),
+            lastDay: DateTime.now().add(Duration(days: 365)),
             focusedDay: _focusedDay,
-            calendarFormat: CalendarFormat.month,
-            startingDayOfWeek: StartingDayOfWeek.monday,
-            headerStyle: HeaderStyle(
-              formatButtonVisible: false,
-            ),
-            calendarStyle: CalendarStyle(
-              todayDecoration: BoxDecoration(
-                color: Colors.blue,
-                shape: BoxShape.circle,
-              ),
-              selectedDecoration: BoxDecoration(
-                color: Colors.orange,
-                shape: BoxShape.circle,
-              ),
-              todayTextStyle: TextStyle(color: Colors.white),
-              markerDecoration: BoxDecoration(
-                color: Colors.red,
-                shape: BoxShape.circle,
-              ),
-            ),
-            selectedDayPredicate: (day) {
-              return isSameDay(_selectedDay, day);
-            },
+            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
             onDaySelected: (selectedDay, focusedDay) {
               if (!isSameDay(_selectedDay, selectedDay)) {
                 setState(() {
                   _selectedDay = selectedDay;
                   _focusedDay = focusedDay;
+                  _selectedEvents.value = _getEventsForDay(selectedDay);
                 });
-                _selectedEvents.value = _getEventsForDay(selectedDay);
               }
             },
             eventLoader: _getEventsForDay,
-          ),
-          const SizedBox(height: 8.0),
-          ElevatedButton(
-            onPressed: () {
-              _showAddEventDialog(context);
+            onFormatChanged: (format) {},
+            onPageChanged: (focusedDay) {
+              _focusedDay = focusedDay;
             },
-            child: Text('Add Event'),
-          ),
-          const SizedBox(height: 8.0),
-          Expanded(
-            child: ValueListenableBuilder<List<Event>>(
-              valueListenable: _selectedEvents,
-              builder: (context, events, _) {
-                return ListView.builder(
-                  itemCount: events.length,
-                  itemBuilder: (context, index) {
-                    final event = events[index];
-                    return ListTile(
-                      leading: CircleAvatar(
-                        backgroundImage: AssetImage('assets/Image/user1.png'),
-                      ),
-                      title: Text(event.title),
-                      subtitle: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(event.time),
-                          Text(event.description),
-                        ],
-                      ),
-                      onTap: () {
-                        _showEditDeleteDialog(context, event,
-                            normalizedDate: _normalizeDate(_selectedDay!),
-                            eventIndex: index);
-                      },
-                    );
-                  },
+            // Customizing the calendar builders
+            calendarBuilders: CalendarBuilders(
+              // Customize the day builder
+              todayBuilder: (context, day, focusedDay) {
+                return Container(
+                  margin: const EdgeInsets.all(4.0),
+                  decoration: BoxDecoration(
+                    color: Colors.blueAccent, // Color for today
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${day.day}',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
                 );
+              },
+              // Custom builder for days with events
+              markerBuilder: (context, day, events) {
+                if (events.isNotEmpty) {
+                  return Container(
+                    margin: const EdgeInsets.all(4.0),
+                    decoration: BoxDecoration(
+                      color: Colors.red, // Change the color here
+                      shape: BoxShape.circle,
+                    ),
+                    width: 8.0,
+                    height: 8.0,
+                  );
+                }
+                return SizedBox(); // Return an empty widget for days without events
               },
             ),
           ),
+          const SizedBox(height: 8.0),
+          ValueListenableBuilder<List<Event>>(
+            valueListenable: _selectedEvents,
+            builder: (context, value, _) {
+              return Expanded(
+                child: ListView.builder(
+                  itemCount: value.length,
+                  itemBuilder: (context, index) {
+                    final event = value[index];
+                    return ListTile(
+                      title: Text("Title: " + event.title),
+                      subtitle: Text("Time: " + event.time + "\nDescription: " + event.description),
+                      onTap: () {
+                        final normalizedDate = _normalizeDate(_selectedDay!);
+                        final eventIndex = _events[normalizedDate]!.indexOf(event);
+                        _showEditDeleteDialog(context, event, normalizedDate: normalizedDate, eventIndex: eventIndex);
+                      },
+                    );
+                  },
+                ),
+              );
+            },
+          ),
         ],
       ),
-      drawer: CustomDrawer(userName: widget.userName, email: widget.email),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          _showAddEventDialog(context);
+        },
+        child: Icon(Icons.add),
+      ),
     );
   }
 }
@@ -349,6 +421,7 @@ class Event {
   final String title;
   final String time;
   final String description;
+  final String type;
 
-  Event(this.title, this.time, this.description);
+  Event(this.title, this.time, this.description, this.type);
 }
