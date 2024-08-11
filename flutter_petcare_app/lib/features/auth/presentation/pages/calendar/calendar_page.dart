@@ -41,36 +41,47 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   Future<void> _fetchAppointments() async {
-  final String email = widget.email!;
-  try {
-    final response = await http.get(Uri.parse('http://${Ip.serverIP}:3000/api/schedule/appointments/calendar/$email'));
-
-    if (response.statusCode == 200) {
-      final List<dynamic> data = json.decode(response.body);
-      for (var appointment in data) {
-        String title = appointment['vetId']['name'];
-        
-        // Parse the date and get only the time formatted as a string
-        DateTime eventDate = DateTime.parse(appointment['date']).toLocal();
-        String time = TimeOfDay.fromDateTime(eventDate).format(context); // Extract just the time
-        String description = appointment['note'] ?? '';
-        String type = 'LH'; // Extract type
-
-        DateTime normalizedDate = _normalizeDate(eventDate);
-
-        // Add event to the _events map
-        _events.putIfAbsent(normalizedDate, () => []).add(Event(title, time, description, type));
-      }
-      // Update the selected events after fetching
-      _selectedEvents.value = _getEventsForDay(_selectedDay!);
-    } else {
-      throw Exception('Failed to load appointments: ${response.reasonPhrase}');
+    if (widget.email == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Email is null')),
+      );
+      return; // Exit early if email is null
     }
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
-  }
-}
+    final String email = widget.email!;
+    try {
+      final response = await http.get(Uri.parse(
+          'http://${Ip.serverIP}:3000/api/schedule/appointments/calendar/$email'));
 
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        for (var appointment in data) {
+          String title = appointment['vetId']['name'];
+
+          // Parse the date and get only the time formatted as a string
+          DateTime eventDate = DateTime.parse(appointment['date']).toLocal();
+          String time = TimeOfDay.fromDateTime(eventDate)
+              .format(context); // Extract just the time
+          String description = appointment['note'] ?? '';
+          String type = 'LH'; // Extract type
+
+          DateTime normalizedDate = _normalizeDate(eventDate);
+
+          // Add event to the _events map
+          _events
+              .putIfAbsent(normalizedDate, () => [])
+              .add(Event(title, time, description, type));
+        }
+        // Update the selected events after fetching
+        _selectedEvents.value = _getEventsForDay(_selectedDay!);
+      } else {
+        throw Exception(
+            'Failed to load appointments: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error: $e')));
+    }
+  }
 
   List<Event> _getEventsForDay(DateTime day) {
     return _events[_normalizeDate(day)] ?? [];
@@ -174,7 +185,8 @@ class _CalendarPageState extends State<CalendarPage> {
               onPressed: () {
                 setState(() {
                   final normalizedDate = _normalizeDate(_selectedDay!);
-                  _events.putIfAbsent(normalizedDate, () => []).add(Event(title, time, description, '')); // Set default type
+                  _events.putIfAbsent(normalizedDate, () => []).add(
+                      Event(title, time, description, '')); // Set default type
                   _selectedEvents.value = _getEventsForDay(_selectedDay!);
                 });
                 Navigator.of(context).pop();
@@ -186,36 +198,38 @@ class _CalendarPageState extends State<CalendarPage> {
     );
   }
 
- Future<void> _showEditDeleteDialog(BuildContext context, Event event, {required DateTime normalizedDate, required int eventIndex}) async {
-  if (event.type == 'LH') {
-    // If the type is 'LH', show only event details
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Event Details'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start, // Align content to the start (left)
-            children: <Widget>[
-              Text('Title: ${event.title}'),
-              Text('Time: ${event.time}'),
-              Text('Description: ${event.description}'),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Close'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+  Future<void> _showEditDeleteDialog(BuildContext context, Event event,
+      {required DateTime normalizedDate, required int eventIndex}) async {
+    if (event.type == 'LH') {
+      // If the type is 'LH', show only event details
+      return showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Event Details'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start, // Align content to the start (left)
+              children: <Widget>[
+                Text('Title: ${event.title}'),
+                Text('Time: ${event.time}'),
+                Text('Description: ${event.description}'),
+              ],
             ),
-          ],
-        );
-      },
-    );
-  }
+            actions: <Widget>[
+              TextButton(
+                child: Text('Close'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    }
     // For other types, show edit/delete options
     String newTitle = event.title;
     String newTime = event.time;
@@ -278,7 +292,8 @@ class _CalendarPageState extends State<CalendarPage> {
               child: Text('Update'),
               onPressed: () {
                 setState(() {
-                  _events[normalizedDate]![eventIndex] = Event(newTitle, newTime, newDescription, event.type);
+                  _events[normalizedDate]![eventIndex] =
+                      Event(newTitle, newTime, newDescription, event.type);
                   _selectedEvents.value = _getEventsForDay(_selectedDay!);
                 });
                 Navigator.of(context).pop();
@@ -325,7 +340,7 @@ class _CalendarPageState extends State<CalendarPage> {
           style: TextStyle(color: Colors.white),
         ),
       ),
-      drawer: CustomDrawer(userName: widget.userName),
+      drawer: CustomDrawer(userName: widget.userName, email: widget.email,),
       body: Column(
         children: [
           TableCalendar<Event>(
@@ -393,11 +408,17 @@ class _CalendarPageState extends State<CalendarPage> {
                     final event = value[index];
                     return ListTile(
                       title: Text("Title: " + event.title),
-                      subtitle: Text("Time: " + event.time + "\nDescription: " + event.description),
+                      subtitle: Text("Time: " +
+                          event.time +
+                          "\nDescription: " +
+                          event.description),
                       onTap: () {
                         final normalizedDate = _normalizeDate(_selectedDay!);
-                        final eventIndex = _events[normalizedDate]!.indexOf(event);
-                        _showEditDeleteDialog(context, event, normalizedDate: normalizedDate, eventIndex: eventIndex);
+                        final eventIndex =
+                            _events[normalizedDate]!.indexOf(event);
+                        _showEditDeleteDialog(context, event,
+                            normalizedDate: normalizedDate,
+                            eventIndex: eventIndex);
                       },
                     );
                   },

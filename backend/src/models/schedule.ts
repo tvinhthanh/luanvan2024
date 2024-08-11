@@ -9,7 +9,7 @@ const scheduleSchema = new mongoose.Schema({
   title: { type: String, required: true },
   datetime: { type: Date, required: true },
   type: { type: String, required: true },
-},{ timestamps: true }););
+},{ timestamps: true });
 
 
 const Schedule = mongoose.model("schedule", scheduleSchema, "schedule");
