@@ -1,4 +1,3 @@
-// MedicationNames.tsx
 import React from "react";
 import { useQuery } from "react-query";
 import * as apiClient from "../../../api-client";
@@ -9,7 +8,7 @@ const MedicationNames: React.FC<{ medicationIds: string[] }> = ({ medicationIds 
     ["fetchMedications", medicationIds],
     () => apiClient.fetchMedicationsByIds(medicationIds),
     {
-      enabled: medicationIds.length > 0, // Chỉ thực hiện truy vấn nếu có ID
+      enabled: medicationIds.length > 0, 
     }
   );
 

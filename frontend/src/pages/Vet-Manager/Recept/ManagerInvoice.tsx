@@ -4,14 +4,15 @@ import { InvoiceType, OwnerType, PetType, MedicType } from "../../../../../backe
 import * as apiClient from "../../../api-client";
 import { useAppContext } from "../../../contexts/AppContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import { faEye, faTrash } from "@fortawesome/free-solid-svg-icons";
+import { useNavigate } from "react-router-dom";
 
 const ManagerInvoice: React.FC = () => {
   const { id_vet } = useAppContext();
   const queryClient = useQueryClient();
   const [namesMap, setNamesMap] = useState<{ [key: string]: string }>({});
   const [recordsMap, setRecordsMap] = useState<{ [key: string]: MedicType }>({});
-
+  const navigate = useNavigate();
   // Fetch invoices query
   const { data: invoices = [], isLoading: isLoadingInvoices, error: invoicesError } = useQuery<InvoiceType[]>(
     "fetchInvoices",
@@ -87,6 +88,9 @@ const ManagerInvoice: React.FC = () => {
       }
     }
   };
+  const handleChoise = async (invoiceId: string) => {
+    navigate(`/invoice/${invoiceId}`); // Redirect to InvoiceDetail page
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -125,6 +129,13 @@ const ManagerInvoice: React.FC = () => {
                     >
                       <FontAwesomeIcon icon={faTrash} className="mr-1" />
                       Delete
+                    </button>
+                    <button
+                      onClick={() => handleChoise(invoice._id)}
+                      className="px-2 py-1 bg-green-500 text-white rounded"
+                    >
+                      <FontAwesomeIcon icon={faEye} className="mr-1" />
+                      Xem Chi tiết
                     </button>
                   </td>
                 </tr>

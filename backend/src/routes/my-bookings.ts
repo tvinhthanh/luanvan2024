@@ -92,7 +92,7 @@ router.post('/', verifyToken, async (req: Request, res: Response) => {
       petId,
       phoneOwner,
       date,
-      status,
+      status : 2,
       vetId
     });
 

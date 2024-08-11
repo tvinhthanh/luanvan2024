@@ -40,9 +40,9 @@ const MyVetInfo: React.FC = () => {
           {vetData.map((vet: VetCType) => (
             <div key={id_vet} className="bg-white shadow-lg rounded-lg p-6">
               <h2 className="text-xl font-semibold mb-2">{vet.name}</h2>
-              <p className="text-gray-700 mb-1"><strong>Address:</strong> {vet.address}</p>
-              <p className="text-gray-700 mb-1"><strong>Phone:</strong> {vet.phone}</p>
-              <p className="text-gray-700 mb-1"><strong>Description:</strong> {vet.description}</p>
+              <p className="text-gray-700 mb-1"><strong>Địa chỉ:</strong> {vet.address}</p>
+              <p className="text-gray-700 mb-1"><strong>Số điện thoại:</strong> {vet.phone}</p>
+              <p className="text-gray-700 mb-1"><strong>Chú thích:</strong> {vet.description}</p>
 
               {vet.imageUrls && vet.imageUrls.length > 0 && (
                 <div className="mt-4 grid grid-cols-3 gap-2">
@@ -63,7 +63,7 @@ const MyVetInfo: React.FC = () => {
                   state={{ vet }} // Pass the vet data through state
                   className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                 >
-                  Update Vet
+                  Cập nhật Phòng khám
                 </Link>
               </div>
             </div>

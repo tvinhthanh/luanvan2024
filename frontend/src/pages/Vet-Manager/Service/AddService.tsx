@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { useMutation, useQuery } from "react-query";
 import { useAppContext } from "../../../contexts/AppContext";
-import { useNavigate } from "react-router-dom"; // Import useNavigate hook
+import { useNavigate } from "react-router-dom";
 import * as apiClient from "../../../api-client";
 import { ServiceType } from "../../../../../backend/src/shared/types";
-import Toast from "../../../components/Toast"; // Import your custom Toast component
+import Toast from "../../../components/Toast";
 
 const AddService: React.FC = () => {
-  const { id_vet } = useAppContext(); // Get id_vet from the context
-  const navigate = useNavigate(); // Initialize navigate from useNavigate
+  const { id_vet } = useAppContext();
+  const navigate = useNavigate(); 
 
   const [name, setName] = useState<string>("");
   const [price, setPrice] = useState<string>("");
@@ -17,7 +17,6 @@ const AddService: React.FC = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<"SUCCESS" | "ERROR">("SUCCESS");
 
-  // Query hook for fetching existing services for the vet
   const { } = useQuery<ServiceType[]>(
     ["fetchServicesForVet", id_vet],
     () => apiClient.fetchServicesForVet(id_vet),
@@ -56,11 +55,11 @@ const AddService: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Add New Service</h1>
+      <h1 className="text-2xl font-bold mb-6">Thêm dịch vụ mới</h1>
       <form onSubmit={handleSubmit} className="max-w-md">
         <div className="mb-4">
           <label htmlFor="name" className="block text-gray-700 font-bold mb-2">
-            Service Name
+            Tên dịch vụ
           </label>
           <input
             type="text"
@@ -74,7 +73,7 @@ const AddService: React.FC = () => {
         </div>
         <div className="mb-4">
           <label htmlFor="price" className="block text-gray-700 font-bold mb-2">
-            Price
+            Giá
           </label>
           <input
             type="number"
@@ -88,7 +87,7 @@ const AddService: React.FC = () => {
         </div>
         <div className="mb-4">
           <label htmlFor="duration" className="block text-gray-700 font-bold mb-2">
-            Duration
+            Thời gian hiện thực
           </label>
           <select
             id="duration"
@@ -97,15 +96,15 @@ const AddService: React.FC = () => {
             onChange={(e) => setDuration(e.target.value)}
             required
           >
-            <option value="30 minutes">30 minutes</option>
-            <option value="1 hour">1 hour</option>
-            <option value="1 hour 30 minutes">1 hour 30 minutes</option>
-            <option value="2 hours">2 hours</option>
+            <option value="30 minutes">30 phút</option>
+            <option value="1 hour">1 tiếng</option>
+            <option value="1 hour 30 minutes">1 tiếng 30 phút</option>
+            <option value="2 hours">2 phút</option>
           </select>
         </div>
         <div className="mb-4">
           <label htmlFor="available" className="block text-gray-700 font-bold mb-2">
-            Available
+            Trạng thái
           </label>
           <select
             id="available"
@@ -114,8 +113,8 @@ const AddService: React.FC = () => {
             onChange={(e) => setAvailable(e.target.value === "true")}
             required
           >
-            <option value="true">Available</option>
-            <option value="false">Not Available</option>
+            <option value="true">Hoạt động</option>
+            <option value="false">Không hoạt động</option>
           </select>
         </div>
         <div className="flex items-center justify-center">
@@ -123,7 +122,7 @@ const AddService: React.FC = () => {
             type="submit"
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           >
-            Add Service
+            Thêm Dịch vụ
           </button>
         </div>
       </form>

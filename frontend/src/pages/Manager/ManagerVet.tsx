@@ -35,7 +35,6 @@ const ManagerVet: React.FC = () => {
       deleteVetMutation.mutate(vetId);
     }
   };
-
   // Handling vet update
   const handleUpdate = (vet: VetCType) => {
     const updatedVet = { ...vet, type: !vet.type };

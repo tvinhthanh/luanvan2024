@@ -52,10 +52,10 @@ const EditService: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-4">Edit Service</h1>
+      <h1 className="text-2xl font-bold mb-4">Cập nhật Dịch vụ</h1>
       <div className="mb-4">
         <label className="block text-gray-700 text-sm font-bold mb-2">
-          Name
+          Tên
         </label>
         <input
           type="text"
@@ -66,7 +66,7 @@ const EditService: React.FC = () => {
       </div>
       <div className="mb-4">
         <label className="block text-gray-700 text-sm font-bold mb-2">
-          Price
+          Giá
         </label>
         <input
           type="number"
@@ -77,7 +77,7 @@ const EditService: React.FC = () => {
       </div>
       <div className="mb-4">
         <label className="block text-gray-700 text-sm font-bold mb-2">
-          Duration
+          Thời gian
         </label>
         <input
           type="text"
@@ -88,22 +88,22 @@ const EditService: React.FC = () => {
       </div>
       <div className="mb-4">
         <label className="block text-gray-700 text-sm font-bold mb-2">
-          Available
+          Trạng thái
         </label>
         <select
           value={available}
           onChange={(e) => setAvailable(e.target.value)}
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
         >
-          <option value="true">Available</option>
-          <option value="false">Not Available</option>
+          <option value="true">Hoạt động</option>
+          <option value="false">Không hoạt động</option>
         </select>
       </div>
       <button
         onClick={handleUpdate}
         className="bg-blue-500 text-white px-4 py-2 rounded"
       >
-        Update Service
+        Cập nhật Dịch vụ
       </button>
     </div>
   );

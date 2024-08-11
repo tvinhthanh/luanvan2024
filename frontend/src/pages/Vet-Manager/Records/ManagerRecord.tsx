@@ -126,10 +126,10 @@ const ManagerRecord: React.FC = () => {
       <MyVetInfo />
       <div className="my-6">
         <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold">Manager Records</h1>
+          <h1 className="text-2xl font-bold">Quản lý Phiếu khám</h1>
           <Link to="/add-medical">
             <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-              Add Record
+              Thêm Phiếu khám
             </button>
           </Link>
         </div>

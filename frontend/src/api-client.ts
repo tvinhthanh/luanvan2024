@@ -289,7 +289,7 @@ export const deletePet = async (petId: string) => {
 };
 
 export const fetchVet = async (): Promise<VetCType> => {
-  const response = await fetch(`${API_BASE_URL}/api/vet`, {
+  const response = await fetch(`${API_BASE_URL}/api/vet/all`, {
     method: "GET",
     credentials: "include",
   });
@@ -980,9 +980,22 @@ export const fetchPetById = async (petId: string): Promise<PetType> => {
 
 export const fetchOwnerById = async (ownerId: string): Promise<OwnerType> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/owner/${ownerId}`);
+    const response = await fetch(`${API_BASE_URL}/api/owner/s/${ownerId}`);
     if (!response.ok) {
       throw new Error("Failed to fetch records by pet.");
+    }
+    const data = await response.json(); // Parse JSON response
+    return data; // Return array of recordIds
+  } catch (error) {
+    console.error("Error fetching records by pet:", error);
+    throw error;
+  }
+};
+export const fetchOwnerByPhone = async (ownerPhone: string): Promise<OwnerType> => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/owner/fetchOwnerByPhone?phone=${encodeURIComponent(ownerPhone)}`);
+    if (!response.ok) {
+      throw new Error("Failed to fetch owner by phone.");
     }
     const data = await response.json(); // Parse JSON response
     return data; // Return array of recordIds

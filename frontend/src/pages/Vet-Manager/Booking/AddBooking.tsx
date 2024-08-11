@@ -15,17 +15,21 @@ const AddBooking: React.FC = () => {
   const [time, setTime] = useState("");
   const [status, setStatus] = useState(1);
   const [pets, setPets] = useState<PetType[]>([]);
+  const [ownerOptions, setOwnerOptions] = useState<OwnerType[]>([]);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
+  // Fetch all owners
   const { data: owners = [], isLoading: isOwnersLoading, error: ownersError } = useQuery<OwnerType[]>(
     "fetchOwners",
     apiClient.fetchOwner,
     {
+      onSuccess: (data) => setOwnerOptions(data),
       onError: (err) => console.error("Error fetching owners:", err),
     }
   );
 
+  // Fetch pets when owner email or ownerId changes
   useEffect(() => {
     const fetchPets = async () => {
       if (ownerEmail) {
@@ -43,6 +47,7 @@ const AddBooking: React.FC = () => {
     fetchPets();
   }, [ownerEmail]);
 
+  // Handle submission
   const addBookingMutation = useMutation(apiClient.addBooking, {
     onSuccess: () => {
       queryClient.invalidateQueries(["fetchBookingsForVet", id_vet]);
@@ -69,6 +74,35 @@ const AddBooking: React.FC = () => {
     }
   };
 
+  // Handle owner change
+  const handleOwnerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedOwner = owners.find((owner) => owner._id === e.target.value);
+    setOwnerId(e.target.value);
+    setOwnerEmail(selectedOwner?.email || "");
+    setPhoneOwner(selectedOwner?.phone || "");
+  };
+
+  // Handle phone input change
+  const handlePhoneChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const phone = e.target.value;
+    setPhoneOwner(phone);
+    try {
+      const matchedOwner = ownerOptions.find((owner) => owner.phone === phone);
+      if (matchedOwner) {
+        setOwnerId(matchedOwner._id);
+        setOwnerEmail(matchedOwner.email);
+        const fetchedPets = await apiClient.fetchPetByOwnerId(matchedOwner.email);
+        setPets(fetchedPets);
+      } else {
+        setOwnerId("");
+        setOwnerEmail("");
+        setPets([]);
+      }
+    } catch (error) {
+      console.error("Error fetching owner by phone:", error);
+    }
+  };
+
   if (isOwnersLoading) return <span>Loading owners...</span>;
   if (ownersError) return <span>Error loading owners</span>;
 
@@ -80,12 +114,7 @@ const AddBooking: React.FC = () => {
           <label className="block text-sm font-medium text-gray-700">Owner</label>
           <select
             value={ownerId}
-            onChange={(e) => {
-              const selectedOwner = owners.find((owner) => owner._id === e.target.value);
-              setOwnerId(e.target.value);
-              setOwnerEmail(selectedOwner?.email || "");
-              setPhoneOwner(selectedOwner?.phone || "");
-            }}
+            onChange={handleOwnerChange}
             className="mt-1 block w-full border border-gray-300 rounded-md p-2"
           >
             <option value="">Select Owner</option>
@@ -101,10 +130,9 @@ const AddBooking: React.FC = () => {
           <input
             type="text"
             value={phoneOwner}
-            onChange={(e) => setPhoneOwner(e.target.value)}
+            onChange={handlePhoneChange}
             className="mt-1 block w-full border border-gray-300 rounded-md p-2"
-            readOnly={!!ownerId}
-            required={!ownerId}
+            required
           />
         </div>
         {ownerId && (
@@ -144,7 +172,7 @@ const AddBooking: React.FC = () => {
             required
           />
         </div>
-        <div>
+        {/* <div>
           <label className="block text-sm font-medium text-gray-700">Status</label>
           <select
             value={status}
@@ -152,15 +180,15 @@ const AddBooking: React.FC = () => {
             className="mt-1 block w-full border border-gray-300 rounded-md p-2"
             required
           >
-            <option value={3}>Confirmed</option>
-            {/* <option value={4}>Completed</option> */}
+            <option value={2}>Confirmed</option> 
+            <option value={4}>Completed</option>
           </select>
-        </div>
+        </div> */}
         <button
           type="submit"
           className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
         >
-          Add Booking
+          Thêm Lịch hẹn
         </button>
       </form>
       {petId && (

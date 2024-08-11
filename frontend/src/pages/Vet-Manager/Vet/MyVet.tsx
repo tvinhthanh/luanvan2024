@@ -75,7 +75,7 @@ const Vet: React.FC = () => {
             <div className="flex items-center space-x-4">
               <div className="flex-shrink-0">
                 <svg
-                  className="h-12 w-12 text-green-500"
+                  className="h-12 w-12 text-pink-500"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"

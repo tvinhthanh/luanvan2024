@@ -17,7 +17,30 @@ router.get('/:email', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
+// Endpoint hiển thị toàn bộ pet theo tài khoản
+router.get('/detail/:ownerId', async (req, res) => {
+  const ownerId = req.params;
+  try {
+    // Find all pets associated with the given email
+    const ownerPets = await Pet.find({ ownerId : ownerId});
+    res.status(200).json(ownerPets);
+  } catch (error) {
+    console.error('Error fetching pets:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+//get pet detail
+// router.get('/detail/:ownerId', async (req, res) => {
+//   const ownerId = req.params.ownerId;
+//   try {
+//     // Find all pets associated with the given email
+//     const ownerPets = await Pet.find({ ownerId });
+//     res.status(200).json(ownerPets);
+//   } catch (error) {
+//     console.error('Error fetching pets:', error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// });
 // Endpoint thêm một thú cưng theo tài khoản
 router.post('/add/:email', async (req, res) => {
   try {

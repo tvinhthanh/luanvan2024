@@ -36,13 +36,13 @@ const MyVetSer: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">My Vet's Service</h1>
+        <h1 className="text-2xl font-bold">Dịch vụ của phòng khám</h1>
         {vetData && vetData.length > 0 && (
           <Link
             to={`/add-service`}
             className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
           >
-            <FontAwesomeIcon icon={faPlus} className="mr-2" /> Add Service
+            <FontAwesomeIcon icon={faPlus} className="mr-2" /> Thêm Dịch vụ
           </Link>
         )}
       </div>
@@ -59,7 +59,7 @@ const MyVetSer: React.FC = () => {
         <div className="text-center mt-4">
           <p className="text-xl text-gray-600">No Vets found</p>
           <Link to="/add-vet" className="text-blue-500 hover:underline">
-            Add Vet
+            Thêm Phòng khám
           </Link>
         </div>
       )}

@@ -11,7 +11,7 @@ interface ServicesListProps {
 
 const ServicesList: React.FC<ServicesListProps> = ({ vetId }) => {
   const navigate = useNavigate();
-const {id_vet} = useAppContext();
+  const {id_vet} = useAppContext();
   const {
     data: services,
     isLoading,
@@ -28,10 +28,9 @@ const {id_vet} = useAppContext();
 
   const queryClient = useQueryClient();
 
-  // Mutation to delete a service
   const deleteServiceMutation = useMutation(apiClient.deleteService, {
     onSuccess: () => {
-      queryClient.invalidateQueries(["fetchServicesForVet", vetId]); // Invalidate cache to trigger refetch
+      queryClient.invalidateQueries(["fetchServicesForVet", vetId]);
     },
     onError: (error: Error) => {
       console.error("Error deleting service:", error);
@@ -67,16 +66,16 @@ const {id_vet} = useAppContext();
           <thead>
             <tr>
               <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">
-                Name
+                Tên
               </th>
               <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">
-                Price
+                Giá
               </th>
               <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">
-                Duration
+                Thời gian
               </th>
               <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">
-                Availability
+                Trạng thái
               </th>
               <th className="px-4 py-2 border-b-2 border-gray-200 bg-gray-50">
                 Actions
@@ -95,15 +94,15 @@ const {id_vet} = useAppContext();
                 <td className="px-4 py-2 border-b">
                   <button
                     onClick={() => handleUpdate(service)}
-                    className="mr-2 px-2 py-1 bg-blue-500 text-white rounded"
+                    className="mr-2 px-2 py-1 bg-green-500 text-white rounded"
                   >
-                    Edit
+                    Cập nhật
                   </button>
                   <button
                     onClick={() => handleDelete(service._id)}
                     className="px-2 py-1 bg-red-500 text-white rounded"
                   >
-                    Delete
+                    Xoá
                   </button>
                 </td>
               </tr>

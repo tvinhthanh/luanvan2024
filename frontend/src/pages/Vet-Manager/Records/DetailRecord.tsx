@@ -53,7 +53,6 @@ const DetailRecords: React.FC = () => {
   };
 
   useEffect(() => {
-    // Optional: Any side effects or additional logic here
   }, [pet, owner, medicalRecords]);
 
   return (
@@ -77,7 +76,6 @@ const DetailRecords: React.FC = () => {
           <p><strong>Tên:</strong> {pet?.name || "N/A"}</p>
           <p><strong>Tuổi:</strong> {pet?.age || "N/A"}</p>
           <p><strong>Giống:</strong> {pet?.breed_type || "N/A"}</p>
-          {/* <p><strong>Loại:</strong> {pet?.breed_id || "N/A"}</p> */}
           <p><strong>Cân nặng:</strong> {pet?.weight || "N/A"}</p>
           <p><strong>Giới tính:</strong> {pet?.sex || "N/A"}</p>
           <p><strong>Hình ảnh:</strong> {pet?.img || "N/A"}</p>

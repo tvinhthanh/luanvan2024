@@ -48,7 +48,7 @@ const EditVet: React.FC = () => {
 
   return (
     <div className="container mx-auto mt-8">
-      <h1 className="text-2xl font-bold">Update Vet</h1>
+      <h1 className="text-2xl font-bold">Cập nhật Phòng khám</h1>
       {error && <div className="text-red-500">{error}</div>}
       <form onSubmit={handleUpdate} className="flex flex-col space-y-4">
         <input
@@ -80,7 +80,7 @@ const EditVet: React.FC = () => {
           className="border border-gray-300 rounded-md p-2"
         />
         <div>
-          <p>Current Images:</p>
+          <p>Hình ảnh thương hiệu:</p>
           {imageUrls.map((url, index) => (
             <div key={index}>
               <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
@@ -105,7 +105,7 @@ const EditVet: React.FC = () => {
           type="submit"
           className="py-2 px-4 bg-blue-500 text-white rounded-lg text-sm font-semibold hover:bg-blue-600 focus:outline-none focus:bg-blue-600"
         >
-          Update Vet
+          Cập nhật Phòng khám
         </button>
       </form>
     </div>
