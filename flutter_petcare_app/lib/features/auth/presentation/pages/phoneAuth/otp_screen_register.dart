@@ -1,21 +1,20 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_petcare_app/features/auth/presentation/pages/account/info_page.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/pages/home_page.dart';
 import 'package:flutter_petcare_app/main.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class OTPScreen extends StatefulWidget {
+class OTPScreenRegister extends StatefulWidget {
   final String verificationId;
   final String? phone;
-  const OTPScreen({super.key, this.phone, required this.verificationId});
+  const OTPScreenRegister({super.key, this.phone, required this.verificationId});
 
   @override
-  State<OTPScreen> createState() => _OTPScreenState();
+  State<OTPScreenRegister> createState() => _OTPScreenRegisterState();
 }
 
-class _OTPScreenState extends State<OTPScreen> {
+class _OTPScreenRegisterState extends State<OTPScreenRegister> {
   TextEditingController otpController = TextEditingController();
   bool isLoadin = false;
 

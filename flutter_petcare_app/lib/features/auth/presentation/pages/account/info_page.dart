@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_petcare_app/core/theme/app_pallete.dart';
@@ -15,7 +16,9 @@ class BasicInfoPage extends StatefulWidget {
   final String? name;
   final String? email;
   final String? phoneNumber;
-  const BasicInfoPage({Key? key, this.name, this.email, this.phoneNumber})
+  final String? type;
+  const BasicInfoPage(
+      {Key? key, this.name, this.email, this.phoneNumber, this.type})
       : super(key: key);
 
   @override
@@ -52,16 +55,15 @@ class _BasicInfoPageState extends State<BasicInfoPage> {
       isLoading = true;
     });
 
-    String? imageUrl;
-    if (_image != null) {
-      imageUrl = await uploadImage(_image!);
-    }
+    String imageUrl =
+        _image != null ? await uploadImage(_image!) : "Icon_User.png";
 
     final userInfo = {
       "name": nameController.text,
       "email": emailController.text,
       "phone": phoneNumberController.text,
       "img": imageUrl,
+      "type": widget.type, // Include the type in the userInfo map
     };
 
     final response = await saveUserInfo(userInfo);
@@ -77,7 +79,10 @@ class _BasicInfoPageState extends State<BasicInfoPage> {
       // Navigate to main or another screen
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
-          builder: (context) => HomePage(userName: nameController.text, email: emailController.text,),
+          builder: (context) => HomePage(
+            userName: nameController.text,
+            email: emailController.text,
+          ),
         ),
       );
     } else {
@@ -117,62 +122,90 @@ class _BasicInfoPageState extends State<BasicInfoPage> {
     });
   }
 
+  Future<bool> _onWillPop() async {
+    bool shouldPop = await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Confirm Exit"),
+        content: Text("Are you sure you want to go back?"),
+        actions: [
+          TextButton(
+            onPressed: () async {
+              await FirebaseAuth.instance
+                  .signOut(); // Sign out before confirming exit
+              Navigator.of(context).pop(true); // Confirm exit
+            },
+            child: Text("Yes"),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false), // Cancel exit
+            child: Text("No"),
+          ),
+        ],
+      ),
+    );
+    return shouldPop; // Return the result from the dialog
+  }
+
   @override
   Widget build(BuildContext context) {
     double height = MediaQuery.of(context).size.height;
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      backgroundColor: AppPallete.backgroundColor,
-      body: SafeArea(
-        child: SizedBox(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(
-                height: height / 3,
-                child: Image.asset('assets/Image/LogoContainer.png'),
-              ),
-              GestureDetector(
-                onTap: _pickImage,
-                child: _image != null
-                    ? CircleAvatar(
-                        radius: 60,
-                        backgroundImage: FileImage(_image!),
-                      )
-                    : CircleAvatar(
-                        radius: 60,
-                        backgroundColor: Colors.grey[200],
-                        child: Icon(
-                          Icons.camera_alt,
-                          size: 50,
-                          color: Colors.grey[800],
+    return WillPopScope(
+      onWillPop: _onWillPop, // Corrected here
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        backgroundColor: AppPallete.backgroundColor,
+        body: SafeArea(
+          child: SizedBox(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: height / 3,
+                  child: Image.asset('assets/Image/LogoContainer.png'),
+                ),
+                GestureDetector(
+                  onTap: _pickImage,
+                  child: _image != null
+                      ? CircleAvatar(
+                          radius: 60,
+                          backgroundImage: FileImage(_image!),
+                        )
+                      : CircleAvatar(
+                          radius: 60,
+                          backgroundColor: Colors.grey[200],
+                          child: Icon(
+                            Icons.camera_alt,
+                            size: 50,
+                            color: Colors.grey[800],
+                          ),
                         ),
-                      ),
-              ),
-              const SizedBox(height: 20),
-              TextFieldInput(
-                icon: Icons.person,
-                textEditingController: nameController,
-                hintText: 'Enter your name',
-                textInputType: TextInputType.text,
-              ),
-              TextFieldInput(
-                icon: Icons.email,
-                textEditingController: emailController,
-                hintText: 'Enter your email',
-                textInputType: TextInputType.text,
-              ),
-              TextFieldInput(
-                icon: Icons.phone,
-                textEditingController: phoneNumberController,
-                hintText: 'Enter your phone number',
-                textInputType: TextInputType.phone,
-              ),
-              MyButtons(
-                onTap: submitInfo,
-                text: isLoading ? "Submitting..." : "Submit",
-              ),
-            ],
+                ),
+                const SizedBox(height: 20),
+                TextFieldInput(
+                  icon: Icons.person,
+                  textEditingController: nameController,
+                  hintText: 'Enter your name',
+                  textInputType: TextInputType.text,
+                ),
+                TextFieldInput(
+                  icon: Icons.email,
+                  textEditingController: emailController,
+                  hintText: 'Enter your email',
+                  textInputType: TextInputType.text,
+                ),
+                TextFieldInput(
+                  icon: Icons.phone,
+                  textEditingController: phoneNumberController,
+                  hintText: 'Enter your phone number',
+                  textInputType: TextInputType.phone,
+                ),
+                MyButtons(
+                  onTap: submitInfo,
+                  text: isLoading ? "Submitting..." : "Submit",
+                ),
+              ],
+            ),
           ),
         ),
       ),
