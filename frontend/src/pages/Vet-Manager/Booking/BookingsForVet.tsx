@@ -123,7 +123,6 @@ const BookingsForVet: React.FC<Props> = ({ vetId }) => {
           <option value="1">Pending</option>
           <option value="2">Confirmed</option>
           <option value="3">Completed</option>
-          <option value="4">Custom Status</option>
         </select>
       </div>
 

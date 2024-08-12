@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus, faAtlas } from "@fortawesome/free-solid-svg-icons";
 import { FaSearch } from "react-icons/fa"; // Import biểu tượng kính lúp
 import BookingsForVet from "./BookingsForVet";
+import MyVetInfo from "../Vet/VetInfo";
 
 const Mybooking: React.FC = () => {
   const { userId } = useAppContext();
@@ -53,22 +54,14 @@ const Mybooking: React.FC = () => {
 
   return (
     <div className="space-y-5">
-
-
+      <MyVetInfo/>
       {/* Display filtered vet data */}
       {filteredVets.map((vet) => (
         <div
           key={vet._id}
           className="border border-gray-200 p-4 rounded-lg shadow-md"
         >
-          <h2 className="text-xl font-bold">{vet.name}</h2>
-          <p className="text-gray-600">{vet.description}</p>
-          <p className="mt-2">
-            <strong>Location:</strong> {vet.address}
-          </p>
-          <p>
-            <strong>Contact:</strong> {vet.phone}
-          </p>
+          
 
           {/* Link to add a new booking */}
           <Link

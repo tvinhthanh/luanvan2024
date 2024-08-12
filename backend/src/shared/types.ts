@@ -6,7 +6,6 @@ export type PaymentIntentResponse = {
   totalCost: number;
 };
 
-
 export interface Pet {
   _id: string;
   name: string;
@@ -24,8 +23,7 @@ export interface UserType {
   password: string;
   firstName: string;
   lastName: string;
-  isAdmin: Boolean; 
-
+  isAdmin: Boolean;
 }
 
 export interface VetType {
@@ -37,7 +35,7 @@ export interface VetType {
   user_id: string;
   createdAt: Date;
   imageUrls: string[];
-  lastUpdated : Date;
+  lastUpdated: Date;
   description: string;
 }
 
@@ -45,7 +43,7 @@ export interface BookingType {
   _id: string;
   ownerId: string;
   petId: string;
-  vetId:string;
+  vetId: string;
   phoneOwner: string;
   date: Date;
   status: number;
@@ -80,9 +78,9 @@ export interface BreedType {
   array: [];
 }
 
-export interface Breed{
+export interface Breed {
   _id: string;
-  name:  string;
+  name: string;
   img: string;
   id_type: string;
 }
@@ -106,7 +104,6 @@ export interface Breed{
 //   dosage: string;
 //   instructions: string;
 // }
-
 
 export interface ServiceType {
   _id: string;
@@ -144,7 +141,7 @@ export interface VetCType {
   booking?: BookingType[];
   medicalrecord?: MedicType[];
   medications?: MedicationType[];
-} 
+}
 
 export interface MedicType {
   _id: string;
@@ -172,12 +169,12 @@ export interface MedicationType {
   vetId: string;
 }
 
-export interface RecordType{
-  _id: string,
-  petId: string,
-  ownerId: string,
-  vetId: string,
-  medicId?: MedicType[],
+export interface RecordType {
+  _id: string;
+  petId: string;
+  ownerId: string;
+  vetId: string;
+  medicId?: MedicType[];
 }
 // Define interfaces for Invoice and related data types if not already defined
 export interface InvoiceType {
@@ -189,13 +186,21 @@ export interface InvoiceType {
   vetId: string;
   createdAt: Date;
 }
-export interface ServiceChart{
+export interface ServiceChart {
   _id: string;
-  name:string;
-  time:number;
+  name: string;
+  time: number;
 }
-export interface MedicationsChart{
-  _id:string;
-  name:string;
-  time:number;
+export interface MedicationsChart {
+  _id: string;
+  name: string;
+  time: number;
+}
+export interface NotiType {
+  _id: string;
+  vetId: string;
+  ownerId: string;
+  bookingId: string;
+  createdAt: Date;
+  updatedAt: Date;
 }

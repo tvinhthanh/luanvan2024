@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+// src/components/Toast.tsx
+import React, { useEffect } from "react";
 
 type ToastProps = {
   message: string;
@@ -24,8 +25,13 @@ const Toast = ({ message, type, onClose }: ToastProps) => {
 
   return (
     <div className={styles}>
-      <div className="flex justify-center items-center">
-        <span className="text-lg font-semibold">{message}</span>
+      <div className="text-lg font-semibold">
+        {message.split('\n').map((line, index) => (
+          <React.Fragment key={index}>
+            {line}
+            <br />
+          </React.Fragment>
+        ))}
       </div>
     </div>
   );

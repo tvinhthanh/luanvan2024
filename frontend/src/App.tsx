@@ -36,7 +36,6 @@ import MedicalRecordDetail from "./pages/Vet-Manager/MedicalInfo/MedicDetail";
 import AddMedicalRecord from "./pages/Vet-Manager/MedicalInfo/AddMedic";
 import ManagerRecord from "./pages/Vet-Manager/Records/ManagerRecord";
 import DetailRecords from "./pages/Vet-Manager/Records/DetailRecord";
-import AddRecords from "./pages/Vet-Manager/Records/AddRecord";
 import ManageMedications from "./pages/Vet-Manager/Medications/ManagerMed";
 import AddMed from "./pages/Vet-Manager/Medications/AddMed";
 import CreateInvoice from "./pages/Vet-Manager/Recept/AddInvoice";
@@ -49,6 +48,12 @@ import StatisticsBookings from "./pages/Vet-Manager/Statistics/StatisticsBooking
 import StatisticsInvoice from "./pages/Vet-Manager/Statistics/StatisticsInvoid";
 import StatisticsMedical from "./pages/Vet-Manager/Statistics/StatisticsMedical";
 import ManagerComments from "./pages/Manager/ManagerComments";
+import BookingNotification from "./components/BookingsNotifications";
+import Notification from "./pages/Vet-Manager/Booking/Notification";
+import BookingForm from "./pages/Vet-Manager/Booking/TestBookings";
+import { ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css'; // Import the CSS
+
 
 const App = () => {
   const { isLoggedIn, userRole, id_vet } = useAppContext();
@@ -144,22 +149,6 @@ const App = () => {
               element={
                 <Layout>
                   <DetailRecords />
-                </Layout>
-              }
-            />
-            <Route
-              path="/add-record"
-              element={
-                <Layout>
-                  <AddRecords />
-                </Layout>
-              }
-            />
-            <Route
-              path="/add-record/:recordId"
-              element={
-                <Layout>
-                  <AddRecords />
                 </Layout>
               }
             />
@@ -424,11 +413,23 @@ const App = () => {
                 </Layout>
               }
             />
-              
+              <Route
+              path="/notification"
+              element={
+                <Layout>
+                  <Notification />
+                </Layout>
+              }
+            />
           </>
         )}
         <Route path="*" element={<Navigate to="/" />} />
+
       </Routes>
+      <BookingNotification />
+        <BookingForm/>
+        <ToastContainer />
+
     </Router>
   );
 };

@@ -2,17 +2,31 @@ import React, { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "react-query";
 import * as apiClient from "../../../api-client";
-import { BookingType, PetType, OwnerType } from "../../../../../backend/src/shared/types";
+import { BookingType, PetType, OwnerType, VetCType } from "../../../../../backend/src/shared/types";
+import { useAppContext } from "../../../contexts/AppContext";
 
 const DetailBooking: React.FC = () => {
-  const { bookingId } = useParams<{ bookingId: string }>(); // Lấy bookingId từ params của URL
+  const { bookingId } = useParams<{ bookingId: string }>(); // Get bookingId from URL params
   const queryClient = useQueryClient(); // Use the useQueryClient hook
   const navigate = useNavigate(); // Hook to navigate
+  const { id_vet } = useAppContext();
 
-  // State cho trạng thái booking
+  // State for booking status
   const [selectedStatus, setSelectedStatus] = useState<number | undefined>(undefined);
 
-  // Query để fetch chi tiết booking
+  // Query to fetch vet information by id_vet
+  const { data: vet, isLoading: vetLoading, error: vetError } = useQuery<VetCType | undefined>(
+    ["fetchVet", id_vet],
+    () => apiClient.fetchVetById(id_vet),
+    {
+      enabled: !!id_vet, // Only fetch when id_vet has a value
+      onError: (err) => {
+        console.error("Error fetching vet details:", err);
+      },
+    }
+  );
+
+  // Query to fetch booking details
   const { data: booking, isLoading: bookingLoading, error: bookingError } = useQuery<BookingType>(
     ["fetchBooking", bookingId],
     () => apiClient.fetchBookingById(bookingId || ""),
@@ -23,10 +37,10 @@ const DetailBooking: React.FC = () => {
     }
   );
 
-  // Query để fetch danh sách pets
+  // Query to fetch list of pets
   const { data: pets = [], isLoading: petsLoading, error: petsError } = useQuery<PetType[]>(
     "fetchPets",
-    () => apiClient.fetchpet(), // API call để lấy danh sách pets
+    () => apiClient.fetchpet(), // API call to get list of pets
     {
       onError: (err) => {
         console.error("Error fetching pets:", err);
@@ -37,23 +51,30 @@ const DetailBooking: React.FC = () => {
   // Find the pet associated with the booking
   const pet = pets.find((pet) => pet._id === booking?.petId);
 
-  // Query để fetch owner thông tin dựa trên gmail của pet
+  // Query to fetch owner information based on pet's email
   const { data: owner, isLoading: ownerLoading, error: ownerError } = useQuery<OwnerType | undefined>(
     ["fetchOwnerByEmail", pet?.email],
     () =>
       pet?.email
-        ? apiClient.fetchOwnerById(pet.email) // API call để lấy thông tin owner dựa trên gmail của pet
+        ? apiClient.fetchOwnerById(pet.email) // API call to get owner information based on pet's email
         : Promise.resolve(undefined),
     {
-      enabled: !!pet?.email, // Chỉ fetch khi gmail của pet có giá trị
+      enabled: !!pet?.email, // Only fetch when pet's email has a value
       onError: (err) => {
-        console.error("Error fetching owner details by pet gmail:", err);
+        console.error("Error fetching owner details by pet email:", err);
       },
     }
   );
-  // Mutation để cập nhật trạng thái
+
+  // Mutation to update booking status
   const updateBookingStatus = useMutation(
-    (newStatus: number) => apiClient.updateBookingStatus(bookingId!, newStatus),
+    (newStatus: number) => {
+      if (vet && vet.name) {
+        return apiClient.updateBookingStatus(bookingId!, newStatus, vet.name); // Send vet's name
+      } else {
+        return Promise.reject(new Error("Vet information or name is not available"));
+      }
+    },
     {
       onSuccess: () => {
         queryClient.invalidateQueries(["fetchBooking", bookingId]);
@@ -65,12 +86,12 @@ const DetailBooking: React.FC = () => {
     }
   );
 
-  // Xử lý khi người dùng thay đổi trạng thái
+  // Handle status change
   const handleChangeStatus = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedStatus(parseInt(e.target.value));
   };
 
-  // Xử lý khi người dùng submit form
+  // Handle form submission
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (selectedStatus !== undefined) {
@@ -78,11 +99,11 @@ const DetailBooking: React.FC = () => {
     }
   };
 
-  if (bookingLoading || petsLoading || ownerLoading) {
+  if (bookingLoading || petsLoading || ownerLoading || vetLoading) {
     return <span>Đang tải...</span>;
   }
 
-  if (bookingError || petsError || ownerError) {
+  if (bookingError || petsError || ownerError || vetError) {
     return <span>Lỗi khi tải chi tiết booking</span>;
   }
 
@@ -111,7 +132,7 @@ const DetailBooking: React.FC = () => {
       </div>
       {booking && (
         <div className="border border-gray-200 p-4 rounded-lg shadow-md">
-          {/* Hiển thị tên của pet */}
+          {/* Display pet's name */}
           <h2 className="text-xl font-bold">{petName}</h2>
           <p className="text-gray-600">
             Chủ nhân: {pet?.email || "Không tìm thấy"}
@@ -127,7 +148,7 @@ const DetailBooking: React.FC = () => {
             <strong>Số điện thoại chủ nhân:</strong>{" "}
             {booking.phoneOwner || "Không có số điện thoại"}
           </p>
-          {/* Dropdown để chọn trạng thái mới */}
+          {/* Dropdown to select new status */}
           <form onSubmit={handleSubmit} className="mt-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Chuyển sang trạng thái:
@@ -151,7 +172,7 @@ const DetailBooking: React.FC = () => {
               Cập nhật
             </button>
           </form>
-          {/* Nút chuyển sang trang AddMedic.tsx */}
+          {/* Button to navigate to AddMedical */}
           <Link
             to={`/add-medical/${bookingId}`} // Include bookingId in the route
             className="bg-blue-500 text-white px-4 py-2 rounded mt-4 inline-block"

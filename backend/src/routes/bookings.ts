@@ -1,187 +1,210 @@
 import express from "express";
 import verifyToken from "../middleware/auth";
 import Schedule from "../models/schedule";
-import { Error } from "mongoose";
 import Booking from "../models/booking";
+import { Server } from "socket.io";
+const { v4: uuidv4 } = require('uuid');
 
 const router = express.Router();
 
-// GET all bookings
-router.get("/", async (req, res) => {
-  try {
-    const bookings = await Booking.find({});
-    res.status(200).json(bookings);
-  } catch (error) {
-    console.error('Error fetching bookings:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-// DELETE a booking by ID
-router.delete("/:id", async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    const deletedBooking = await Booking.findByIdAndDelete(id);
-    if (!deletedBooking) {
-      return res.status(404).json({ error: 'Booking not found' });
+export default (io: Server) => {
+  // GET all bookings
+  router.get("/", async (req, res) => {
+    try {
+      const bookings = await Booking.find({});
+      res.status(200).json(bookings);
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
-    res.status(200).json({ message: 'Booking deleted successfully' });
-  } catch (error) {
-    console.error('Error deleting booking:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
+  });
 
-// GET a booking by ID
-router.get('/:bookingId', async (req, res) => {
-  const { bookingId } = req.params;
+  // DELETE a booking by ID
+  router.delete("/:id", async (req, res) => {
+    const { id } = req.params;
 
-  try {
-    const bookings = await Booking.findById({ _id: bookingId }); 
-    res.status(200).json(bookings);
-  } catch (error) {
-    console.error("Server error:", error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
-router.patch("/:bookingId/status", async (req, res) => {
-  const { bookingId } = req.params;
-  const { status } = req.body;
-
-  if (typeof status !== "number") {
-    return res.status(400).json({ error: "Invalid status value" });
-  }
-
-  try {
-    const booking = await Booking.findById(bookingId);
-    if (!booking) {
-      return res.status(404).json({ error: "Booking not found" });
+    try {
+      const deletedBooking = await Booking.findByIdAndDelete(id);
+      if (!deletedBooking) {
+        return res.status(404).json({ error: 'Booking not found' });
+      }
+      res.status(200).json({ message: 'Booking deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting booking:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
+  });
 
-    booking.status = status;
-    await booking.save();
+  // GET a booking by ID
+  router.get('/:bookingId', async (req, res) => {
+    const { bookingId } = req.params;
 
-    res.status(200).json(booking);
-  } catch (error) {
-    res.status(500).json({ error: error });
-  }
-});
+    try {
+      const booking = await Booking.findById(bookingId);
+      if (!booking) {
+        return res.status(404).json({ message: "Booking not found" });
+      }
+      res.status(200).json(booking);
+    } catch (error) {
+      console.error("Server error:", error);
+      res.status(500).json({ message: "Server error" });
+    }
+  });
 
-router.put('/:bookingId', verifyToken, async (req, res) => {
-  const { bookingId } = req.params;
-  const { vetId, ownerId, petId, phoneOwner, date, status } = req.body;
+  // PATCH booking status by ID
+  router.patch("/:bookingId/status", async (req, res) => {
+    const { bookingId } = req.params;
+    const { status } = req.body;
 
-  try {
-    const updatedBooking = await Booking.findByIdAndUpdate(
-      bookingId,
-      { vetId, ownerId, petId, phoneOwner, date, status },
-      { new: true }
-    );
-
-    if (!updatedBooking) {
-      return res.status(404).json({ error: 'Booking not found' });
+    if (typeof status !== "number") {
+      return res.status(400).json({ error: "Invalid status value" });
     }
 
-    res.status(200).json(updatedBooking);
+    try {
+      const booking = await Booking.findById(bookingId);
+      if (!booking) {
+        return res.status(404).json({ error: "Booking not found" });
+      }
+
+      booking.status = status;
+      await booking.save();
+
+      res.status(200).json(booking);
+    } catch (error) {
+      console.error('Error updating booking status:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // PUT (update) a booking by ID
+  router.put('/:bookingId', verifyToken, async (req, res) => {
+    const { bookingId } = req.params;
+    const { vetId, ownerId, petId, phoneOwner, date, status } = req.body;
+
+    try {
+      const updatedBooking = await Booking.findByIdAndUpdate(
+        bookingId,
+        { vetId, ownerId, petId, phoneOwner, date, status },
+        { new: true }
+      );
+
+      if (!updatedBooking) {
+        return res.status(404).json({ error: 'Booking not found' });
+      }
+
+      res.status(200).json(updatedBooking);
+    } catch (error) {
+      console.error('Error updating booking:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+
+  const getNextIdSchedule = async () => {
+    try {
+      const count = await Schedule.countDocuments();
+      const newId = (count + 1).toString();
+      return newId;
+    } catch (error) {
+      console.error("Error getting next schedule ID:", error);
+      throw error;
+    }
+  };
+
+  // POST (create) a new schedule
+  router.post("/booking/addSchedule/", async (req, res) => {
+    try {
+      const { owner_id, vet_id, pet_id, note, datetime } = req.body;
+      const nextId = await getNextIdSchedule();
+
+      const newSchedule = new Schedule({
+        _id: nextId,
+        owner_id,
+        vet_id,
+        pet_id,
+        note,
+        datetime,
+        status: "pending",
+      });
+
+      await newSchedule.save();
+      res.status(201).json({ message: "Thêm lịch hẹn thành công", schedule: newSchedule });
+    } catch (error) {
+      console.error('Error adding schedule:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // POST (create) a new schedule with vet_id from params
+  router.post("/booking/addSchedule/:vet_id", async (req, res) => {
+    try {
+      const vet_id = req.params.vet_id;
+      const { owner_id, pet_id, note, datetime } = req.body;
+      const nextId = await getNextIdSchedule();
+
+      const newSchedule = new Schedule({
+        _id: nextId,
+        owner_id,
+        vet_id,
+        pet_id,
+        note,
+        datetime,
+        status: "pending",
+      });
+
+      await newSchedule.save();
+      res.status(201).json({ message: "Thêm lịch hẹn thành công", schedule: newSchedule });
+    } catch (error) {
+      console.error('Error adding schedule:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // GET schedules for a specific pet and owner
+  router.get("/booking/showForPet/:owner_id/:pet_id", async (req, res) => {
+    const { owner_id, pet_id } = req.params;
+
+    try {
+      const schedules = await Schedule.find(
+        { owner_id, pet_id },
+        "note datetime"
+      );
+
+      if (schedules.length === 0) {
+        return res.status(404).json({ message: "Không tìm thấy lịch trình cho owner_id và pet_id cung cấp" });
+      }
+
+      res.json(schedules);
+    } catch (error) {
+      console.error('Error fetching schedules:', error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+// POST (create) a new booking
+router.post("/", async (req, res) => {
+  try {
+    const { vetId, ownerId, petId, phoneOwner, date, status } = req.body;
+
+    // Tạo một bản ghi booking mới với các dữ liệu từ request body
+    const newBooking = new Booking({
+      _id: uuidv4(), // Generate a unique ID for the booking
+      vetId,
+      ownerId,
+      petId,
+      phoneOwner,
+      date,
+      status : 2
+    });
+    // Lưu booking mới vào cơ sở dữ liệu
+    await newBooking.save();
+    io.emit('newBooking', newBooking);
+
+    // Trả về booking mới tạo và trạng thái thành công
+    res.status(201).json({ message: "Booking created successfully", booking: newBooking });
   } catch (error) {
-    console.error('Error updating booking:', error);
-    res.status(500).json({ message: 'Server error' });
+    console.error("Error creating booking:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
-
-const getNextIdSchedule = async () => {
-  try {
-    // Đếm số lượng tài liệu trong collection
-    const count = await Schedule.countDocuments();
-    // Tạo ID mới bằng cách thêm 1 vào số lượng tài liệu đã đếm được
-    const newId = (count + 1).toString();
-    return newId;
-  } catch (error) {
-    console.error("Error getting next schedule ID:", error);
-    throw error;
-  }
+  return router;
 };
-
-// Endpoint booking lịch hẹn
-router.post("/booking/addSchedule/", async (req, res) => {
-  try {
-    const { owner_id, vet_id, pet_id, note, datetime } = req.body;
-
-    // Lấy ID tiếp theo
-    const nextId = await getNextIdSchedule();
-
-    const newSchedule = new Schedule({
-      _id: nextId.toString(), // Chuyển đổi sang kiểu String
-      owner_id,
-      vet_id,
-      pet_id,
-      note,
-      datetime,
-      status: "pending", // Đặt trạng thái là "pending"
-    });
-
-    await newSchedule.save(); // Lưu lịch hẹn mới vào database
-    res
-      .status(201)
-      .json({ message: "Thêm lịch hẹn thành công", schedule: newSchedule });
-  } catch (error) {
-    res.status(500).json({ error: Error.messages });
-  }
-});
-
-// Endpoint thêm một lịch hẹn từ vet_id
-router.post("/booking/addSchedule/:vet_id", async (req, res) => {
-  try {
-    const vet_id = req.params.vet_id; // Lấy vet_id từ URL params
-    const { owner_id, pet_id, note, datetime } = req.body;
-
-    // Lấy ID tiếp theo
-    const nextId = await getNextIdSchedule();
-
-    const newSchedule = new Schedule({
-      _id: nextId.toString(), // Chuyển đổi sang kiểu String
-      owner_id,
-      vet_id,
-      pet_id,
-      note,
-      datetime,
-      status: "pending", // Đặt trạng thái là "pending"
-    });
-
-    await newSchedule.save(); // Lưu lịch hẹn mới vào database
-    res.status(201).json({ message: "Thêm lịch hẹn thành công", schedule: newSchedule });
-  } catch (error) {
-    res.status(500).json({ error: Error.messages });
-  }
-});
-
-// Endpoint hiển thị lịch cho từng pet
-router.get("/booking/showForPet/:owner_id/:pet_id", async (req, res) => {
-  const { owner_id, pet_id } = req.params;
-
-  try {
-    // Tìm kiếm lịch trình dựa trên owner_id và pet_id
-    const schedules = await Schedule.find(
-      { owner_id, pet_id },
-      "note datetime"
-    );
-
-    if (schedules.length === 0) {
-      return res
-        .status(404)
-        .json({
-          message: "Không tìm thấy lịch trình cho owner_id và pet_id cung cấp",
-        });
-    }
-
-    // Trả về lịch trình đã tìm thấy
-    res.json(schedules);
-  } catch (error) {
-    res.status(500).json({ message: Error.messages });
-  }
-});
-
-export default router;

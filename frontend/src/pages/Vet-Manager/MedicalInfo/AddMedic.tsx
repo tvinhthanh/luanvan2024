@@ -46,7 +46,6 @@ const AddMedicalRecord: React.FC = () => {
       },
     }
   );
-console.log(ownerEmail)
   useEffect(() => {
     const fetchPets = async () => {
       if (ownerId) {
@@ -79,7 +78,7 @@ console.log(ownerEmail)
             setIsOwnerSelected(false);
           }
         } catch (error) {
-          console.error("Error fetching owner by phone:", error);
+          // console.error("Error fetching owner by phone:", error);
         }
       };
 

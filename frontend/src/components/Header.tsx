@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
 import { useAppContext } from "../contexts/AppContext";
 import SignOutButton from "./SignOutButton";
+import { faBell } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import NotificationComponent from "./BookingsNotifications";
 
 const Header = () => {
   const { isLoggedIn, userRole } = useAppContext(); // Sử dụng userRole từ AppContext
@@ -53,6 +56,12 @@ const Header = () => {
                     to="/my-vet"
                   >
                     Phòng Khám
+                  </Link>
+                  <Link
+                    className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
+                     to="/notification"
+                  >
+                    <FontAwesomeIcon icon={faBell} className="mr-2" />
                   </Link>
                 </>
               )}

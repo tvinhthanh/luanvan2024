@@ -5,6 +5,7 @@ import Vet from "../models/vet";
 import Booking from "../models/booking";
 import UsersApp from "../models/usersApp";
 import mongoose from "mongoose";
+import Schedule from "../models/schedule";
 const { v4: uuidv4 } = require('uuid');
 
 const router = express.Router();
@@ -46,15 +47,17 @@ router.get("/:vetId", verifyToken, async (req: Request, res: Response) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-router.patch("/:bookingId/status", async (req, res) => {
+
+router.patch("/:bookingId/status", async (req: Request, res: Response) => {
   const { bookingId } = req.params;
-  const { status } = req.body;
+  const { status, id_vet } = req.body;
 
   if (typeof status !== "number") {
     return res.status(400).json({ error: "Invalid status value" });
   }
 
   try {
+    // Cập nhật trạng thái booking
     const booking = await Booking.findById(bookingId);
     if (!booking) {
       return res.status(404).json({ error: "Booking not found" });
@@ -63,11 +66,33 @@ router.patch("/:bookingId/status", async (req, res) => {
     booking.status = status;
     await booking.save();
 
+    // Nếu trạng thái được cập nhật thành 3 hoặc 2, cập nhật thông tin vào bảng Schedule
+    if (status === 3 || status===2) {
+      // Dữ liệu ví dụ cho Schedule, bạn có thể thay đổi dựa trên nhu cầu thực tế
+      const scheduleData = {
+        owner_id: booking.ownerId,  // Giả sử bạn có ownerId trong booking
+        booking_id: booking._id.toString(),
+        description: "Update Bookings",  // Cập nhật mô tả nếu cần
+        title: id_vet,  // Cập nhật tiêu đề nếu cần
+        datetime: new Date(),  // Hoặc một ngày cụ thể
+        type: "LH"  // Loại thông tin lịch hẹn (hoặc thay đổi tùy theo mô hình của bạn)
+      };
+
+      // Cập nhật hoặc thêm thông tin vào bảng Schedule
+      await Schedule.findOneAndUpdate(
+        { booking_id: bookingId },
+        scheduleData,
+        { upsert: true, new: true }  // upsert: true sẽ tạo mới nếu không tìm thấy
+      );
+    }
+
     res.status(200).json(booking);
   } catch (error) {
-    res.status(500).json({ error: error });
+    res.status(500).json({ error: "errormessage" });
   }
 });
+
+
 // GET /api/my-bookings/:bookingId
 router.get("/:bookingId", verifyToken, async (req: Request, res: Response) => {
   const { bookingId } = req.params;
@@ -174,5 +199,22 @@ router.get('/appointments/:petId/:vetId', async (req, res) => {
   }
 });
 
+router.delete('/:id', async(req,res)=>{
+  try {
+    const bookingId = req.params.id;
+
+    // Find and delete the booking
+    const result = await Booking.findByIdAndDelete(bookingId);
+
+    if (!result) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    res.status(200).json({ message: 'Booking deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+})
 
 export default router;

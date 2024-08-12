@@ -6,6 +6,7 @@ import {
   MedicType,
   MedicationType,
   MedicationsChart,
+  NotiType,
   OwnerType,
   PetType,
   RecordType,
@@ -701,6 +702,7 @@ export const fetchBookingById = async (
     throw error;
   }
 };
+
 export const addBooking = async (
   newBooking: BookingType
 ): Promise<BookingType> => {
@@ -722,9 +724,13 @@ export const addBooking = async (
 
 export const deleteBooking = async (bookingId: string) => {
   const response = await fetch(
-    `${API_BASE_URL}/api/my-vet/bookings/${bookingId}`,
+    `${API_BASE_URL}/api/my-bookings/${bookingId}`,
     {
       method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
     }
   );
   if (!response.ok) {
@@ -892,7 +898,8 @@ export async function fetchMedicalRecordById(
 }
 export const updateBookingStatus = async (
   bookingId: string,
-  newStatus: number
+  newStatus: number,
+  id_vet : string,
 ) => {
   try {
     const response = await fetch(
@@ -902,7 +909,7 @@ export const updateBookingStatus = async (
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus, id_vet: id_vet }),
       }
     );
     if (!response.ok) {
@@ -1337,6 +1344,22 @@ export const fetchServiceChart = async (vetId: string): Promise<ServiceChart> =>
 };
 export const fetchMedicationChart = async (vetId: string): Promise<MedicationsChart> => {
   const response = await fetch(`${API_BASE_URL}/api/medications/${vetId}/chart`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include", // Include credentials if needed (e.g., cookies)
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch vets");
+  }
+
+  return response.json();
+};
+
+export const fetchNotiByVet = async (vetId: string): Promise<NotiType> => {
+  const response = await fetch(`${API_BASE_URL}/api/notification/${vetId}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

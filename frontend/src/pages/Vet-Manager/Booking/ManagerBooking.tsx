@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useQuery } from "react-query";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import * as apiClient from "../../../api-client";
 import { BookingType, OwnerType, PetType } from "../../../../../backend/src/shared/types";
 import { Link } from "react-router-dom";
@@ -11,6 +11,7 @@ interface Props {
 const ManagerBooking: React.FC<Props> = ({ vetId }) => {
   const [filterStatus, setFilterStatus] = useState<number | null>(null); // State for filtering by status
   const [filterDate, setFilterDate] = useState<string | null>(null); // State for filtering by date
+  const queryClient = useQueryClient();
 
   const { data: bookings, isLoading, error } = useQuery<BookingType[]>(
     ["fetchBookingsForVet", vetId],
@@ -42,6 +43,39 @@ const ManagerBooking: React.FC<Props> = ({ vetId }) => {
     }
   );
 
+  // Mutation for deleting a booking
+  const mutation = useMutation({
+    mutationFn: (bookingId: string) => apiClient.deleteBooking(bookingId),
+    onSuccess: () => {
+      // Invalidate and refetch the bookings query
+      queryClient.invalidateQueries(["fetchBookingsForVet", vetId]);
+    },
+    onError: (error) => {
+      console.error("Error deleting booking:", error);
+    },
+  });
+
+  const handleDelete = (bookingId: string) => {
+    if (window.confirm("Are you sure you want to delete this booking?")) {
+      mutation.mutate(bookingId);
+    }
+  };
+
+  const getStatusText = (status: number) => {
+    switch (status) {
+      case 1:
+        return <span className="text-yellow-500">Đang chờ xác nhận</span>;
+      case 0:
+        return <span className="text-red-500">Từ chối</span>;
+      case 2:
+        return <span className="text-green-500">Đã xác nhận</span>;
+      case 3:
+        return <span className="text-gray-500">Hoàn thành</span>;
+      default:
+        return <span className="text-red-500">Unknown</span>;
+    }
+  };
+
   if (isLoading) {
     return <span>Loading bookings...</span>;
   }
@@ -69,21 +103,6 @@ const ManagerBooking: React.FC<Props> = ({ vetId }) => {
     const dateB = new Date(b.date).getTime();
     return dateB - dateA; // Sort in descending order
   });
-
-  const getStatusText = (status: number) => {
-    switch (status) {
-      case 1:
-        return <span className="text-yellow-500">Đang chờ xác nhận</span>;
-      case 0:
-        return <span className="text-red-500">Từ chối</span>;
-      case 2:
-        return <span className="text-green-500">Đã xác nhận</span>;
-      case 3:
-        return <span className="text-gray-500">Hoàn thành</span>;
-      default:
-        return <span className="text-red-500">Unknown</span>;
-    }
-  };
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -147,7 +166,12 @@ const ManagerBooking: React.FC<Props> = ({ vetId }) => {
                   ) : (
                     <span className="text-gray-500">Done</span>
                   )}
-                  <p className="text-red-500 hover:underline cursor-pointer"> Delete</p>
+                  <p
+                    className="text-red-500 hover:underline cursor-pointer"
+                    onClick={() => handleDelete(booking._id)}
+                  >
+                    Delete
+                  </p>
                 </td>
               </tr>
             );

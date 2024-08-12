@@ -25,9 +25,6 @@ const StatisticsInvoice: React.FC = () => {
   if (error) {
     return <div>Error loading invoices: {error.message}</div>;
   }
-
-//   console.log('Invoices data:', invoices);
-
   // Aggregate invoices by date
   const aggregateInvoicesByDate = (invoices: InvoiceType[]) => {
     return invoices.reduce((acc, invoice) => {
@@ -41,7 +38,6 @@ const StatisticsInvoice: React.FC = () => {
   };
 
   const aggregatedInvoices = invoices ? aggregateInvoicesByDate(invoices) : {};
-  console.log('Aggregated Invoices:', aggregatedInvoices);
 
   // Prepare data for the chart
   const chartData = {
@@ -56,9 +52,6 @@ const StatisticsInvoice: React.FC = () => {
       }
     ]
   };
-
-  console.log('Chart Data:', chartData);
-
   const chartOptions = {
     responsive: true,
     plugins: {
