@@ -4,14 +4,15 @@ import UsersApp, { IUser } from "../models/usersApp";
 
 const router = express.Router();
 
-// Endpoint để thêm thông tin người dùng vào cơ sở dữ liệu
+// Endpoint to add user information to the database
 router.post(
   "/usersInfo",
   [
     body("name").isString().withMessage("Name must be a string"),
     body("email").isEmail().withMessage("Email must be valid"),
     body("phone").isString().withMessage("Phone must be a string"),
-    body("img").optional().isString().withMessage("Image path must be a string") // img optional
+    body("img").optional().isString().withMessage("Image path must be a string"), // img optional
+    body("type").isString().withMessage("Type must be a string"), // Add validation for type
   ],
   async (req: Request, res: Response) => {
     // Validate request body
@@ -20,7 +21,7 @@ router.post(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, email, phone, img } = req.body;
+    const { name, email, phone, img, type } = req.body; // Include type
 
     try {
       // Check if user already exists
@@ -30,7 +31,7 @@ router.post(
       }
 
       // Create a new user with MongoDB generating the _id automatically
-      const newUser: IUser = new UsersApp({ name, email, phone, img });
+      const newUser: IUser = new UsersApp({ name, email, phone, img, type }); // Include type
       await newUser.save();
 
       res.status(201).json({ message: "User information added successfully", user: newUser });
@@ -45,8 +46,7 @@ router.post(
   }
 );
 
-
-// Endpoint to get and check user in database
+// Endpoint to get and check user in the database
 router.get("/userInfo/:userId", async (req: Request, res: Response) => {
   const userId = req.params.userId;
 
@@ -64,12 +64,13 @@ router.get("/userInfo/:userId", async (req: Request, res: Response) => {
   }
 });
 
-// Endpoint to update info account
+// Endpoint to update account info
 router.put(
   "/userInfo/update/:userId",
   [
     body("name").optional().isString().withMessage("Name must be a string"),
     body("img").optional().isString().withMessage("Image path must be a string"),
+    body("type").optional().isString().withMessage("Type must be a string"), // Add validation for type
   ],
   async (req: Request, res: Response) => {
     // Validate request body
@@ -78,7 +79,7 @@ router.put(
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { name, img } = req.body;
+    const { name, img, type } = req.body; // Include type
     const userId = req.params.userId;
 
     try {
@@ -92,6 +93,7 @@ router.put(
       // Update user information
       if (name) user.name = name;
       if (img) user.img = img;
+      if (type) user.type = type; // Update type if provided
 
       await user.save();
 
@@ -106,7 +108,8 @@ router.put(
     }
   }
 );
-// lấy ra userID
+
+// Endpoint to get user ID
 router.get('/userInfo/userId/:email', async (req, res) => {
   const { email } = req.params;
 
