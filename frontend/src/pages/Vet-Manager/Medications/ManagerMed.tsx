@@ -74,7 +74,7 @@ const ManageMedications: React.FC = () => {
                 <td className="px-4 py-2 border-b">{medication.name}</td>
                 <td className="px-4 py-2 border-b">{medication.dosage}</td>
                 <td className="px-4 py-2 border-b">{medication.instructions}</td>
-                <td className="px-4 py-2 border-b">{medication.price}$</td>
+                <td className="px-4 py-2 border-b">{medication.price.toFixed(3)}VNĐ</td>
                 <td className="px-4 py-2 border-b">{medication.quantity}</td>
                 <td className="px-4 py-2 border-b">
                   <Link

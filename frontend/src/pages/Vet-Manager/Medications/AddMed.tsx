@@ -19,10 +19,10 @@ const AddMed: React.FC = () => {
   const [toastType, setToastType] = useState<"SUCCESS" | "ERROR">("SUCCESS");
 
   const instructionOptions = [
-    "200ml 2 times per day",
-    "300ml 3 times per day, one time 100ml",
-    "200ml 1 time per day",
-    "400ml 2 times per day, one time 200ml",
+    "200ml/1 lần - 2 lần 1 ngày",
+    "3 lần 1 lần, mỗi lần 100ml",
+    "200ml 1 lần mỗi ngày",
+    "400ml 2 lần mỗi ngày, 1 lần 200ml",
   ];
 
   const { data: existingMedications = [], isLoading, error } = useQuery<MedicationType[]>(
@@ -70,7 +70,7 @@ const AddMed: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold mb-6">Add New Medication</h1>
+      <h1 className="text-2xl font-bold mb-6">Thêm thuốc mới</h1>
       <form onSubmit={handleSubmit} className="max-w-md">
         <div className="mb-4">
           <label htmlFor="name" className="block text-gray-700 font-bold mb-2">

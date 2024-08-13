@@ -123,7 +123,7 @@ const ManagerInvoice: React.FC = () => {
                   <td className="py-2 px-4 border-b border-gray-300">{record ? namesMap[record.ownerId] || ` ${record.ownerId}` : 'Unknown'}</td>
                   <td className="px-4 py-2 border-b">{new Date(invoice.createdAt).toLocaleDateString()}</td>
                   <td className="px-4 py-2 border-b">{new Date(invoice.createdAt).toLocaleTimeString()}</td>
-                  <td className="px-4 py-2 border-b">${invoice.total.toFixed(2)}</td>
+                  <td className="px-4 py-2 border-b">{invoice.total.toFixed(3)}VNĐ</td>
                   <td className="px-4 py-2 border-b flex space-x-2">
                     <button
                       onClick={() => handleDelete(invoice._id)}

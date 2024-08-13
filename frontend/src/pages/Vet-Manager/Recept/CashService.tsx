@@ -12,16 +12,16 @@ const ServicesList: React.FC<ServicesListProps> = ({ services, selectedServices,
     <table className="table-auto w-full">
       <thead>
         <tr>
-          <th className="px-4 py-2">Service</th>
-          <th className="px-4 py-2">Price</th>
-          <th className="px-4 py-2">Select</th>
+          <th className="px-4 py-2">Dịch vụ</th>
+          <th className="px-4 py-2">Giá</th>
+          <th className="px-4 py-2">Chọn</th>
         </tr>
       </thead>
       <tbody>
         {services.map((service) => (
           <tr key={service._id}>
             <td className="border px-4 py-2">{service.name}</td>
-            <td className="border px-4 py-2">${parseFloat(service.price.toString()).toFixed(2)}</td>
+            <td className="border px-4 py-2">{parseFloat(service.price.toString()).toFixed(3)}VNĐ</td>
             <td className="border px-4 py-2">
               <input
                 type="checkbox"

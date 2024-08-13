@@ -76,7 +76,7 @@ const EditMed: React.FC = () => {
         <input
           type="number"
           placeholder="Price"
-          value={price}
+          value={price.toFixed(3)}
           onChange={(e) => setPrice(Number(e.target.value))} // Convert string to number
           className="border border-gray-300 rounded-md p-2"
         />

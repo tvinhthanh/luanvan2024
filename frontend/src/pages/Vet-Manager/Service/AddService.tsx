@@ -99,7 +99,7 @@ const AddService: React.FC = () => {
             <option value="30 minutes">30 phút</option>
             <option value="1 hour">1 tiếng</option>
             <option value="1 hour 30 minutes">1 tiếng 30 phút</option>
-            <option value="2 hours">2 phút</option>
+            <option value="2 hours">2 tiếng</option>
           </select>
         </div>
         <div className="mb-4">

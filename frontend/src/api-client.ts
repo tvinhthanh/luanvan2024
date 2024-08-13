@@ -1263,7 +1263,13 @@ export const fetchInvoices2 = async (type: any ) => {
 };
 // Lấy thông tin chi tiết của một hóa đơn theo ID
 export const fetchInvoiceById = async (id: string) => {
-  const response = await fetch(`${API_BASE_URL}/api/invoices/detail/${id}`);
+  const response = await fetch(`${API_BASE_URL}/api/invoices/s/${id}`,{
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  });
 
   if (!response.ok) {
     throw new Error('Error fetching invoice');

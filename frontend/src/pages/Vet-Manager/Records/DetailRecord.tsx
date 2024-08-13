@@ -133,14 +133,14 @@ console.log(petId)
           )}
         </div>
         <div className="bg-white shadow-md rounded-lg p-6 col-span-3 mb-6">
-          <h2 className="text-2xl font-semibold mb-2">Medical History</h2>
+          <h2 className="text-2xl font-semibold mb-2">Lịch sử dụng thuốc</h2>
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-100">
               <tr>
-                <th className="py-2 px-4">Date</th>
-                <th className="py-2 px-4">Medications</th>
-                <th className="py-2 px-4">Reason</th>
-                <th className="py-2 px-4">Treatment Plan</th>
+                <th className="py-2 px-4">Ngày</th>
+                <th className="py-2 px-4">Thuốc</th>
+                <th className="py-2 px-4">Lí do</th>
+                <th className="py-2 px-4">Kế Hoạch Điều Trị</th>
                 <th className="py-2 px-4">Notes</th>
               </tr>
             </thead>

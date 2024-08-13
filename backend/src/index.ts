@@ -70,6 +70,9 @@ io.on('connection', (socket) => {
   socket.on('newBooking', (booking) => {
   console.log('Received new booking:', booking);
   })
+  socket.on('newVet', (vet) => {
+    console.log('Received new vet:', vet);
+    })
   socket.on('disconnect', () => {
     console.log('Client disconnected', socket.id);
   });

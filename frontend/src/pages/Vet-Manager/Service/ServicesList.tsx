@@ -86,10 +86,10 @@ const ServicesList: React.FC<ServicesListProps> = ({ vetId }) => {
             {services.map((service) => (
               <tr key={service._id}>
                 <td className="px-4 py-2 border-b">{service.name}</td>
-                <td className="px-4 py-2 border-b">{service.price}$</td>
+                <td className="px-4 py-2 border-b">{service.price}.000 VNĐ </td>
                 <td className="px-4 py-2 border-b">{service.duration}</td>
                 <td className="px-4 py-2 border-b">
-                  {service.available ? "Available" : "Not Available"}
+                  {service.available ? "Hoạt động" : "Không hoạt động"}
                 </td>
                 <td className="px-4 py-2 border-b">
                   <button
