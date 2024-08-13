@@ -6,7 +6,7 @@ import Booking from "./booking";
 const scheduleSchema = new mongoose.Schema({
   _id: { type: String, required: true },
   owner_id: { type: mongoose.Schema.Types.ObjectId, ref: UsersApp, required: true }, 
-  booking_id: { type: String, ref: Booking, required: true }, 
+  booking_id: { type: String, ref: Booking, required: false }, 
   description: { type: String, required: false },
   title: { type: String, required: true },
   datetime: { type: Date, required: true },
