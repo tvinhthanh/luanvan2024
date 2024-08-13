@@ -21,6 +21,8 @@ import invoiceRoutes from "./routes/invoice";
 import usersAppRoutes from "./routes/usersApp";
 import medicalRoutes from "./routes/medic";
 import scheduleRoutes from "./routes/schedule";
+import reviewRoutes from "./routes/schedule";
+
 import Stripe from "stripe";
 import "dotenv/config";
 import { createServer } from "http";
@@ -97,6 +99,7 @@ app.use('/api/invoices', invoiceRoutes);
 app.use('/api/usersApp', usersAppRoutes);
 app.use('/api/medic', medicalRoutes);
 app.use('/api/schedule', scheduleRoutes);
+app.use('/api/review', reviewRoutes);
 
 // Start the server
 server.listen(PORT, () => {
