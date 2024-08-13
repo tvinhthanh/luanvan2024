@@ -108,7 +108,7 @@ router.get("/:bookingId", verifyToken, async (req: Request, res: Response) => {
   }
 });
 // POST a new booking
-router.post('/', verifyToken, async (req: Request, res: Response) => {
+router.post('/', async (req: Request, res: Response) => {
   const { vetId, ownerId, petId, phoneOwner, date, status } = req.body;
   
   try {
@@ -125,6 +125,7 @@ router.post('/', verifyToken, async (req: Request, res: Response) => {
 
     // Save the new booking to the database
     await newBooking.save();
+    io.emit('newBooking', newBooking);
 
     // Find the vet and add the new booking to their bookings
     const vet = await Vet.findById(vetId);
