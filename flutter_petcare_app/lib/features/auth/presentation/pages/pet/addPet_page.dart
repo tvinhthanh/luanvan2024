@@ -233,24 +233,33 @@ class _AddPetPageState extends State<AddPetPage> {
               TextField(
                 controller: nameController,
                 decoration: InputDecoration(
-                  labelText: 'Name',
-                  labelStyle: TextStyle(color: Colors.white),
+                  labelText: 'Tên thú cưng:',
+                  labelStyle: TextStyle(color: Colors.white, fontSize: 18),
                 ),
                 style: TextStyle(color: Colors.white),
               ),
               TextField(
                 controller: ageController,
                 decoration: InputDecoration(
-                  labelText: 'Age',
-                  labelStyle: TextStyle(color: Colors.white),
+                  labelText: 'Tuổi thú cưng:',
+                  labelStyle: TextStyle(color: Colors.white, fontSize: 18),
                 ),
                 style: TextStyle(color: Colors.white),
               ),
               TextField(
                 controller: weightController,
                 decoration: InputDecoration(
-                  labelText: 'Weight',
-                  labelStyle: TextStyle(color: Colors.white),
+                  labelText: 'Cân nặng:',
+                  labelStyle: TextStyle(color: Colors.white, fontSize: 18),
+                ),
+                style: TextStyle(color: Colors.white),
+              ),
+              TextField(
+                controller: breedTypeController,
+                enabled: false,
+                decoration: InputDecoration(
+                  labelText: 'Giống thú cưng:',
+                  labelStyle: TextStyle(color: Colors.white, fontSize: 24),
                 ),
                 style: TextStyle(color: Colors.white),
               ),
@@ -258,7 +267,8 @@ class _AddPetPageState extends State<AddPetPage> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Text('Sex:', style: TextStyle(color: Colors.white)),
+                  Text('Giới tính:',
+                      style: TextStyle(color: Colors.white, fontSize: 18)),
                   Radio<String>(
                     value: 'Male',
                     groupValue: selectedSex,
@@ -269,7 +279,8 @@ class _AddPetPageState extends State<AddPetPage> {
                     },
                     activeColor: Colors.blue,
                   ),
-                  Text('Male', style: TextStyle(color: Colors.white)),
+                  Text('Đực',
+                      style: TextStyle(color: Colors.white, fontSize: 18)),
                   Radio<String>(
                     value: 'Female',
                     groupValue: selectedSex,
@@ -280,23 +291,15 @@ class _AddPetPageState extends State<AddPetPage> {
                     },
                     activeColor: Colors.blue,
                   ),
-                  Text('Female', style: TextStyle(color: Colors.white)),
+                  Text('Cái',
+                      style: TextStyle(color: Colors.white, fontSize: 18)),
                 ],
-              ),
-              TextField(
-                controller: breedTypeController,
-                enabled: false,
-                decoration: InputDecoration(
-                  labelText: 'Breed Type',
-                  labelStyle: TextStyle(color: Colors.white),
-                ),
-                style: TextStyle(color: Colors.white),
               ),
               TextField(
                 controller: imgController,
                 decoration: InputDecoration(
-                  labelText: 'Image URL (Tap to select)',
-                  labelStyle: TextStyle(color: Colors.white),
+                  labelText: 'Nhấp vào để chọn hình ảnh',
+                  labelStyle: TextStyle(color: Colors.white, fontSize: 18),
                 ),
                 style: TextStyle(color: Colors.white),
                 onTap: _selectImage, // Open image picker on tap
@@ -310,8 +313,7 @@ class _AddPetPageState extends State<AddPetPage> {
                   style: TextStyle(color: Colors.white),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppPallete.button  
-                ),
+                    backgroundColor: AppPallete.button),
               ),
             ],
           ),

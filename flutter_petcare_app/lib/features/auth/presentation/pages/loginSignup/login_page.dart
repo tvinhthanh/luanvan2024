@@ -128,25 +128,25 @@ class _LoginPageState extends State<LoginPage> {
                 TextFieldInput(
                   icon: Icons.person,
                   textEditingController: emailController,
-                  hintText: 'Enter your email',
+                  hintText: 'Nhập địa chỉ email',
                   textInputType: TextInputType.text,
                 ),
                 TextFieldInput(
                   icon: Icons.lock,
                   textEditingController: passwordController,
-                  hintText: 'Enter your password',
+                  hintText: 'Nhập mật khẩu',
                   textInputType: TextInputType.text,
                   isPass: true,
                 ),
                 // Gọi quên mật khẩu bên dưới nút đăng nhập
                 const ForgotPassword(),
-                MyButtons(onTap: loginUser, text: "Log In"),
+                MyButtons(onTap: loginUser, text: "Đăng nhập"),
                 Row(
                   children: [
                     Expanded(
                       child: Container(height: 1, color: Colors.black26),
                     ),
-                    const Text("  or  "),
+                    const Text("  hoặc  "),
                     Expanded(
                       child: Container(height: 1, color: Colors.black26),
                     )
@@ -189,6 +189,7 @@ class _LoginPageState extends State<LoginPage> {
                                   email: user.email ?? "",
                                   name: user.displayName ?? "",
                                   phoneNumber: user.phoneNumber ?? "",
+                                  type: "google",
                                 ),
                               ),
                             );
@@ -215,7 +216,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         const SizedBox(width: 10),
                         const Text(
-                          "Continue with Google",
+                          "Đăng nhập với Goole",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 18,
@@ -235,7 +236,7 @@ class _LoginPageState extends State<LoginPage> {
                     Container(
                       padding: const EdgeInsets.symmetric(vertical: 8),
                       child: const Text(
-                        "Don't have an account? ",
+                        "Bạn không có tài khoản? ",
                         style: TextStyle(fontSize: 18),
                       ),
                     ),
@@ -250,7 +251,7 @@ class _LoginPageState extends State<LoginPage> {
                       child: Container(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: const Text(
-                          "Sign Up.",
+                          "Đăng ký.",
                           style: TextStyle(
                             color: Colors.blue,
                             fontWeight: FontWeight.bold,

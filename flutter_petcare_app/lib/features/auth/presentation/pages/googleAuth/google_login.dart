@@ -52,6 +52,7 @@ class _GooleLoginState extends State<GooleLogin> {
                 builder: (context) => HomePage(
                   userName: existingUser['name'],
                   email: existingUser['email'],
+                  imageURLs: existingUser['img'],
                 ),
               ),
             );
@@ -65,6 +66,7 @@ class _GooleLoginState extends State<GooleLogin> {
                       FirebaseAuth.instance.currentUser!.displayName.toString(),
                   phoneNumber:
                       FirebaseAuth.instance.currentUser!.phoneNumber ?? "",
+                      type: "google", 
                 ),
               ),
             );
@@ -81,7 +83,7 @@ class _GooleLoginState extends State<GooleLogin> {
             ),
             const SizedBox(width: 10),
             const Text(
-              "Continue with Google",
+              "Đăng nhập bằng Google",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,

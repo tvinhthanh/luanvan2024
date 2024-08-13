@@ -122,7 +122,7 @@ class _ContactPageState extends State<ContactPage> {
           },
         ),
         title: const Text(
-          'Contacts',
+          'DANH SÁCH LIÊN HỆ',
           style: TextStyle(color: Colors.white),
         ),
         actions: [
@@ -148,7 +148,7 @@ class _ContactPageState extends State<ContactPage> {
                     TextField(
                       decoration: InputDecoration(
                         prefixIcon: const Icon(Icons.search),
-                        hintText: 'Enter contact name',
+                        hintText: 'Nhập tên phòng khám',
                         hintStyle: TextStyle(
                           color: Colors.grey,
                         ),

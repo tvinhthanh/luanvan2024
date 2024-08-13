@@ -207,24 +207,24 @@ class _BasicInfoPageState extends State<BasicInfoPage> {
                 TextFieldInput(
                   icon: Icons.person,
                   textEditingController: nameController,
-                  hintText: 'Enter your name',
+                  hintText: 'Nhập tên của bạn',
                   textInputType: TextInputType.text,
                 ),
                 TextFieldInput(
                   icon: Icons.email,
                   textEditingController: emailController,
-                  hintText: 'Enter your email',
+                  hintText: 'Nhập địa chỉ email',
                   textInputType: TextInputType.text,
                 ),
                 TextFieldInput(
                   icon: Icons.phone,
                   textEditingController: phoneNumberController,
-                  hintText: 'Enter your phone number',
+                  hintText: 'Nhập số điện thoại',
                   textInputType: TextInputType.phone,
                 ),
                 MyButtons(
                   onTap: submitInfo,
-                  text: isLoading ? "Submitting..." : "Submit",
+                  text: isLoading ? "Đang xác nhận..." : "Xác nhận",
                 ),
               ],
             ),

@@ -92,7 +92,7 @@ class _DetailPetPageState extends State<DetailPetPage> {
     }
   }
 
-    Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
+  Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -143,7 +143,29 @@ class _DetailPetPageState extends State<DetailPetPage> {
     }
   }
 
-  Future<void> _showUpdateDialog(BuildContext context) async {
+  Future<String> uploadImage(File image) async {
+    final url =
+        Uri.parse('https://api.cloudinary.com/v1_1/dop4jetlx/image/upload');
+    const uploadPreset = 'ftpphxq2';
+    // Create a multipart request to upload the file
+    final request = http.MultipartRequest('POST', url)
+      ..fields['upload_preset'] = uploadPreset
+      ..files.add(await http.MultipartFile.fromPath('file', image.path));
+
+    // Send the request
+    final response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+      return jsonResponse['secure_url']; // Return the URL of the uploaded image
+    } else {
+      throw Exception(
+          'Failed to upload image. Status code: ${response.statusCode}');
+    }
+  }
+
+   Future<void> _showUpdateDialog(BuildContext context) async {
     String? tempSelectedImagePath = _selectedImagePath;
 
     return showDialog<void>(
@@ -201,8 +223,7 @@ class _DetailPetPageState extends State<DetailPetPage> {
                   // Button to pick image
                   TextButton(
                     onPressed: () async {
-                      final pickedFile = await ImagePicker()
-                          .pickImage(source: ImageSource.gallery);
+                      final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
                       if (pickedFile != null) {
                         setState(() {
                           tempSelectedImagePath = pickedFile.path;
@@ -215,46 +236,51 @@ class _DetailPetPageState extends State<DetailPetPage> {
                   // Display selected image
                   if (tempSelectedImagePath != null)
                     Image.file(File(tempSelectedImagePath!), height: 100),
+                  if (_selectedImagePath != null && tempSelectedImagePath == null)
+                    Image.network(_selectedImagePath!, height: 100), // Display existing image
                 ],
               ),
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: Text('Hủy'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Update'),
+              child: Text('Cập nhật'),
               onPressed: () async {
                 if (_formKey.currentState!.validate()) {
-                  // Call backend update API
+                  String? imageUrl;
+                  if (tempSelectedImagePath != null) {
+                    // Upload the image and get the URL
+                    imageUrl = await uploadImage(File(tempSelectedImagePath!));
+                  }
+
+                  // Prepare updated data
                   Map<String, dynamic> updatedData = {
                     'name': _nameController.text,
                     'age': int.parse(_ageController.text),
                     'weight': double.parse(_weightController.text),
                     'sex': _sexController.text,
-                    'img': tempSelectedImagePath != null
-                        ? tempSelectedImagePath
-                        : widget.pet['img'], // Placeholder for image update
+                    'img': imageUrl ?? widget.pet['img'], // Use uploaded URL or existing
                   };
 
-                  // Replace with actual API call to update pet info
+                  // Call backend update API
                   bool updateSuccess = await _updatePetInfo(updatedData);
 
                   if (updateSuccess) {
                     setState(() {
-                      _selectedImagePath = tempSelectedImagePath;
+                      _selectedImagePath = tempSelectedImagePath; // Update selected image path
                     });
                     // Update successful
                     Navigator.of(context).pop(true); // Pass success result
                   } else {
                     // Handle update failure
                     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                      content:
-                          Text('Failed to update pet info. Please try again.'),
+                      content: Text('Failed to update pet info. Please try again.'),
                       duration: Duration(seconds: 2),
                     ));
                   }
@@ -326,50 +352,47 @@ class _DetailPetPageState extends State<DetailPetPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: GestureDetector(
-                onTap: _pickImage,
-                child: Container(
-                  width: 150,
-                  height: 150,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: _selectedImagePath != null
-                        ? DecorationImage(
-                            fit: BoxFit.cover,
-                            image: FileImage(File(_selectedImagePath!)),
-                          )
-                        : DecorationImage(
-                            fit: BoxFit.cover,
-                            image: NetworkImage(
-                                '${widget.pet['img'].toString()}'),
-                          ),
-                  ),
+              child: Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: _selectedImagePath != null
+                      ? DecorationImage(
+                          fit: BoxFit.cover,
+                          image: FileImage(File(_selectedImagePath!)),
+                        )
+                      : DecorationImage(
+                          fit: BoxFit.cover,
+                          image:
+                              NetworkImage('${widget.pet['img'].toString()}'),
+                        ),
                 ),
               ),
             ),
             SizedBox(height: 20),
             Text(
-              'Pet name: ${widget.pet['name']}',
+              'Tên thú cưng: ${widget.pet['name']}',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
             Text(
-              'Breed: ${widget.pet['breed_type']}',
+              'Giống thú cưng: ${widget.pet['breed_type']}',
               style: TextStyle(fontSize: 18),
             ),
             SizedBox(height: 10),
             Text(
-              'Age: ${widget.pet['age']} year',
+              'Tuổi: ${widget.pet['age']} year',
               style: TextStyle(fontSize: 18),
             ),
             SizedBox(height: 10),
             Text(
-              'Gender: ${widget.pet['sex']}',
+              'Giới tính: ${widget.pet['sex']}',
               style: TextStyle(fontSize: 18),
             ),
             SizedBox(height: 10),
             Text(
-              'Weight: ${widget.pet['weight']}',
+              'Cân nặng: ${widget.pet['weight']}',
               style: TextStyle(fontSize: 18),
             ),
             SizedBox(height: 20),
@@ -380,7 +403,7 @@ class _DetailPetPageState extends State<DetailPetPage> {
                   onPressed: () {
                     _showUpdateDialog(context);
                   },
-                  child: Text('Update Info'),
+                  child: Text('Cập nhật'),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -394,26 +417,26 @@ class _DetailPetPageState extends State<DetailPetPage> {
                               )),
                     );
                   },
-                  child: Text('Booking'),
+                  child: Text('Đặt lịch'),
                 ),
               ],
             ),
             SizedBox(height: 20),
             Text(
-              'Medical records',
+              'Hồ sơ bệnh án',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
             DataTable(
               columns: <DataColumn>[
-                DataColumn(label: Text('No.')),
+                DataColumn(label: Text('STT')),
                 DataColumn(
                   label: Container(
                     width: 90, // Adjust this width as needed
-                    child: Text('Clinic Name', overflow: TextOverflow.ellipsis),
+                    child: Text('Phòng khám', overflow: TextOverflow.ellipsis),
                   ),
                 ),
-                DataColumn(label: Text('View Details')),
+                DataColumn(label: Text('Chi tiết')),
               ],
               rows: appointmentHistory.asMap().entries.map((entry) {
                 int index = entry.key;
@@ -453,7 +476,7 @@ class _DetailPetPageState extends State<DetailPetPage> {
                           ),
                         );
                       },
-                      child: Text('View Details'),
+                      child: Text('Xem'),
                     ),
                   ),
                 ]);

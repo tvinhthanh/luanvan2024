@@ -147,12 +147,12 @@ class _AccountPageState extends State<AccountPage> {
           _imageUrl = updatedUser['img'] ?? _imageUrl; // Update _imageUrl from server response
         });
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('User information updated successfully'),
+          content: Text('Đã cập nhật thông tin thành công'),
           duration: Duration(seconds: 2),
         ));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Failed to update user information'),
+          content: Text('Cập nhật thông tin thất bại'),
           duration: Duration(seconds: 2),
         ));
       }
@@ -216,7 +216,7 @@ class _AccountPageState extends State<AccountPage> {
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
-                labelText: 'Name',
+                labelText: 'Tên người dùng',
                 border: OutlineInputBorder(),
               ),
             ),
@@ -224,7 +224,7 @@ class _AccountPageState extends State<AccountPage> {
             TextField(
               controller: _emailController,
               decoration: InputDecoration(
-                labelText: 'Email',
+                labelText: 'Địa chỉ email',
                 border: OutlineInputBorder(),
               ),
               readOnly: true,
@@ -233,7 +233,7 @@ class _AccountPageState extends State<AccountPage> {
             TextField(
               controller: _phoneController,
               decoration: InputDecoration(
-                labelText: 'Phone Number',
+                labelText: 'Số điện thoại',
                 border: OutlineInputBorder(),
               ),
               readOnly: true,
@@ -241,7 +241,7 @@ class _AccountPageState extends State<AccountPage> {
             SizedBox(height: 16),
             ElevatedButton(
               onPressed: _updateUserInfo,
-              child: Text('Save'),
+              child: Text('Lưu'),
             ),
           ],
         ),

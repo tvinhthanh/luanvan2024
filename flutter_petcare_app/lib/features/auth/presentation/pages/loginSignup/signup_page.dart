@@ -110,23 +110,23 @@ class _SignupPageState extends State<SignupPage> {
                 TextFieldInput(
                   icon: Icons.person,
                   textEditingController: nameController,
-                  hintText: 'Enter your name',
+                  hintText: 'Nhập tên của bạn',
                   textInputType: TextInputType.text,
                 ),
                 TextFieldInput(
                   icon: Icons.email,
                   textEditingController: emailController,
-                  hintText: 'Enter your email',
+                  hintText: 'Nhập địa chỉ email',
                   textInputType: TextInputType.text,
                 ),
                 TextFieldInput(
                   icon: Icons.lock,
                   textEditingController: passwordController,
-                  hintText: 'Enter your password',
+                  hintText: 'Nhập mật khẩu',
                   textInputType: TextInputType.text,
                   isPass: true,
                 ),
-                MyButtons(onTap: signupUser, text: "Sign Up"),
+                MyButtons(onTap: signupUser, text: "Đăng ký"),
                 Row(
                   children: [
                     Expanded(
@@ -134,7 +134,7 @@ class _SignupPageState extends State<SignupPage> {
                     ),
                     const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text("or"),
+                      child: Text("hoặc"),
                     ),
                     Expanded(
                       child: Container(height: 1, color: Colors.black26),
@@ -147,7 +147,7 @@ class _SignupPageState extends State<SignupPage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Text(
-                      "Already have an account? ",
+                      "Bạn đã có tài khoản? ",
                       style: TextStyle(fontSize: 18),
                     ),
                     GestureDetector(
@@ -159,7 +159,7 @@ class _SignupPageState extends State<SignupPage> {
                         );
                       },
                       child: const Text(
-                        "Sign In.",
+                        "Đăng nhập.",
                         style: TextStyle(
                           color: Colors.blue,
                           fontWeight: FontWeight.bold,

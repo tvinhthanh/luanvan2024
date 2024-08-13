@@ -153,7 +153,7 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
                   const SizedBox(height: 20),
                   // Availability
                   Text(
-                    'Availability',
+                    'Phòng khám hoạt động',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -162,8 +162,8 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
                   SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: 'MTWTFSS'.split('').map((day) {
-                      bool isAvailable = day != 'S';
+                    children: 'T2 T3 T4 T5 T6 T7 CN'.split(' ').map((day) {
+                      bool isAvailable = day != 'CN';
                       return CircleAvatar(
                         backgroundColor:
                             isAvailable ? Colors.blue : Colors.grey,
@@ -173,12 +173,12 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
                   ),
                   SizedBox(height: 8),
                   Text(
-                    'Hours: 10:00 - 20:00',
+                    'Thời gian hoạt động: 09:00 - 20:00',
                     style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                   ),
                   // Services
                   Text(
-                    'Services Provided:',
+                    'Dịch vụ:',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -191,7 +191,7 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
                       return ListTile(
                         title: Text(service['name']),
                         subtitle: Text(
-                            '${service['duration']} - \$${service['price']}'),
+                            '${service['duration']} - ${service['price']}.000 VNĐ'),
                       );
                     }).toList(),
                   ),
@@ -203,7 +203,7 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
                         MaterialPageRoute(builder: (context) => BookingPage(userName: widget.userName,email: widget.email,imageURLs:widget.imageURLs,clinicName: widget.clinicName,)),
                       );
                     },
-                    child: Text('Book a date'),
+                    child: Text('Đặt lịch ngay'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       padding: EdgeInsets.symmetric(vertical: 16),

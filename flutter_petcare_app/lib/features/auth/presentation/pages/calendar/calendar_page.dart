@@ -215,19 +215,19 @@ class _CalendarPageState extends State<CalendarPage> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Add Event'),
+          title: Text('Thêm sự kiện'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               TextField(
-                decoration: InputDecoration(labelText: 'Event Title'),
+                decoration: InputDecoration(labelText: 'Tiêu đề: '),
                 onChanged: (value) {
                   title = value;
                 },
               ),
               TextField(
                 readOnly: true,
-                decoration: InputDecoration(labelText: 'Time'),
+                decoration: InputDecoration(labelText: 'Chọn thời gian: '),
                 controller: timeController,
                 onTap: () async {
                   TimeOfDay? pickedTime = await showTimePicker(
@@ -241,7 +241,7 @@ class _CalendarPageState extends State<CalendarPage> {
                 },
               ),
               TextField(
-                decoration: InputDecoration(labelText: 'Description'),
+                decoration: InputDecoration(labelText: 'Mô tả:'),
                 onChanged: (value) {
                   description = value;
                 },
@@ -282,15 +282,15 @@ class _CalendarPageState extends State<CalendarPage> {
         barrierDismissible: false,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Event Details'),
+            title: Text('Chi tiết lịch hẹn'),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment:
                   CrossAxisAlignment.start, // Align content to the start (left)
               children: <Widget>[
-                Text('Title: ${event.title}'),
-                Text('Time: ${event.time}'),
-                Text('Description: ${event.description}'),
+                Text('Phòng khám: ${event.title}'),
+                Text('Thời gian: ${event.time}'),
+                Text('Mô tả: ${event.description}'),
               ],
             ),
             actions: <Widget>[
@@ -317,12 +317,12 @@ class _CalendarPageState extends State<CalendarPage> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Edit Event'),
+          title: Text('Thông tin sự kiện'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               TextField(
-                decoration: InputDecoration(labelText: 'Event Title'),
+                decoration: InputDecoration(labelText: 'Tiêu đề:'),
                 controller: TextEditingController(text: newTitle),
                 onChanged: (value) {
                   newTitle = value;
@@ -330,7 +330,7 @@ class _CalendarPageState extends State<CalendarPage> {
               ),
               TextField(
                 readOnly: true,
-                decoration: InputDecoration(labelText: 'Time'),
+                decoration: InputDecoration(labelText: 'Thời gian:'),
                 controller: timeController,
                 onTap: () async {
                   TimeOfDay? pickedTime = await showTimePicker(
@@ -344,7 +344,7 @@ class _CalendarPageState extends State<CalendarPage> {
                 },
               ),
               TextField(
-                decoration: InputDecoration(labelText: 'Description'),
+                decoration: InputDecoration(labelText: 'Mô tả:'),
                 controller: TextEditingController(text: newDescription),
                 onChanged: (value) {
                   newDescription = value;
@@ -354,7 +354,7 @@ class _CalendarPageState extends State<CalendarPage> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Delete'),
+              child: Text('Xóa sự kiện'),
               onPressed: () {
                 setState(() {
                   _events[normalizedDate]!.removeAt(eventIndex);
@@ -364,7 +364,7 @@ class _CalendarPageState extends State<CalendarPage> {
               },
             ),
             TextButton(
-              child: Text('Update'),
+              child: Text('Cập nhật'),
               onPressed: () {
                 setState(() {
                   _events[normalizedDate]![eventIndex] =
@@ -375,7 +375,7 @@ class _CalendarPageState extends State<CalendarPage> {
               },
             ),
             TextButton(
-              child: Text('Cancel'),
+              child: Text('Hủy'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
@@ -411,7 +411,7 @@ class _CalendarPageState extends State<CalendarPage> {
           ),
         ],
         title: Text(
-          'Calendar',
+          'LỊCH BIỂU',
           style: TextStyle(color: Colors.white),
         ),
       ),
@@ -486,10 +486,10 @@ class _CalendarPageState extends State<CalendarPage> {
                   itemBuilder: (context, index) {
                     final event = value[index];
                     return ListTile(
-                      title: Text("Title: " + event.title),
-                      subtitle: Text("Time: " +
+                      title: Text("Tiêu đề: " + event.title),
+                      subtitle: Text("Thời gian: " +
                           event.time +
-                          "\nDescription: " +
+                          "\nMô tả: " +
                           event.description),
                       onTap: () {
                         final normalizedDate = _normalizeDate(_selectedDay!);

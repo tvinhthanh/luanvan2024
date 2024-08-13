@@ -253,7 +253,7 @@ class _BookingPageState extends State<BookingPage> {
               ),
               SizedBox(height: 10),
               Text(
-                DateFormat('EEEE, dd MMMM').format(selectedDate),
+                'Ngày hẹn:\n'+DateFormat('EEEE, dd MMMM').format(selectedDate),
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
@@ -305,7 +305,7 @@ class _BookingPageState extends State<BookingPage> {
               ),
               SizedBox(height: 16),
               Text(
-                'Time',
+                'Giờ hẹn: ',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
@@ -331,7 +331,7 @@ class _BookingPageState extends State<BookingPage> {
               ),
               SizedBox(height: 16),
               Text(
-                'Services',
+                'Dịch vụ:',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               ...services.map((service) {
@@ -347,14 +347,14 @@ class _BookingPageState extends State<BookingPage> {
               }).toList(),
               SizedBox(height: 16),
               Text(
-                '* Prices are estimative and the payment will be made at the location.',
+                '*Hãy ghi tình trạng cơ bản của thú cưng của bạn ở đây. Nếu không có hãy bỏ qua.',
                 style: TextStyle(fontSize: 12, color: Colors.grey),
               ),
               SizedBox(height: 5),
               TextField(
                 controller: noteController,
                 decoration: InputDecoration(
-                  labelText: 'Add note',
+                  labelText: 'Nhập tình trạng thú cưng',
                   border: OutlineInputBorder(),
                 ),
                 maxLength: 250,
@@ -399,9 +399,9 @@ class _BookingPageState extends State<BookingPage> {
                           context: context,
                           builder: (BuildContext context) {
                             return AlertDialog(
-                              title: Text('Booking confirmed'),
+                              title: Text('Xác nhận lịch hẹn thành công'),
                               content: Text(
-                                  'Your booking has been confirmed successfully.'),
+                                  'Lịch hẹn của bạn đã được hệ thống gửi thành công đến phòng khám.'),
                               actions: <Widget>[
                                 TextButton(
                                   onPressed: () {
@@ -418,13 +418,13 @@ class _BookingPageState extends State<BookingPage> {
                                     );
                                     ;
                                   },
-                                  child: Text('OK'),
+                                  child: Text('Đóng'),
                                 ),
                               ],
                             );
                           },
                         );
-                        print('Booking confirmed successfully');
+                        print('booking confirm');
                       } else {
                         // Xử lý khi có lỗi từ backend
                         print(
@@ -437,7 +437,7 @@ class _BookingPageState extends State<BookingPage> {
                       // Hiển thị thông báo cho người dùng nếu cần
                     }
                   },
-                  child: Text('Confirm booking'),
+                  child: Text('Đặt lịch hẹn'),
                 ),
               ),
             ],

@@ -54,7 +54,7 @@ class IntroPage extends StatelessWidget {
                     child: const Padding(
                       padding: EdgeInsets.all(16.0), // Padding for the button
                       child: Text(
-                        'Get Started',
+                        'Bắt Đầu',
                         style: TextStyle(
                           color: AppPallete.whiteColor, // Button text color
                           fontSize: 20,

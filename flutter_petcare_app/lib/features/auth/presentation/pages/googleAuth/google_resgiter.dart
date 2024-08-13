@@ -91,7 +91,7 @@ class _GoogleAuthenticationState extends State<GoogleAuthentication> {
       // Handle any errors during sign-in or user check
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Sign-in failed: ${e.toString()}'),
+          content: Text('đăng ký thất bại: ${e.toString()}'),
         ),
       );
     }
@@ -136,7 +136,7 @@ class _GoogleAuthenticationState extends State<GoogleAuthentication> {
             ),
             const SizedBox(width: 10),
             const Text(
-              "Continue with Google",
+              "Đăng ký bằng Google",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,

@@ -127,7 +127,7 @@ class _ChooseBreedTypePageState extends State<ChooseBreedTypePage> {
       backgroundColor: const Color(0xFF2A3240),
       appBar: AppBar(
         title: Text(
-          'Add Pet Profile',
+          'THÔNG TIN THÚ CƯNG',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color(0xFF2A3240),
@@ -156,14 +156,14 @@ class _ChooseBreedTypePageState extends State<ChooseBreedTypePage> {
         children: [
           Positioned(
             top: 10,
-            left: 150,
+            left: 100,
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    'Breed',
+                    'Chọn loại thú cưng',
                     style: TextStyle(color: Colors.white, fontSize: 20),
                   ),
                 ],
@@ -256,7 +256,7 @@ class _ChooseBreedTypePageState extends State<ChooseBreedTypePage> {
                                     }).toList() ??
                                     [],
                                 hint: Text(
-                                  'Select Breed',
+                                  'Chọn giống thú cưng',
                                   style: TextStyle(color: Colors.white),
                                 ),
                               ),
@@ -304,7 +304,7 @@ class _ChooseBreedTypePageState extends State<ChooseBreedTypePage> {
                       MaterialPageRoute(builder: (context) => AddPetPage(email: widget.email,userName: widget.userName, imageURLs: widget.imageURLs, breedId: selectedBreedType!.id, breedType: selectedBreedName,)),
                     );
                   },
-                  child: Text('Continue'),
+                  child: Text('Tiếp tục'),
                 ),
               ],
             ),

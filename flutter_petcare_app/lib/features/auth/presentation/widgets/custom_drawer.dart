@@ -43,7 +43,7 @@ class CustomDrawer extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Hello',
+                            'Xin chào',
                             style: TextStyle(fontSize: 16, color: Colors.white),
                           ),
                           Text(
@@ -60,7 +60,7 @@ class CustomDrawer extends StatelessWidget {
           ),
           ListTile(
             title: Text(
-              'Your Pets',
+              'Thêm thú cưng',
               style: TextStyle(color: Colors.white),
             ),
           ),
@@ -91,7 +91,7 @@ class CustomDrawer extends StatelessWidget {
                 ),
                 SizedBox(height: 5),
                 Text(
-                  'add new',
+                  'thêm mới',
                   style: TextStyle(color: Colors.grey),
                 ),
                 SizedBox(height: 10),
@@ -102,7 +102,7 @@ class CustomDrawer extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.dashboard, color: Colors.white),
             title: Text(
-              'Dashboard',
+              'Trang chủ',
               style: TextStyle(color: Colors.white),
             ),
             onTap: () {
@@ -121,7 +121,7 @@ class CustomDrawer extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.contact_phone, color: Colors.white),
             title: Text(
-              'Contacts',
+              'Liên hệ',
               style: TextStyle(color: Colors.white),
             ),
             onTap: () {
@@ -140,7 +140,7 @@ class CustomDrawer extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.calendar_month_outlined, color: Colors.white),
             title: Text(
-              'Calendar',
+              'Lịch biểu',
               style: TextStyle(color: Colors.white),
             ),
             onTap: () {
@@ -160,7 +160,7 @@ class CustomDrawer extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.account_circle_outlined, color: Colors.white),
             title: Text(
-              'Account',
+              'Tài khoản',
               style: TextStyle(color: Colors.white),
             ),
             onTap: () {
@@ -179,7 +179,7 @@ class CustomDrawer extends StatelessWidget {
           ListTile(
             leading: Icon(Icons.settings, color: Colors.white),
             title: Text(
-              'Settings',
+              'Cài đặt',
               style: TextStyle(color: Colors.white),
             ),
             onTap: () {

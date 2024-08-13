@@ -88,7 +88,7 @@ class _HomePageState extends State<HomePage> {
         padding: EdgeInsets.all(10),
         children: [
           Text(
-            'Active pet profiles',
+            'Các thú cưng của bạn',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -99,7 +99,7 @@ class _HomePageState extends State<HomePage> {
           isLoading
               ? Center(child: CircularProgressIndicator())
               : pets.isEmpty
-                  ? Center(child: Text('No pets found'))
+                  ? Center(child: Text('Hiện tại không có thú cưng nào'))
                   : GridView.builder(
                       physics: NeverScrollableScrollPhysics(),
                       shrinkWrap: true,

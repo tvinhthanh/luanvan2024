@@ -50,7 +50,7 @@ class _PhoneRegisterState extends State<PhoneRegister> {
             ),
             const SizedBox(width: 10),
             const Text(
-              "Sign in with Phone",
+              "Đăng ký bằng số điện thoại",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,

@@ -51,7 +51,7 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication> {
             ),
             const SizedBox(width: 10),
             const Text(
-              "Sign in with Phone",
+              "Đăng nhập bằng số điện thoại",
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,

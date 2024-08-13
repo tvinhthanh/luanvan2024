@@ -23,7 +23,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
             myDialogBox(context);
           },
           child: const Text(
-            "Forgot Password?",
+            "Quên mật khẩu?",
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 16,
