@@ -170,6 +170,7 @@ class _HomePageState extends State<HomePage> {
                     pet: pet,
                     email: widget.email,
                     userName: widget.userName,
+                    imageURLs: widget.imageURLs,
                   )),
         );
       },

@@ -41,29 +41,29 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
     }
   }
 
-    Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
+ Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Confirm Logout'),
+          title: Text('Xác nhận đăng xuất'),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('Are you sure you want to log out?'),
+                Text('Bạn xác nhận rằng muốn đăng xuất chứ?'),
               ],
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: Text('Hủy'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Logout'),
+              child: Text('Đăng xuất'),
               onPressed: () async {
                 // Sign out from Firebase
                 await FirebaseAuth.instance.signOut();

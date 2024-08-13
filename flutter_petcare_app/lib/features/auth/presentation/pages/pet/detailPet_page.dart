@@ -14,9 +14,10 @@ import 'package:image_picker/image_picker.dart';
 class DetailPetPage extends StatefulWidget {
   final String? userName;
   final String? email;
+  final String? imageURLs;
   final Map<String, dynamic> pet;
 
-  const DetailPetPage({Key? key, this.userName, this.email, required this.pet})
+  const DetailPetPage({Key? key, this.userName, this.email, required this.pet, this.imageURLs})
       : super(key: key);
 
   @override
@@ -463,6 +464,7 @@ class _DetailPetPageState extends State<DetailPetPage> {
                             builder: (context) => PetProfilePage(
                               email: widget.email,
                               userName: widget.userName,
+                              imageURLs: widget.imageURLs,
                               petId: widget.pet['_id'],
                               vetID: appointment['clinic_id'].toString(),
                               vetName: appointment['clinic_name'].toString(),
@@ -485,7 +487,7 @@ class _DetailPetPageState extends State<DetailPetPage> {
           ],
         ),
       ),
-      drawer: CustomDrawer(userName: widget.userName, email: widget.email),
+      drawer: CustomDrawer(userName: widget.userName, email: widget.email, imageURLs: widget.imageURLs,),
     );
   }
 }

@@ -12,6 +12,7 @@ import 'dart:convert';
 class PetProfilePage extends StatefulWidget {
   final String? userName;
   final String? email;
+  final String? imageURLs;
   final String vetID;
   final String vetName;
   final String petId;
@@ -26,6 +27,7 @@ class PetProfilePage extends StatefulWidget {
     Key? key,
     required this.userName,
     required this.email,
+    required this.imageURLs,
     required this.petId,
     required this.vetID,
     required this.vetName,
@@ -130,23 +132,23 @@ class _PetProfilePageState extends State<PetProfilePage> {
       barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Confirm Logout'),
+          title: Text('Xác nhận đăng xuất'),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('Are you sure you want to log out?'),
+                Text('Bạn xác nhận rằng muốn đăng xuất chứ?'),
               ],
             ),
           ),
           actions: <Widget>[
             TextButton(
-              child: Text('Cancel'),
+              child: Text('Hủy'),
               onPressed: () {
                 Navigator.of(context).pop();
               },
             ),
             TextButton(
-              child: Text('Logout'),
+              child: Text('Đăng xuất'),
               onPressed: () async {
                 // Sign out from Firebase
                 await FirebaseAuth.instance.signOut();
@@ -229,7 +231,7 @@ class _PetProfilePageState extends State<PetProfilePage> {
           ],
         ),
       ),
-      drawer: CustomDrawer(userName: widget.userName, email: widget.email),
+      drawer: CustomDrawer(userName: widget.userName, email: widget.email, imageURLs: widget.imageURLs,),
     );
   }
 
@@ -238,7 +240,7 @@ class _PetProfilePageState extends State<PetProfilePage> {
       children: [
         CircleAvatar(
           radius: 60,
-          backgroundImage: AssetImage('assets/Image/${widget.petImage}'),
+          backgroundImage: NetworkImage(widget.petImage),
         ),
         SizedBox(height: 8),
         Text(
@@ -264,9 +266,9 @@ class _PetProfilePageState extends State<PetProfilePage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildTabButton('About', 0),
-        _buildTabButton('Health', 1),
-        _buildTabButton('History', 2),
+        _buildTabButton('Thông tin', 0),
+        _buildTabButton('Sức khỏe', 1),
+        _buildTabButton('Lịch hẹn', 2),
       ],
     );
   }
@@ -292,20 +294,20 @@ class _PetProfilePageState extends State<PetProfilePage> {
     return ListView(
       children: [
         Divider(),
-        _buildDetailRow('Gender', widget.petGender),
-        _buildDetailRow('Weight', '${widget.petWeight} kg'),
+        _buildDetailRow('Giới tính', widget.petGender),
+        _buildDetailRow('Cân nặng', '${widget.petWeight} kg'),
         Divider(),
         Text(
-          'Important Dates',
+          'Ngày khai sanh',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
         ),
         SizedBox(height: 8),
-        _buildDateRow(Icons.cake, 'Birthday', '3 November 2019',
-            '${widget.petAge} years old'),
-        _buildDateRow(Icons.home, 'Adoption Day', '6 January 2020'),
+        _buildDateRow(Icons.cake, 'Ngày sinh', 'ngày 03 tháng 10 năm 2019',
+            '${widget.petAge} tuổi'),
+        _buildDateRow(Icons.home, 'Ngày nhận', 'ngày 03 tháng 12 năm 2019'),
       ],
     );
   }
@@ -352,24 +354,24 @@ class _PetProfilePageState extends State<PetProfilePage> {
     return ListView(
       children: [
         _buildHealthOption(
-            Icons.security, 'Insurance', 'Insurance details here...'),
+            Icons.security, 'Bảo hiểm', 'Chi tiết bảo hiểm...'),
         _buildHealthOption(
-            Icons.vaccines, 'Vaccines', 'Vaccination details here...'),
+            Icons.vaccines, 'Vắc xin', 'Chi tiết vắc xin...'),
         _buildHealthOption(
             Icons.bug_report,
-            'Anti-parasitical treatments',
+            'Phương pháp điều trị',
             showMedicalInterventions
                 ? _buildMedicalInterventions()
                 : _buildLoadButton()),
         _buildHealthOption(
             Icons.medical_services,
-            'Medical interventions',
+            'Can thiệp y tế',
             showMedicalInterventions
                 ? _buildMedicalInterventions()
                 : _buildLoadButton()),
         _buildHealthOption(
             Icons.healing,
-            'Treatment Plan',
+            'Kế hoạch điều trị',
             showMedicalInterventions
                 ? _buildTreatmentPlan()
                 : _buildLoadButton()),
@@ -385,7 +387,7 @@ class _PetProfilePageState extends State<PetProfilePage> {
           await fetchMedicalInterventions(); // Gọi hàm để lấy dữ liệu
         },
         child: Text(
-          'Tap to load medical interventions',
+          'Nhấn để tải các can thiệp y tế',
           style: TextStyle(color: Colors.blue),
         ),
       ),
@@ -409,7 +411,7 @@ class _PetProfilePageState extends State<PetProfilePage> {
 
   Widget _buildAppointmentHistory() {
     if (appointments.isEmpty) {
-      return Center(child: Text('No appointments found.'));
+      return Center(child: Text('Bạn hiện chưa có lịch hẹn.'));
     }
     return ListView(
       children: appointments.map((appointment) {
@@ -422,33 +424,33 @@ class _PetProfilePageState extends State<PetProfilePage> {
         String statusText;
         switch (appointment['status']) {
           case 1:
-            statusText = 'Pending';
+            statusText = 'Đang đợi';
             break;
           case 0:
-            statusText = 'Canceled';
+            statusText = 'Hủy bỏ';
             break;
           case 2:
-            statusText = 'Confirmed';
+            statusText = 'Xác nhận';
             break;
           case 3:
-            statusText = 'Complete';
+            statusText = 'Hoàn tất';
             break;
           default:
-            statusText = 'Unknown';
+            statusText = 'Không xác định';
         }
         return Card(
           child: ListTile(
             title: Text(
-              'Appointment\nDate:$formattedAppointmentDateTime',
+              'Lịch hẹn\nNgày hẹn:$formattedAppointmentDateTime',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Owner Phone: ${appointment['phoneOwner']}'),
-                Text('Status: $statusText'),
+                Text('Số điện thoại: ${appointment['phoneOwner']}'),
+                Text('Trạng thái: $statusText'),
                 if (appointment['note'] != null)
-                  Text('Note: ${appointment['note']}'),
+                  Text('Mô tả: ${appointment['note']}'),
               ],
             ),
           ),
@@ -459,7 +461,7 @@ class _PetProfilePageState extends State<PetProfilePage> {
 
   Widget _buildMedicalInterventions() {
     if (medicalInterventions.isEmpty) {
-      return Center(child: Text('No medical interventions found.'));
+      return Center(child: Text('Không tìm thấy can thiệp y tế.'));
     }
     return Column(
       children: medicalInterventions.map((intervention) {
@@ -474,13 +476,13 @@ class _PetProfilePageState extends State<PetProfilePage> {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Date: $formattedVisitDateTime'),
-                Text('Symptoms: ${intervention['symptoms']}'),
-                Text('Diagnosis: ${intervention['diagnosis']}'),
-                Text('Treatment Plan: ${intervention['treatmentPlan']}'),
-                Text('Medication: ${intervention['medications']}'),
+                Text('Ngày: $formattedVisitDateTime'),
+                Text('Triệu chứng: ${intervention['symptoms']}'),
+                Text('Chẩn đoán: ${intervention['diagnosis']}'),
+                Text('Kế hoạch trị: ${intervention['treatmentPlan']}'),
+                Text('Thuốc: ${intervention['medications']}'),
                 if (intervention['notes'] != null)
-                  Text('Notes: ${intervention['notes']}'),
+                  Text('Mô tả: ${intervention['notes']}'),
               ],
             ),
           ),
@@ -491,7 +493,7 @@ class _PetProfilePageState extends State<PetProfilePage> {
 
   Widget _buildTreatmentPlan() {
     if (medicalInterventions.isEmpty) {
-      return Center(child: Text('No medical interventions found.'));
+      return Center(child: Text('Không tìm thấy can thiệp y tế.'));
     }
     return Column(
       children: medicalInterventions.map((intervention) {
@@ -505,10 +507,10 @@ class _PetProfilePageState extends State<PetProfilePage> {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Date: $formattedVisitDateTime'),
-                Text('Treatment Plan: ${intervention['treatmentPlan']}'),
+                Text('Ngày: $formattedVisitDateTime'),
+                Text('Kế hoạch trị: ${intervention['treatmentPlan']}'),
                 if (intervention['notes'] != null)
-                  Text('Notes: ${intervention['notes']}'),
+                  Text('Mô tả: ${intervention['notes']}'),
               ],
             ),
           ),

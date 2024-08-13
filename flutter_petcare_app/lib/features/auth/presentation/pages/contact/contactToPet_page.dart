@@ -12,9 +12,10 @@ import 'dart:convert';
 class ContactToPetPage extends StatefulWidget {
   final String? userName;
   final String? email;
+  final String? imageURLs;
   final Map<String, dynamic> pet;
 
-  const ContactToPetPage({Key? key, this.userName, this.email, required this.pet})
+  const ContactToPetPage({Key? key, this.userName, this.email, required this.pet, this.imageURLs})
       : super(key: key);
 
   @override
@@ -238,7 +239,7 @@ class _ContactToPetPageState extends State<ContactToPetPage> {
                 ),
               ),
             ),
-      drawer: CustomDrawer(userName: widget.userName, email: widget.email),
+      drawer: CustomDrawer(userName: widget.userName, email: widget.email, imageURLs: widget.imageURLs,),
     );
   }
 }

@@ -57,10 +57,11 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     children: [
                       Container(),
                       const Text(
-                        "Forgot Your Password",
+                        "Quên mật khẩu",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18,
+                          color: Colors.black,
                         ),
                       ),
                       IconButton(
@@ -76,7 +77,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     controller: emailController,
                     decoration: const InputDecoration(
                       border: OutlineInputBorder(),
-                      labelText: "Enter the Email",
+                      labelText: "Nhập địa chỉ email",
                       hintText: "eg abc@gmail.com",
                     ),
                   ),

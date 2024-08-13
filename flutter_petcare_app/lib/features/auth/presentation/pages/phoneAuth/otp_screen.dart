@@ -101,6 +101,7 @@ class _OTPScreenState extends State<OTPScreen> {
                               builder: (context) => HomePage(
                                 userName: existingUser['name'],
                                 email: existingUser['email'],
+                                imageURLs: existingUser['img'] ?? '',
                               ),
                             ),
                           );

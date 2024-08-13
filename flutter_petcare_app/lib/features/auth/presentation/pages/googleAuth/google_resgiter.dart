@@ -45,6 +45,7 @@ class _GoogleAuthenticationState extends State<GoogleAuthentication> {
 
       if (existingUser != null) {
         // User exists in the database, show dialog
+        await FirebaseServices().googleSignOut();
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -55,6 +56,7 @@ class _GoogleAuthenticationState extends State<GoogleAuthentication> {
               actions: [
                 TextButton(
                   onPressed: () {
+                    
                     Navigator.of(context).pop(); // Close the dialog
                   },
                   child: const Text('OK'),
@@ -108,6 +110,7 @@ class _GoogleAuthenticationState extends State<GoogleAuthentication> {
       if (googleUser != null) {
         return googleUser.email; // Return the email
       } else {
+        
         throw Exception('Google sign-in was canceled');
       }
     } catch (error) {
