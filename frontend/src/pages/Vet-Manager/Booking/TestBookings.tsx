@@ -7,6 +7,7 @@ const BookingForm = () => {
   const handleSubmit = (e: any) => {
     e.preventDefault();
     socket.emit('newBooking', message);
+    socket.emit('newVet',message);
     setMessage(''); // Clear input after sending
   };
 
@@ -16,9 +17,7 @@ const BookingForm = () => {
         type="text"
         value={message}
         onChange={(e) => setMessage(e.target.value)}
-        placeholder="Enter booking message"
       />
-      <button type="submit">Send Booking</button>
     </form>
   );
 };

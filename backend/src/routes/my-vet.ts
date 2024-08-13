@@ -3,9 +3,11 @@ import multer from 'multer';
 import cloudinary from 'cloudinary';
 import verifyToken from '../middleware/auth';
 import Vet from '../models/vet';
+import { Server } from 'socket.io';
 const { v4: uuidv4 } = require('uuid');
 
 const router = express.Router();
+export default (io: Server) => {
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -42,6 +44,8 @@ router.post('/', verifyToken, upload.array('imageFiles', 1), async (req: Request
 
     // Lưu đối tượng Vet mới vào cơ sở dữ liệu
     const newVet = await vet.save();
+    io.emit('newVet', vet);
+
     res.status(201).json(newVet);
   } catch (err) {
     console.error('Error adding vet:', err);
@@ -120,4 +124,5 @@ async function uploadImages(imageFiles: Express.Multer.File[]): Promise<string[]
   return imageUrls;
 }
 
-export default router;
+return router;
+}

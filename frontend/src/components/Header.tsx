@@ -57,12 +57,17 @@ const Header = () => {
                   >
                     Phòng Khám
                   </Link>
-                  <Link
+                  {/* <Link
                     className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
                      to="/notification"
                   >
                     <FontAwesomeIcon icon={faBell} className="mr-2" />
-                  </Link>
+                  </Link> */}
+                  <p
+                    className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
+                  >
+                    <FontAwesomeIcon icon={faBell} className="mr-2" />
+                  </p>
                 </>
               )}
               <SignOutButton />

@@ -79,13 +79,13 @@ io.on('connection', (socket) => {
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/my-bookings", bookingRoutes);
-app.use("/api/my-vet", myVetRoutes);
+app.use("/api/my-bookings", bookingRoutes(io));
+app.use("/api/my-vet", myVetRoutes(io));
 app.use("/api/owner", ownerRoutes);
 app.use("/api/pet", petRoutes);
 app.use("/api/breed", breedRoutes);
 app.use("/api/breedType", breedTypeRoutes);
-app.use("/api/vet", vetRoutes(io));
+app.use("/api/vet", vetRoutes);
 app.use('/api/medical-records', medicalRecordRoutes);
 app.use('/api/service', serviceRoutes);
 app.use('/api/bookings', bookingsRoutes(io));

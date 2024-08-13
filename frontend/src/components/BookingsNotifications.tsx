@@ -27,7 +27,27 @@ const BookingNotification: React.FC = () => {
       socket.off('newBooking');
     };
   }, []);
+  useEffect(() => {
+    socket.on('newVet', (vet: any) => {
+      if (vet) {
+        // Hiển thị thông báo dạng toast với thông tin chi tiết hơn và xuống dòng
+        setToast({
+          message: `New booking added!\nPhone: ${vet.name || 'Unknown'}\nVào khung giờ: ${new Date(vet.date).toLocaleString()}`,
+          type: "SUCCESS",
+        });
+      } else {
+        setToast({
+          message: 'Received an invalid booking',
+          type: "ERROR",
+        });
+      }
+    });
 
+    // Cleanup on component unmount
+    return () => {
+      socket.off('newBooking');
+    };
+  }, []);
   // Handle close of the toast
   const handleClose = () => {
     setToast(null);

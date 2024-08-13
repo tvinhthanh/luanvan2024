@@ -173,7 +173,7 @@ router.post('/add/:vetID/:email/:petID', async (req: Request, res: Response) => 
 
     // Save the new booking to the database
     const savedBooking = await newBooking.save();
-    io.emit('newBooking', newBooking);
+    io.emit('newBooking', savedBooking);
 
     // Respond with the saved booking object
     res.status(201).json(savedBooking);

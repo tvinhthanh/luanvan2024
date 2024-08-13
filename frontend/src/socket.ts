@@ -25,7 +25,13 @@ socket.on("newBooking", (booking) => {
 socket.on("disconnect", (reason) => {
   console.log(`Disconnected from socket server: ${reason}`);
 });
+// Listen for 'newBooking' event from server
+socket.on("newVet", (vet) => {
+  console.log("Received new vet:", vet);
 
+  // Perform actions with the received booking data
+  // For example, you could update the state or UI here
+});
 // Optionally, handle connection errors
 socket.on("connect_error", (error) => {
   console.error("Socket connection error:", error);
@@ -34,5 +40,7 @@ socket.on("connect_error", (error) => {
 // Emit a 'newBooking' event (if needed)
 // Ensure this matches your server's expectations
 socket.emit('newBooking', { message: "Test booking data" });
+socket.emit('newVet', { message: "Test booking data" });
+
 
 export default socket;
