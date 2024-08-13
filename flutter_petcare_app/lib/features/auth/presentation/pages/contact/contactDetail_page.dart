@@ -302,10 +302,9 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  // Rating Section
+                  SizedBox(height: 10),
                   RatingBar.builder(
-                    initialRating: 0,
+                    initialRating: _userRating,
                     minRating: 1,
                     direction: Axis.horizontal,
                     allowHalfRating: true,
@@ -321,26 +320,21 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
                       });
                     },
                   ),
-                  const SizedBox(height: 20),
-                  // Comment Section
+                  SizedBox(height: 10),
                   TextField(
                     controller: _commentController,
                     decoration: InputDecoration(
-                      labelText: 'Leave a comment',
+                      hintText: 'Enter your comment',
                       border: OutlineInputBorder(),
                     ),
-                    maxLines: 3,
                   ),
-                  const SizedBox(height: 20),
+                  SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () {
-                      submitRating(
-                        widget.clinicName['_id'].toString(),
-                        _userRating,
-                        _commentController.text,
-                      );
+                      submitRating(widget.clinicName['_id'].toString(),
+                          _userRating, _commentController.text);
                     },
-                    child: Text('Submit'),
+                    child: Text('Submit Rating'),
                   ),
                 ],
               );
