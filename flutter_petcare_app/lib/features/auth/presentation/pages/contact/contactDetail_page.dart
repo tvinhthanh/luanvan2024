@@ -5,6 +5,7 @@ import 'package:flutter_petcare_app/features/auth/presentation/pages/booking/boo
 import 'package:flutter_petcare_app/features/auth/presentation/pages/loginSignup/login_page.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/widgets/custom_drawer.dart';
 import 'package:flutter_petcare_app/main.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart'; // Import the rating bar package
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -24,6 +25,8 @@ class ContactDetailPage extends StatefulWidget {
 
 class _ContactDetailPageState extends State<ContactDetailPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  double _userRating = 0.0;
+  TextEditingController _commentController = TextEditingController();
 
   Future<List<dynamic>> fetchServices(String vetId) async {
     final url = Uri.parse('http://${Ip.serverIP}:3000/api/service/show/$vetId');
@@ -41,7 +44,43 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
     }
   }
 
- Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
+  Future<List<dynamic>> fetchRatings(String vetId) async {
+    final url = Uri.parse('http://${Ip.serverIP}:3000/api/review/rating/show/$vetId');
+    try {
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        print('Failed to load ratings');
+        return [];
+      }
+    } catch (e) {
+      print('Error: $e');
+      return [];
+    }
+  }
+
+  Future<void> submitRating(String vetId, double rating, String comment) async {
+    final url = Uri.parse('http://${Ip.serverIP}:3000/api/review/add');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'vetId': vetId,
+        'rating': rating,
+        'comment': comment,
+        'userName': widget.userName,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      print('Rating submitted successfully');
+    } else {
+      print('Failed to submit rating');
+    }
+  }
+
+  Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -151,6 +190,29 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
                     style: TextStyle(fontSize: 16),
                   ),
                   const SizedBox(height: 20),
+                  // Booking Button
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BookingPage(
+                            clinicName: widget.clinicName,
+                            email: widget.email,
+                            imageURLs: widget.imageURLs,
+                            userName: widget.userName,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Text('Đặt lịch hẹn',style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppPallete.button,
+                      padding: EdgeInsets.symmetric(vertical: 15),
+                      textStyle: TextStyle(fontSize: 18),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
                   // Availability
                   Text(
                     'Phòng khám hoạt động',
@@ -176,6 +238,7 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
                     'Thời gian hoạt động: 09:00 - 20:00',
                     style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                   ),
+                  const SizedBox(height: 20),
                   // Services
                   Text(
                     'Dịch vụ:',
@@ -195,19 +258,89 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
                       );
                     }).toList(),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 20),
+                  // Ratings and Comments
+                  Text(
+                    'Đánh giá từ người dùng:',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  FutureBuilder<List<dynamic>>(
+                    future: fetchRatings(widget.clinicName['_id'].toString()),
+                    builder: (context, ratingSnapshot) {
+                      if (ratingSnapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      } else if (ratingSnapshot.hasError) {
+                        return Center(
+                            child: Text(
+                                'Error loading ratings: ${ratingSnapshot.error}'));
+                      } else if (!ratingSnapshot.hasData ||
+                          ratingSnapshot.data!.isEmpty) {
+                        return Center(child: Text('No ratings yet'));
+                      } else {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: ratingSnapshot.data!.map<Widget>((rating) {
+                            return ListTile(
+                              title: Text(
+                                  '${rating['userName']} (${rating['rating']}/5)'),
+                              subtitle: Text(rating['comment']),
+                            );
+                          }).toList(),
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'Đánh giá phòng khám:',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Rating Section
+                  RatingBar.builder(
+                    initialRating: 0,
+                    minRating: 1,
+                    direction: Axis.horizontal,
+                    allowHalfRating: true,
+                    itemCount: 5,
+                    itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                    itemBuilder: (context, _) => Icon(
+                      Icons.star,
+                      color: Colors.amber,
+                    ),
+                    onRatingUpdate: (rating) {
+                      setState(() {
+                        _userRating = rating;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                  // Comment Section
+                  TextField(
+                    controller: _commentController,
+                    decoration: InputDecoration(
+                      labelText: 'Leave a comment',
+                      border: OutlineInputBorder(),
+                    ),
+                    maxLines: 3,
+                  ),
+                  const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (context) => BookingPage(userName: widget.userName,email: widget.email,imageURLs:widget.imageURLs,clinicName: widget.clinicName,)),
+                      submitRating(
+                        widget.clinicName['_id'].toString(),
+                        _userRating,
+                        _commentController.text,
                       );
                     },
-                    child: Text('Đặt lịch ngay'),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      padding: EdgeInsets.symmetric(vertical: 16),
-                    ),
+                    child: Text('Submit'),
                   ),
                 ],
               );
@@ -215,7 +348,11 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
           },
         ),
       ),
-      drawer: CustomDrawer(userName: widget.userName, email: widget.email, imageURLs: widget.imageURLs,),
+      drawer: CustomDrawer(
+        userName: widget.userName,
+        email: widget.email,
+        imageURLs: widget.imageURLs,
+      ),
     );
   }
 }

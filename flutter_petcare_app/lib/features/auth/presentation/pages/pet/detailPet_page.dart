@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_petcare_app/core/theme/app_pallete.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/pages/contact/contactToPet_page.dart';
+import 'package:flutter_petcare_app/features/auth/presentation/pages/contact/contact_page.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/pages/loginSignup/login_page.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/pages/medicalRecord/record_page.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/widgets/custom_drawer.dart';
@@ -411,10 +412,10 @@ class _DetailPetPageState extends State<DetailPetPage> {
                     Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => ContactToPetPage(
-                                pet: widget.pet,
+                          builder: (context) => ContactPage(
                                 userName: widget.userName,
                                 email: widget.email,
+                                imageURLs: widget.imageURLs,
                               )),
                     );
                   },

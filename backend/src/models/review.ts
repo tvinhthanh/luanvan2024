@@ -14,6 +14,6 @@ const reviewSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Booking = mongoose.model("review", reviewSchema);
+const Review = mongoose.model("review", reviewSchema);
 
-export default Booking;
+export default Review;
