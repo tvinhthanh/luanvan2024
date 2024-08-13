@@ -1209,8 +1209,8 @@ export async function deleteMedication(medicationId: string): Promise<void> {
   }
 }
 
-export const updateMedication = async (medication: MedicationType): Promise<MedicationType> => {
-  const response = await fetch(`${API_BASE_URL}/api/medications/${medication._id}`, {
+export const updateMedication = async (medId: string,medication: MedicationType): Promise<MedicationType> => {
+  const response = await fetch(`${API_BASE_URL}/api/medications/${medId}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",

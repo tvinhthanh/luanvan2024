@@ -125,7 +125,7 @@ const AddMedicalRecordWithBookId: React.FC = () => {
       <h1 className="text-2xl font-bold mb-4">Thêm phiếu khám</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700">Owner</label>
+          <label className="block text-sm font-medium text-gray-700">Chủ sở hửu</label>
           <input
             type="text"
             value={ownerName}
@@ -134,7 +134,7 @@ const AddMedicalRecordWithBookId: React.FC = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Pet</label>
+          <label className="block text-sm font-medium text-gray-700">Tên thú cưng</label>
           <input
             type="text"
             value={petName}
@@ -144,7 +144,7 @@ const AddMedicalRecordWithBookId: React.FC = () => {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700">Reason for Visit</label>
+          <label className="block text-sm font-medium text-gray-700">Lí di khám</label>
           <input
             type="text"
             value={reasonForVisit}
@@ -181,16 +181,16 @@ const AddMedicalRecordWithBookId: React.FC = () => {
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700">Medications</label>
+          <label className="block text-sm font-medium text-gray-700">Thuốc</label>
           <select
             value={selectedMedicationId}
             onChange={(e) => setSelectedMedicationId(e.target.value)}
             className="mt-1 block w-full border border-gray-300 rounded-md p-2"
           >
-            <option value="">Select Medication</option>
+            <option value="">Chọn Thuốc</option>
             {availableMedications.map((medication) => (
               <option key={medication._id} value={medication._id}>
-                {medication.name} - {medication.dosage} - {medication.instructions}
+                {medication.name} - {medication.dosage} - {medication.instructions} - {medication.price.toFixed(3)} VND
               </option>
             ))}
           </select>
@@ -204,19 +204,19 @@ const AddMedicalRecordWithBookId: React.FC = () => {
             }}
             className="mt-2 bg-blue-500 text-white p-2 rounded-md"
           >
-            Add Medication
+            Thêm Thuốc
           </button>
           <ul className="mt-2">
             {medications.map((med, index) => (
-              <li key={index} className="flex justify-between items-center">
-                {med.name} - {med.dosage} - {med.instructions}
+              <li key={med._id} className="flex items-center justify-between p-2 border-b border-gray-300">
+              {med.name} - {med.dosage} - {med.instructions}
 
                 <button
                   type="button"
                   onClick={() => handleRemoveMedication(index)}
-                  className="ml-2 bg-red-500 text-white p-1 rounded-md"
+                  className="text-red-500"
                 >
-                  Remove
+                  Xoá
                 </button>
               </li>
             ))}

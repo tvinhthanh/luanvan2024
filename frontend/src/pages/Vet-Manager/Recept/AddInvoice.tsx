@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { MedicType, PetType, MedicationType, ServiceType, InvoiceType } from "../../../../../backend/src/shared/types";
+import { MedicType, PetType, MedicationType, ServiceType, InvoiceType, OwnerType } from "../../../../../backend/src/shared/types";
 import * as apiClient from "../../../api-client";
 import { useMutation, useQueries, useQuery } from "react-query";
 import { useAppContext } from "../../../contexts/AppContext";
@@ -25,7 +25,16 @@ const AddInvoice: React.FC = () => {
       }
     }
   );
-
+  const { data: owner, isLoading: isOwnerLoading, error: ownerError } = useQuery<OwnerType>(
+    "fetchOwner",
+    () => apiClient.fetchOwnerById(ownerId),
+    {
+      enabled: !!medicalRecord,
+      onError: (err) => {
+        console.error("Error fetching services:", err);
+      }
+    }
+  );
   // Filter services to only show available ones
   const availableServices = services?.filter(service => service.available) || [];
 
@@ -84,7 +93,7 @@ const AddInvoice: React.FC = () => {
       }
     });
 
-    return total.toFixed(2); // Format total to 2 decimal places
+    return total.toFixed(3); // Format total to 2 decimal places
   };
 
   const handleCreateInvoice = async () => {
@@ -114,41 +123,41 @@ const AddInvoice: React.FC = () => {
     }
   };
 
-  if (isServicesLoading || medicationQueries.some((query) => query.isLoading)) {
+  if (isServicesLoading || medicationQueries.some((query) => query.isLoading )|| isOwnerLoading) {
     return <span>Loading services and medications...</span>;
   }
 
-  if (servicesError || medicationQueries.some((query) => query.error)) {
+  if (servicesError || medicationQueries.some((query) => query.error) || ownerError) {
     return <span>Error fetching services or medications</span>;
   }
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Add Invoice</h1>
-      <p>
-        <strong>Pet Name:</strong> {pet.name}
+      <h1 className="text-2xl font-bold mb-4">Tạo hoá đơn</h1>
+      <p> 
+        <strong>Tên thú cưng:</strong> {pet.name}
       </p>
       <p>
-        <strong>Owner Name:</strong> {medicalRecord.ownerId}
+        <strong>Tên chủ nhân :</strong> {owner?.name}
       </p>
       <p>
-        <strong>Visit Date:</strong> {new Date(medicalRecord.visitDate).toLocaleDateString()}
+        <strong>Ngày khám:</strong> {new Date(medicalRecord.visitDate).toLocaleDateString()}
       </p>
       <p>
-        <strong>Reason for Visit:</strong> {medicalRecord.reasonForVisit}
+        <strong>Lí do khám:</strong> {medicalRecord.reasonForVisit}
       </p>
 
       {/* Render Medications */}
       <div className="mt-4">
-        <h4 className="font-bold">Medications:</h4>
+        <h4 className="font-bold">Thuốc sử dụng:</h4>
         <ul>
           {medications.map((medication) => (
             <li key={medication._id}>
               <p>
-                <strong>Name:</strong> {medication.name}
+                <strong>Tên:</strong> {medication.name}
               </p>
               <p>
-                <strong>Price:</strong> ${parseFloat(medication.price.toString()).toFixed(2)}
+                <strong>Giá:</strong> {parseFloat(medication.price.toString()).toFixed(3)} VNĐ
               </p>
             </li>
           ))}
@@ -157,7 +166,7 @@ const AddInvoice: React.FC = () => {
 
       {/* Select Services */}
       <div className="mt-4">
-        <h4 className="font-bold">Additional Services:</h4>
+        <h4 className="font-bold">Dịch vụ thêm:</h4>
         <ServicesList 
           services={availableServices}
           selectedServices={selectedServices}
@@ -167,15 +176,15 @@ const AddInvoice: React.FC = () => {
 
       {/* Total Calculation */}
       <div className="mt-4">
-        <h4 className="font-bold">Total:</h4>
-        <p>${calculateTotal()}</p>
+        <h4 className="font-bold">Tổng:</h4>
+        <p>{calculateTotal()} VNĐ</p>
       </div>
 
       <button
         onClick={handleCreateInvoice}
         className="bg-green-500 text-white px-4 py-2 rounded-md mt-4"
       >
-        Create Invoice
+        Tạo Hoá Đơn
       </button>
     </div>
   );

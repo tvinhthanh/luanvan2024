@@ -123,6 +123,12 @@ router.put('/:id', verifyToken, async (req: Request, res: Response) => {
   const { name, dosage, instructions, price, vetId, quantity } = req.body;
 
   try {
+    // Validate input data
+    if (!name || !dosage || !price || !vetId) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    // Update the medication details
     const updatedMedication = await Medication.findByIdAndUpdate(
       id,
       { name, dosage, instructions, price, vetId, quantity },
@@ -133,22 +139,33 @@ router.put('/:id', verifyToken, async (req: Request, res: Response) => {
       return res.status(404).json({ message: 'Medication not found' });
     }
 
-    // Optionally, update Vet's medications array if needed
+    // Update Vet's medications array if needed
     const vet = await Vet.findById(vetId);
     if (!vet) {
       return res.status(404).json({ error: 'Vet not found' });
     }
-    // Remove the old medication reference if needed before adding updated one
+
+    // Remove the old medication reference if needed
     vet.medications = vet.medications.filter(med => med.toString() !== id);
+
+    // Add the updated medication reference
     vet.medications.push(updatedMedication._id);
+
+    // Optional: flatten the array if there's a possibility of nested arrays
+    vet.medications = vet.medications.flat();
+
+    // Save the updated vet
     await vet.save();
 
+    // Respond with the updated medication
     res.status(200).json(updatedMedication);
+
   } catch (error) {
     console.error('Error updating medication:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 
 // Delete a medication by id
