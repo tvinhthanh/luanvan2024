@@ -76,7 +76,7 @@ io.on('connection', (socket) => {
 });
 
 
-// Routes
+// Routes của tui
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/my-bookings", bookingRoutes(io));
