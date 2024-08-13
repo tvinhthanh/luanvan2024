@@ -23,6 +23,7 @@ class ContactPage extends StatefulWidget {
 class _ContactPageState extends State<ContactPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   List<Map<String, dynamic>> clinics = [];
+  List<Map<String, dynamic>> filteredClinics = [];
   bool isLoading = true;
 
   @override
@@ -32,8 +33,7 @@ class _ContactPageState extends State<ContactPage> {
   }
 
   Future<void> fetchClinics() async {
-    final url = Uri.parse(
-        'http://${Ip.serverIP}:3000/api/vet');
+    final url = Uri.parse('http://${Ip.serverIP}:3000/api/vet');
     try {
       final response = await http.get(url);
       if (response.statusCode == 200) {
@@ -51,6 +51,7 @@ class _ContactPageState extends State<ContactPage> {
                     'description': clinic['description']
                   })
               .toList();
+          filteredClinics = clinics; // Initially, filtered list is the same as the full list
           isLoading = false;
         });
       } else {
@@ -67,7 +68,20 @@ class _ContactPageState extends State<ContactPage> {
     }
   }
 
-    Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
+  void filterClinics(String query) {
+    final results = clinics.where((clinic) {
+      final clinicName = clinic['name'].toLowerCase();
+      final input = query.toLowerCase();
+
+      return clinicName.contains(input);
+    }).toList();
+
+    setState(() {
+      filteredClinics = results;
+    });
+  }
+
+  Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -159,16 +173,16 @@ class _ContactPageState extends State<ContactPage> {
                         fillColor: Colors.black,
                       ),
                       onChanged: (value) {
-                        // Implement search logic here
+                        filterClinics(value);
                       },
                     ),
                     const SizedBox(height: 20),
                     ListView.builder(
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),
-                      itemCount: clinics.length,
+                      itemCount: filteredClinics.length,
                       itemBuilder: (context, index) {
-                        final clinic = clinics[index];
+                        final clinic = filteredClinics[index];
                         return Card(
                           color: Color(0xFF2E3B4E),
                           shape: RoundedRectangleBorder(
@@ -179,8 +193,8 @@ class _ContactPageState extends State<ContactPage> {
                               children: [
                                 CircleAvatar(
                                   radius: 30.0,
-                                  backgroundImage: NetworkImage(
-                                      '${clinic['image']}'),
+                                  backgroundImage:
+                                      NetworkImage('${clinic['image']}'),
                                 ),
                               ],
                             ),
@@ -225,7 +239,10 @@ class _ContactPageState extends State<ContactPage> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ContactDetailPage(
-                                      clinicName: clinic, email: widget.email,userName: widget.userName,imageURLs: widget.imageURLs),
+                                      clinicName: clinic,
+                                      email: widget.email,
+                                      userName: widget.userName,
+                                      imageURLs: widget.imageURLs),
                                 ),
                               );
                             },
@@ -237,7 +254,11 @@ class _ContactPageState extends State<ContactPage> {
                 ),
               ),
             ),
-      drawer: CustomDrawer(userName: widget.userName, email: widget.email, imageURLs: widget.imageURLs,),
+      drawer: CustomDrawer(
+        userName: widget.userName,
+        email: widget.email,
+        imageURLs: widget.imageURLs,
+      ),
     );
   }
 }
