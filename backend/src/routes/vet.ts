@@ -5,9 +5,11 @@ import cloudinary from "cloudinary";
 import verifyToken from "../middleware/auth";
 import { body } from "express-validator";
 import { VetType } from "../shared/types";
+import { Server } from "socket.io";
 
 const router = express.Router();
 const upload = multer(); // Initialize multer middleware
+export default (io: Server) => {
 
 //get all vets for admin
 router.get("/all", async (req, res) => {
@@ -140,6 +142,8 @@ router.post("/", upload.single("image"), async (req: Request, res: Response) => 
     });
 
     await vet.save();
+    io.emit('newVet', vet);
+
     res.status(201).send(vet);
   } catch (error) {
     console.log(error);
@@ -147,4 +151,5 @@ router.post("/", upload.single("image"), async (req: Request, res: Response) => 
   }
 });
 
-export default router;
+  return router;
+}

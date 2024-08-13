@@ -13,6 +13,7 @@ const ManagerInvoice: React.FC = () => {
   const [namesMap, setNamesMap] = useState<{ [key: string]: string }>({});
   const [recordsMap, setRecordsMap] = useState<{ [key: string]: MedicType }>({});
   const navigate = useNavigate();
+
   // Fetch invoices query
   const { data: invoices = [], isLoading: isLoadingInvoices, error: invoicesError } = useQuery<InvoiceType[]>(
     "fetchInvoices",
@@ -88,13 +89,14 @@ const ManagerInvoice: React.FC = () => {
       }
     }
   };
-  const handleChoise = async (invoiceId: string) => {
+
+  const handleChoice = (invoiceId: string) => {
     navigate(`/invoice/${invoiceId}`); // Redirect to InvoiceDetail page
-  }
+  };
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-2xl font-bold">Quản Lý Hóa Đơn</h1>
+      <h1 className="text-2xl font-bold mb-6">Quản Lý Hóa Đơn</h1>
 
       {isLoadingInvoices || isLoadingRecords ? (
         <span>Loading...</span>
@@ -117,25 +119,23 @@ const ManagerInvoice: React.FC = () => {
               const record = recordsMap[invoice.medicalRecordId];
               return (
                 <tr key={invoice._id}>
-                  <td className="px-4 py-2 border-b">{record ? namesMap[record.petId] || `Pet ${record.petId}` : 'Unknown'}</td>
-                  <td className="py-2 px-4 border-b border-gray-300">{record ? namesMap[record.ownerId] || `Owner ${record.ownerId}` : 'Unknown'}</td>
+                  <td className="px-4 py-2 border-b">{record ? namesMap[record.petId] || ` ${record.petId}` : 'Unknown'}</td>
+                  <td className="py-2 px-4 border-b border-gray-300">{record ? namesMap[record.ownerId] || ` ${record.ownerId}` : 'Unknown'}</td>
                   <td className="px-4 py-2 border-b">{new Date(invoice.createdAt).toLocaleDateString()}</td>
                   <td className="px-4 py-2 border-b">{new Date(invoice.createdAt).toLocaleTimeString()}</td>
                   <td className="px-4 py-2 border-b">${invoice.total.toFixed(2)}</td>
-                  <td className="px-4 py-2 border-b">
+                  <td className="px-4 py-2 border-b flex space-x-2">
                     <button
                       onClick={() => handleDelete(invoice._id)}
-                      className="px-2 py-1 bg-red-500 text-white rounded"
+                      className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 transition"
                     >
                       <FontAwesomeIcon icon={faTrash} className="mr-1" />
-                      Delete
                     </button>
                     <button
-                      onClick={() => handleChoise(invoice._id)}
-                      className="px-2 py-1 bg-green-500 text-white rounded"
+                      onClick={() => handleChoice(invoice._id)}
+                      className="px-3 py-1 bg-green-600 text-white rounded-md hover:bg-green-700 transition"
                     >
                       <FontAwesomeIcon icon={faEye} className="mr-1" />
-                      Xem Chi tiết
                     </button>
                   </td>
                 </tr>

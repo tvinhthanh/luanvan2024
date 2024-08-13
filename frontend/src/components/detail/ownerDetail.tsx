@@ -6,7 +6,7 @@ type OwnerDetailsProps = {
     name: string;
     email: string;
     phone: string;
-    image?: string;
+    img?: string;
   };
   onClose: () => void;
 };
@@ -28,6 +28,16 @@ const OwnerDetails: React.FC<OwnerDetailsProps> = ({ owner, onClose }) => {
     .owner-details-content {
       max-width: 400px;
       width: 100%;
+      text-align: center;
+    }
+
+    .owner-image {
+      display: block;
+      margin: 0 auto 20px auto;
+      width: 150px;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 50%;
     }
   `;
 
@@ -37,12 +47,16 @@ const OwnerDetails: React.FC<OwnerDetailsProps> = ({ owner, onClose }) => {
       <div className="owner-details">
         <div className="owner-details-content">
           <h2 className="text-xl font-bold mb-4">Owner Details</h2>
+          {owner.img && (
+            <img
+              src={owner.img}
+              alt={`${owner.name}'s image`}
+              className="owner-image"
+            />
+          )}
           <p><strong>Name:</strong> {owner.name}</p>
           <p><strong>Email:</strong> {owner.email}</p>
           <p><strong>Phone:</strong> {owner.phone}</p>
-          {owner.image && (
-            <img src={owner.image} alt={`${owner.name}'s image`} className="mt-4 w-32 h-32 object-cover rounded-full" />
-          )}
           <button
             onClick={onClose}
             className="mt-4 px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-500 active:bg-gray-700 focus:outline-none focus:border-gray-700 focus:ring focus:ring-gray-200 disabled:opacity-25 transition"

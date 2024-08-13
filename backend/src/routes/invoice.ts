@@ -117,7 +117,7 @@ router.get('/', async (req: Request, res: Response) => {
 });
 
 // Route to get invoice details by ID
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/detail/:id', async (req: Request, res: Response) => {
   const { id } = req.params;
 
   try {

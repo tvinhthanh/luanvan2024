@@ -6,7 +6,9 @@ import Booking from "../models/booking";
 import UsersApp from "../models/usersApp";
 import mongoose from "mongoose";
 import Schedule from "../models/schedule";
+import { Server } from "socket.io";
 const { v4: uuidv4 } = require('uuid');
+export default (io: Server) => {
 
 const router = express.Router();
 
@@ -217,4 +219,5 @@ router.delete('/:id', async(req,res)=>{
   }
 })
 
-export default router;
+return router;
+}

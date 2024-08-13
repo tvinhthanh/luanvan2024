@@ -53,6 +53,7 @@ import Notification from "./pages/Vet-Manager/Booking/Notification";
 import BookingForm from "./pages/Vet-Manager/Booking/TestBookings";
 import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css'; // Import the CSS
+import InvoiceDetail from "./pages/Vet-Manager/Recept/InvoiceDetail";
 
 
 const App = () => {
@@ -135,7 +136,14 @@ const App = () => {
                   <CreateInvoice />
                 </Layout>
               }
-            />
+            /><Route
+            path="/invoice/:invoiceId"
+            element={
+              <Layout>
+                <InvoiceDetail />
+              </Layout>
+            }
+          />
             <Route
               path="/record-info"
               element={

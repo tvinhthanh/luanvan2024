@@ -85,7 +85,7 @@ app.use("/api/owner", ownerRoutes);
 app.use("/api/pet", petRoutes);
 app.use("/api/breed", breedRoutes);
 app.use("/api/breedType", breedTypeRoutes);
-app.use("/api/vet", vetRoutes);
+app.use("/api/vet", vetRoutes(io));
 app.use('/api/medical-records', medicalRecordRoutes);
 app.use('/api/service', serviceRoutes);
 app.use('/api/bookings', bookingsRoutes(io));
