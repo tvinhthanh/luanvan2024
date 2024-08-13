@@ -87,7 +87,7 @@ class _PhoneRegisterState extends State<PhoneRegister> {
                       children: [
                         const SizedBox(),
                         const Text(
-                          "Phone Authentication",
+                          "Đăng ký số điện thoại",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 20,
@@ -120,7 +120,7 @@ class _PhoneRegisterState extends State<PhoneRegister> {
                       keyboardType: TextInputType.phone,
                       cursorColor: Colors.purple,
                       decoration: InputDecoration(
-                        hintText: "Enter phone number",
+                        hintText: "Nhập số điện thoại",
                         hintStyle: TextStyle(
                           fontWeight: FontWeight.w500,
                           fontSize: 15,
@@ -196,12 +196,6 @@ class _PhoneRegisterState extends State<PhoneRegister> {
                                   await FirebaseAuth.instance
                                       .signInWithCredential(
                                           phoneAuthCredential);
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => BasicInfoPage(),
-                                    ),
-                                  );
                                 },
                                 verificationFailed: (error) {
                                   print(error);

@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_petcare_app/features/auth/presentation/pages/account/info_page.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/pages/home_page.dart';
 import 'package:flutter_petcare_app/main.dart';
 import 'package:http/http.dart' as http;
@@ -8,7 +9,8 @@ import 'dart:convert';
 class OTPScreenRegister extends StatefulWidget {
   final String verificationId;
   final String? phone;
-  const OTPScreenRegister({super.key, this.phone, required this.verificationId});
+  const OTPScreenRegister(
+      {super.key, this.phone, required this.verificationId});
 
   @override
   State<OTPScreenRegister> createState() => _OTPScreenRegisterState();
@@ -98,6 +100,7 @@ class _OTPScreenRegisterState extends State<OTPScreenRegister> {
                               builder: (context) => HomePage(
                                 userName: existingUser['name'],
                                 email: existingUser['email'],
+                                imageURLs: existingUser['img'],
                               ),
                             ),
                           );
@@ -105,9 +108,9 @@ class _OTPScreenRegisterState extends State<OTPScreenRegister> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                               builder: (context) => HomePage(
-                                userName: existingUser?['name'],
-                                email: existingUser?['email'],
+                              builder: (context) => BasicInfoPage(
+                                phoneNumber: widget.phone!,
+                                type:"phone",
                               ),
                             ),
                           );

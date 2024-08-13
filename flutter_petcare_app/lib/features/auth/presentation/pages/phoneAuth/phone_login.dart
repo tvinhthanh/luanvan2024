@@ -88,7 +88,7 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication> {
                       children: [
                         const SizedBox(),
                         const Text(
-                          "Phone Authentication",
+                          "Xác thực số điện thoại",
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 20,
@@ -121,7 +121,7 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication> {
                       keyboardType: TextInputType.phone,
                       cursorColor: Colors.purple,
                       decoration: InputDecoration(
-                        hintText: "Enter phone number",
+                        hintText: "Nhập số điện thoại",
                         hintStyle: TextStyle(
                           fontWeight: FontWeight.w500,
                           fontSize: 15,
@@ -197,12 +197,6 @@ class _PhoneAuthenticationState extends State<PhoneAuthentication> {
                                   await FirebaseAuth.instance
                                       .signInWithCredential(
                                           phoneAuthCredential);
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => BasicInfoPage(),
-                                    ),
-                                  );
                                 },
                                 verificationFailed: (error) {
                                   print(error);

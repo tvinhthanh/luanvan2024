@@ -20,15 +20,6 @@ class _OTPScreenState extends State<OTPScreen> {
   TextEditingController otpController = TextEditingController();
   bool isLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    // Tắt reCAPTCHA cho thử nghiệm
-    FirebaseAuth.instance.setSettings(
-      appVerificationDisabledForTesting: true,
-    );
-  }
-
   // Hàm lấy thông tin người dùng từ MongoDB
   Future<Map<String, dynamic>?> getUserInfo(String phoneNumber) async {
     final Uri url = Uri.parse(
@@ -81,7 +72,7 @@ class _OTPScreenState extends State<OTPScreen> {
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: "000000",
-                  labelText: "Enter the OTP",
+                  labelText: "Nhập mã OTP",
                 ),
               ),
             ),
@@ -117,9 +108,9 @@ class _OTPScreenState extends State<OTPScreen> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => HomePage(
-                                userName: existingUser?['name'],
-                                email: existingUser?['email'],
+                              builder: (context) => BasicInfoPage(
+                                phoneNumber: widget.phone!,
+                                type:"phone",
                               ),
                             ),
                           );
