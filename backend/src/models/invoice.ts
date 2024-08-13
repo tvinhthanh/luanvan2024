@@ -6,7 +6,7 @@ import Medic from "./medical";
 
 const InvoiceSchema: Schema = new Schema({
   //id tự sinh trong mongo
-  _id : {type: String , required: false},
+  _id : {type: String , required: true},
   medicalRecordId: { type: String, ref: Medic, required: true },
   medications: [{ type: String, ref: Medication}],
   services: [{ type: String, ref: Service }],
