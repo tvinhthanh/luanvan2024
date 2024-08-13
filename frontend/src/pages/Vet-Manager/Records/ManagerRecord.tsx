@@ -31,7 +31,7 @@ const ManagerRecord: React.FC = () => {
   );
 
   const deleteRecordMutation = useMutation(
-    (recordId: string) => apiClient.deleteRecordById(recordId),
+    (recordId: string) => apiClient.deleteMedicalRecord(recordId),
     {
       onSuccess: () => {
         queryClient.invalidateQueries("fetchRecordForVet");

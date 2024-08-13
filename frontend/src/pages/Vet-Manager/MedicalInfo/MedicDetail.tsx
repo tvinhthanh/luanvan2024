@@ -93,6 +93,7 @@ const MedicalRecordDetail: React.FC = () => {
 
     try {
       await deleteMedicalRecordMutation.mutateAsync(recordId);
+      navigate(`/medical-record`)
     } catch (error) {
       console.error("Error deleting medical record:", error);
     }
@@ -165,7 +166,7 @@ const MedicalRecordDetail: React.FC = () => {
                 <strong>Tên:</strong> {medication.name}
               </p>
               <p>
-                <strong>Giá:</strong> ${parseFloat(medication.price.toString()).toFixed(2)}
+                <strong>Giá:</strong> {parseFloat(medication.price.toString()).toFixed(3)} VNĐ
               </p>
               <p>
                 <strong>--------------------</strong>

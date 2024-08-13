@@ -36,7 +36,7 @@ const EditMed: React.FC = () => {
         vetId: id_vet,
         quantity,
       };
-      await apiClient.updateMedication(updatedMedication);
+      await apiClient.updateMedication(medication._id,updatedMedication);
       // Show success toast and navigate back
       toast.success('Medication updated successfully!');
       navigate('/my-vet/med');
@@ -76,7 +76,7 @@ const EditMed: React.FC = () => {
         <input
           type="number"
           placeholder="Price"
-          value={price.toFixed(3)}
+          value={price}
           onChange={(e) => setPrice(Number(e.target.value))} // Convert string to number
           className="border border-gray-300 rounded-md p-2"
         />

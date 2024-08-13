@@ -190,7 +190,7 @@ const AddMedicalRecordWithBookId: React.FC = () => {
             <option value="">Select Medication</option>
             {availableMedications.map((medication) => (
               <option key={medication._id} value={medication._id}>
-                {medication.name} - {medication.dosage} - {medication.instructions}
+                {medication.name} - {medication.dosage} - {medication.instructions} - {medication.price.toFixed(3)} VND
               </option>
             ))}
           </select>
@@ -208,13 +208,13 @@ const AddMedicalRecordWithBookId: React.FC = () => {
           </button>
           <ul className="mt-2">
             {medications.map((med, index) => (
-              <li key={index} className="flex justify-between items-center">
-                {med.name} - {med.dosage} - {med.instructions}
+              <li key={med._id} className="flex items-center justify-between p-2 border-b border-gray-300">
+              {med.name} - {med.dosage} - {med.instructions}
 
                 <button
                   type="button"
                   onClick={() => handleRemoveMedication(index)}
-                  className="ml-2 bg-red-500 text-white p-1 rounded-md"
+                  className="text-red-500"
                 >
                   Remove
                 </button>

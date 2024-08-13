@@ -81,13 +81,20 @@ router.put('/:id', verifyToken, async (req: Request, res: Response) => {
 // Delete a medical record by ID (for vet)
 router.delete('/detail/:medicId', async (req: Request, res: Response) => {
   try {
-    const { medicId } = req.params; // Extracting the medicId from the route parameters
+    const { medicId,bookingsId } = req.params; // Extracting the medicId from the route parameters
     const deletedMedic = await medicalRecord.findOneAndDelete({ _id: medicId }); // Use _id to match MongoDB's default identifier
 
     if (!deletedMedic) {
       return res.status(404).json({ error: 'Medical record not found' });
     }
-
+    const updatedBooking = await Booking.findByIdAndUpdate(
+      bookingsId,
+      { status: "3" },
+      { new: true }
+    );
+    if (!updatedBooking) {
+      return res.status(404).json({ error: 'Booking not found' });
+    }
     res.status(200).json({ message: 'Medical record deleted' });
   } catch (error) {
     console.error('Error deleting medical record:', error);

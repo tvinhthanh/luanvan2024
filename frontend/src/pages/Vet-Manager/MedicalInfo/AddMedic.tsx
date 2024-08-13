@@ -11,7 +11,6 @@ const AddMedicalRecord: React.FC = () => {
   const [ownerId, setOwnerId] = useState("");
   const [ownerPhone, setOwnerPhone] = useState("");
   const [ownerEmail, setOwnerEmail] = useState("");
-  const [recordId, setRecordId] = useState<string>("");
   const [visitDate, setVisitDate] = useState(""); // Sửa đây để có thể thay đổi giá trị
   const [reasonForVisit, setReasonForVisit] = useState("");
   const [symptoms, setSymptoms] = useState("");
@@ -271,7 +270,7 @@ const AddMedicalRecord: React.FC = () => {
             <option value="">Chọn thuốc</option>
             {availableMedications.map((med) => (
               <option key={med._id} value={med._id}>
-                {med.name} - {med.price} VND
+                {med.name} - {med.dosage} - {med.instructions} - {med.price.toFixed(3)} VND
               </option>
             ))}
           </select>
@@ -285,7 +284,7 @@ const AddMedicalRecord: React.FC = () => {
           <ul className="mt-4">
             {medications.map((med, index) => (
               <li key={med._id} className="flex items-center justify-between p-2 border-b border-gray-300">
-                <span>{med.name}</span>
+              <span> {med.name} - {med.dosage} - {med.instructions} </span>
                 <button
                   type="button"
                   onClick={() => handleRemoveMedication(index)}
