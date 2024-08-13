@@ -16,9 +16,10 @@ router.get('/appointment/:email', async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    const schedules = await Schedule.find({ owner_id: user._id, type: "LH" });
+    // Fetch all schedules for the user without filtering by type
+    const schedules = await Schedule.find({ owner_id: user._id });
     if (schedules.length === 0) {
-      return res.status(404).json({ message: 'No schedules found with type "LH"' });
+      return res.status(404).json({ message: 'No schedules found' });
     }
 
     res.status(200).json(schedules);
@@ -27,6 +28,7 @@ router.get('/appointment/:email', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 // Endpoint thêm sự kiện mới
 router.post('/events/add/:email', async (req, res) => {
