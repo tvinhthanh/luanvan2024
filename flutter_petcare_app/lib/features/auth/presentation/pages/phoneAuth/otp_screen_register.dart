@@ -89,7 +89,6 @@ class _OTPScreenRegisterState extends State<OTPScreenRegister> {
                           verificationId: widget.verificationId,
                           smsCode: otpController.text,
                         );
-
                         await FirebaseAuth.instance
                             .signInWithCredential(credential);
                         final existingUser = await getUserInfo(widget.phone!);

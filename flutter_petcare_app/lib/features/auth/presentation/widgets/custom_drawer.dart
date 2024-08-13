@@ -8,7 +8,9 @@ import 'package:flutter_petcare_app/features/auth/presentation/pages/pet/chooseB
 class CustomDrawer extends StatelessWidget {
   final String? userName;
   final String? email;
-  const CustomDrawer({super.key, this.userName, this.email});
+  final String? imageURLs;
+  
+  const CustomDrawer({super.key, this.userName, this.email, this.imageURLs});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +32,10 @@ class CustomDrawer extends StatelessWidget {
                     children: [
                       CircleAvatar(
                         radius: 25,
-                        backgroundImage: AssetImage("assets/Image/Icon_User.png"),
+                        backgroundImage: imageURLs != null 
+                            ? NetworkImage(imageURLs!)
+                            : AssetImage("assets/Image/Icon_User.png") 
+                                as ImageProvider,
                       ),
                       SizedBox(width: 10),
                       Column(
@@ -42,7 +47,7 @@ class CustomDrawer extends StatelessWidget {
                             style: TextStyle(fontSize: 16, color: Colors.white),
                           ),
                           Text(
-                            '${userName}',
+                            userName ?? 'User',
                             style: TextStyle(fontSize: 16, color: Colors.white),
                           ),
                         ],
@@ -64,7 +69,12 @@ class CustomDrawer extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => ChooseBreedTypePage(userName: userName, email: email,)),
+                  builder: (context) => ChooseBreedTypePage(
+                    userName: userName,
+                    email: email,
+                    imageURLs: imageURLs
+                  ),
+                ),
               );
             },
             child: Column(
@@ -73,14 +83,10 @@ class CustomDrawer extends StatelessWidget {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.black,
-                      border: Border(
-                        bottom: BorderSide(width: 1, color: Colors.grey),
-                        top: BorderSide(width: 1, color: Colors.grey),
-                        left: BorderSide(width: 1, color: Colors.grey),
-                        right: BorderSide(width: 1, color: Colors.grey),
-                      )),
+                    shape: BoxShape.circle,
+                    color: Colors.black,
+                    border: Border.all(width: 1, color: Colors.grey),
+                  ),
                   child: Icon(Icons.add, color: Colors.grey),
                 ),
                 SizedBox(height: 5),
@@ -103,7 +109,12 @@ class CustomDrawer extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => HomePage(userName: userName, email: email,)),
+                  builder: (context) => HomePage(
+                    userName: userName,
+                    email: email,
+                    imageURLs: imageURLs,
+                  ),
+                ),
               );
             },
           ),
@@ -117,7 +128,12 @@ class CustomDrawer extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => ContactPage(userName: userName, email: email,)),
+                  builder: (context) => ContactPage(
+                    userName: userName,
+                    email: email,
+                    imageURLs: imageURLs,
+                  ),
+                ),
               );
             },
           ),
@@ -131,7 +147,12 @@ class CustomDrawer extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => CalendarPage(userName: userName, email: email)),
+                  builder: (context) => CalendarPage(
+                    userName: userName,
+                    email: email,
+                    imageURLs: imageURLs
+                  ),
+                ),
               );
             },
           ),
@@ -146,7 +167,12 @@ class CustomDrawer extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => AccountPage(userName: userName, email: email)),
+                  builder: (context) => AccountPage(
+                    userName: userName,
+                    email: email,
+                    imageURLs: imageURLs,
+                  ),
+                ),
               );
             },
           ),
@@ -160,7 +186,12 @@ class CustomDrawer extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => HomePage(userName: userName, email: email)),
+                  builder: (context) => HomePage(
+                    userName: userName,
+                    email: email,
+                    imageURLs: imageURLs
+                  ),
+                ),
               );
             },
           ),

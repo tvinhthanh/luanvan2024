@@ -12,8 +12,8 @@ import 'package:http/http.dart' as http;
 class AccountPage extends StatefulWidget {
   final String? userName;
   final String? email;
-
-  const AccountPage({Key? key, this.userName, this.email}) : super(key: key);
+  final String? imageURLs;
+  const AccountPage({Key? key, this.userName, this.email, this.imageURLs}) : super(key: key);
 
   @override
   _AccountPageState createState() => _AccountPageState();
@@ -49,7 +49,7 @@ class _AccountPageState extends State<AccountPage> {
     }
   }
 
-    Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
+  Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -96,51 +96,74 @@ class _AccountPageState extends State<AccountPage> {
       setState(() {
         _image = File(pickedFile.path);
       });
+
+      // Upload image to Cloudinary
+      await _uploadImageToCloudinary(_image!);
+    }
+  }
+
+  Future<void> _uploadImageToCloudinary(File image) async {
+    final cloudinaryUrl = 'https://api.cloudinary.com/v1_1/dop4jetlx/image/upload';
+    final preset = 'ftpphxq2'; // Set this up in your Cloudinary account
+
+    final request = http.MultipartRequest('POST', Uri.parse(cloudinaryUrl));
+    request.fields['upload_preset'] = preset;
+    request.files.add(await http.MultipartFile.fromPath('file', image.path));
+
+    final response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseData = await response.stream.bytesToString();
+      final jsonData = jsonDecode(responseData);
+      setState(() {
+        _imageUrl = jsonData['secure_url']; // Update image URL with Cloudinary URL
+      });
+    } else {
+      print('Failed to upload image to Cloudinary');
     }
   }
 
   Future<void> _updateUserInfo() async {
-  final String apiUrl = 'http://${Ip.serverIP}:3000/api/usersApp/userInfo/update/${widget.email}';
-  final Map<String, String> headers = {
-    'Content-Type': 'application/json',
-  };
+    final String apiUrl = 'http://${Ip.serverIP}:3000/api/usersApp/userInfo/update/${widget.email}';
+    final Map<String, String> headers = {
+      'Content-Type': 'application/json',
+    };
 
-  final Map<String, dynamic> userData = {
-    'name': _nameController.text,
-    'img': _image != null ? _image!.path : _imageUrl, // Sử dụng _imageUrl nếu không có hình ảnh mới
-  };
+    final Map<String, dynamic> userData = {
+      'name': _nameController.text,
+      'img': _imageUrl, // Use the Cloudinary image URL
+    };
 
-  try {
-    final response = await http.put(
-      Uri.parse(apiUrl),
-      headers: headers,
-      body: jsonEncode(userData),
-    );
+    try {
+      final response = await http.put(
+        Uri.parse(apiUrl),
+        headers: headers,
+        body: jsonEncode(userData),
+      );
 
-    if (response.statusCode == 200) {
-      final updatedUser = jsonDecode(response.body);
-      setState(() {
-        _imageUrl = updatedUser['img'] ?? _imageUrl; // Cập nhật _imageUrl từ phản hồi server
-      });
+      if (response.statusCode == 200) {
+        final updatedUser = jsonDecode(response.body);
+        setState(() {
+          _imageUrl = updatedUser['img'] ?? _imageUrl; // Update _imageUrl from server response
+        });
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('User information updated successfully'),
+          duration: Duration(seconds: 2),
+        ));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Failed to update user information'),
+          duration: Duration(seconds: 2),
+        ));
+      }
+    } catch (error) {
+      print('Error updating user: $error');
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('User information updated successfully'),
-        duration: Duration(seconds: 2),
-      ));
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text('Failed to update user information'),
+        content: Text('Failed to update user information. Please try again later.'),
         duration: Duration(seconds: 2),
       ));
     }
-  } catch (error) {
-    print('Error updating user: $error');
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Failed to update user information. Please try again later.'),
-      duration: Duration(seconds: 2),
-    ));
   }
-}
-
 
   @override
   void dispose() {
@@ -185,7 +208,7 @@ class _AccountPageState extends State<AccountPage> {
                 radius: 50,
                 backgroundImage: _image != null
                     ? FileImage(_image!)
-                    : (_imageUrl.isNotEmpty ? AssetImage("assets/Image/$_imageUrl") as ImageProvider : null),
+                    : (_imageUrl.isNotEmpty ? NetworkImage(_imageUrl) as ImageProvider : null),
                 child: (_image == null && _imageUrl.isEmpty) ? Icon(Icons.add_a_photo, size: 50) : null,
               ),
             ),
@@ -223,7 +246,7 @@ class _AccountPageState extends State<AccountPage> {
           ],
         ),
       ),
-      drawer: CustomDrawer(userName: _nameController.text, email: _emailController.text),
+      drawer: CustomDrawer(userName: _nameController.text, email: _emailController.text, imageURLs: _imageUrl,),
     );
   }
 }

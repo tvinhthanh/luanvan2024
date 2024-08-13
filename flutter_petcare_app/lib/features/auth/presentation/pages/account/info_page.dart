@@ -40,6 +40,10 @@ class _BasicInfoPageState extends State<BasicInfoPage> {
     nameController = TextEditingController(text: widget.name);
     emailController = TextEditingController(text: widget.email);
     phoneNumberController = TextEditingController(text: widget.phoneNumber);
+    print('Name: ${widget.name}');
+    print('Email: ${widget.email}');
+    print('Phone Number: ${widget.phoneNumber}');
+    print('Type: ${widget.type}');
   }
 
   @override
@@ -63,7 +67,7 @@ class _BasicInfoPageState extends State<BasicInfoPage> {
       "email": emailController.text,
       "phone": phoneNumberController.text,
       "img": imageUrl,
-      "type": widget.type, // Include the type in the userInfo map
+      "type": widget.type,
     };
 
     final response = await saveUserInfo(userInfo);
@@ -82,6 +86,7 @@ class _BasicInfoPageState extends State<BasicInfoPage> {
           builder: (context) => HomePage(
             userName: nameController.text,
             email: emailController.text,
+            imageURLs: imageUrl,
           ),
         ),
       );
@@ -91,8 +96,25 @@ class _BasicInfoPageState extends State<BasicInfoPage> {
   }
 
   Future<String> uploadImage(File image) async {
-    // Implement your image upload logic here and return the image URL
-    return "uploaded_image_url";
+    final url =
+        Uri.parse('https://api.cloudinary.com/v1_1/dop4jetlx/image/upload');
+    const uploadPreset = 'ftpphxq2';
+    // Create a multipart request to upload the file
+    final request = http.MultipartRequest('POST', url)
+      ..fields['upload_preset'] = uploadPreset
+      ..files.add(await http.MultipartFile.fromPath('file', image.path));
+
+    // Send the request
+    final response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+      return jsonResponse['secure_url']; // Return the URL of the uploaded image
+    } else {
+      throw Exception(
+          'Failed to upload image. Status code: ${response.statusCode}');
+    }
   }
 
   Future<bool> saveUserInfo(Map<String, dynamic> userInfo) async {

@@ -1,24 +1,30 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_petcare_app/core/theme/app_pallete.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/pages/home_page.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/pages/loginSignup/login_page.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/widgets/custom_drawer.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_petcare_app/main.dart';
-
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
+import 'dart:convert';
 
 class AddPetPage extends StatefulWidget {
   final String? email;
   final String? userName;
+  final String? imageURLs;
   final String breedId;
   final String breedType;
-  const AddPetPage(
-      {Key? key,
-      required this.email,
-       this.userName,
-      required this.breedId,
-      required this.breedType})
-      : super(key: key);
+
+  const AddPetPage({
+    Key? key,
+    this.imageURLs,
+    required this.email,
+    this.userName,
+    required this.breedId,
+    required this.breedType,
+  }) : super(key: key);
 
   @override
   State<AddPetPage> createState() => _AddPetPageState();
@@ -26,37 +32,33 @@ class AddPetPage extends StatefulWidget {
 
 class _AddPetPageState extends State<AddPetPage> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   final TextEditingController nameController = TextEditingController();
   final TextEditingController ageController = TextEditingController();
   final TextEditingController weightController = TextEditingController();
-  final TextEditingController sexController = TextEditingController();
   final TextEditingController imgController = TextEditingController();
-  final TextEditingController breedIdController = TextEditingController();
   final TextEditingController breedTypeController = TextEditingController();
+
+  String? selectedSex; // To store the selected sex
+  final ImagePicker _picker = ImagePicker(); // Image picker instance
 
   @override
   void initState() {
     super.initState();
-    breedIdController.text =
-        widget.breedId; // Gán giá trị từ widget vào controller
-    breedTypeController.text =
-        widget.breedType; // Gán giá trị từ widget vào controller
+    breedTypeController.text = widget.breedType;
+    imgController.text =
+        widget.imageURLs ?? ''; // Show existing image URL if available
   }
 
   Future<void> addPet() async {
-    final String url =
-        'http://${Ip.serverIP}:3000/api/pet/add/${widget.email}';
+    final String url = 'http://${Ip.serverIP}:3000/api/pet/add/${widget.email}';
     final Map<String, String> body = {
       'name': nameController.text,
       'age': ageController.text,
       'weight': weightController.text,
-      'breed_id': widget
-          .breedId, // Thay thế giá trị từ controller bằng giá trị từ widget
-      'sex': sexController.text,
-      'breed_type': widget
-          .breedType, // Thay thế giá trị từ controller bằng giá trị từ widget
-      'img': imgController.text,
+      'breed_id': widget.breedId,
+      'sex': selectedSex ?? '', // Use selected sex
+      'breed_type': widget.breedType,
+      'img': imgController.text, // Use the uploaded image URL
     };
 
     try {
@@ -69,17 +71,49 @@ class _AddPetPageState extends State<AddPetPage> {
       );
 
       if (response.statusCode == 201) {
-        // Thêm thành công, hiển thị dialog
         showAddPetResultDialog(true);
       } else {
-        // Hiển thị dialog với thông báo thất bại
         showAddPetResultDialog(false);
         print('Failed to add pet: ${response.statusCode}');
       }
     } catch (error) {
-      // Hiển thị dialog với thông báo thất bại
       showAddPetResultDialog(false);
       print('Error adding pet: $error');
+    }
+  }
+
+  Future<String> uploadImage(File image) async {
+    final url =
+        Uri.parse('https://api.cloudinary.com/v1_1/dop4jetlx/image/upload');
+    const uploadPreset = 'ftpphxq2';
+
+    final request = http.MultipartRequest('POST', url)
+      ..fields['upload_preset'] = uploadPreset
+      ..files.add(await http.MultipartFile.fromPath('file', image.path));
+
+    final response = await request.send();
+
+    if (response.statusCode == 200) {
+      final responseBody = await response.stream.bytesToString();
+      final jsonResponse = json.decode(responseBody);
+      return jsonResponse['secure_url']; // Return the URL of the uploaded image
+    } else {
+      throw Exception(
+          'Failed to upload image. Status code: ${response.statusCode}');
+    }
+  }
+
+  Future<void> _selectImage() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
+      try {
+        String imageUrl = await uploadImage(File(image.path));
+        setState(() {
+          imgController.text = imageUrl; // Store the uploaded image URL
+        });
+      } catch (e) {
+        print('Error uploading image: $e');
+      }
     }
   }
 
@@ -103,15 +137,16 @@ class _AddPetPageState extends State<AddPetPage> {
             TextButton(
               child: Text('OK'),
               onPressed: () {
-                Navigator.of(context).pop(); // Đóng dialog
+                Navigator.of(context).pop();
                 if (success) {
-                  // Chuyển đến trang HomePage khi thêm pet thành công
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (context) => HomePage(
-                            userName: widget.userName,
-                            email: widget.email)),
+                              userName: widget.userName,
+                              email: widget.email,
+                              imageURLs: widget.imageURLs,
+                            )),
                   );
                 }
               },
@@ -122,7 +157,7 @@ class _AddPetPageState extends State<AddPetPage> {
     );
   }
 
-   Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
+  Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -146,10 +181,7 @@ class _AddPetPageState extends State<AddPetPage> {
             TextButton(
               child: Text('Logout'),
               onPressed: () async {
-                // Sign out from Firebase
                 await FirebaseAuth.instance.signOut();
-
-                // Navigate to LoginPage
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => LoginPage()),
@@ -208,7 +240,6 @@ class _AddPetPageState extends State<AddPetPage> {
               ),
               TextField(
                 controller: ageController,
-                
                 decoration: InputDecoration(
                   labelText: 'Age',
                   labelStyle: TextStyle(color: Colors.white),
@@ -223,22 +254,34 @@ class _AddPetPageState extends State<AddPetPage> {
                 ),
                 style: TextStyle(color: Colors.white),
               ),
-              TextField(
-                controller: breedIdController,
-                enabled: false,
-                decoration: InputDecoration(
-                  labelText: 'Breed ID',
-                  labelStyle: TextStyle(color: Colors.white),
-                ),
-                style: TextStyle(color: Colors.white),
-              ),
-              TextField(
-                controller: sexController,
-                decoration: InputDecoration(
-                  labelText: 'Sex',
-                  labelStyle: TextStyle(color: Colors.white),
-                ),
-                style: TextStyle(color: Colors.white),
+              // Radio buttons for selecting sex
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Text('Sex:', style: TextStyle(color: Colors.white)),
+                  Radio<String>(
+                    value: 'Male',
+                    groupValue: selectedSex,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedSex = value;
+                      });
+                    },
+                    activeColor: Colors.blue,
+                  ),
+                  Text('Male', style: TextStyle(color: Colors.white)),
+                  Radio<String>(
+                    value: 'Female',
+                    groupValue: selectedSex,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedSex = value;
+                      });
+                    },
+                    activeColor: Colors.blue,
+                  ),
+                  Text('Female', style: TextStyle(color: Colors.white)),
+                ],
               ),
               TextField(
                 controller: breedTypeController,
@@ -252,10 +295,12 @@ class _AddPetPageState extends State<AddPetPage> {
               TextField(
                 controller: imgController,
                 decoration: InputDecoration(
-                  labelText: 'Image URL',
+                  labelText: 'Image URL (Tap to select)',
                   labelStyle: TextStyle(color: Colors.white),
                 ),
                 style: TextStyle(color: Colors.white),
+                onTap: _selectImage, // Open image picker on tap
+                readOnly: true, // Make the text field read-only
               ),
               SizedBox(height: 20),
               ElevatedButton(
@@ -265,14 +310,14 @@ class _AddPetPageState extends State<AddPetPage> {
                   style: TextStyle(color: Colors.white),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
+                  backgroundColor: AppPallete.button  
                 ),
               ),
             ],
           ),
         ),
       ),
-      drawer: CustomDrawer(userName: widget.userName, email: widget.email,),
+      drawer: CustomDrawer(userName: widget.userName),
     );
   }
 }

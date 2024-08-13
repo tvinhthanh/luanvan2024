@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_petcare_app/core/theme/app_pallete.dart';
-import 'package:flutter_petcare_app/features/auth/presentation/pages/calendar/calendar_page.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/pages/home_page.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/pages/loginSignup/login_page.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/widgets/custom_drawer.dart';
@@ -13,10 +12,15 @@ import 'dart:convert';
 class BookingPage extends StatefulWidget {
   final String? userName;
   final String? email;
+  final String? imageURLs;
   final Map<String, dynamic> clinicName;
 
   const BookingPage(
-      {Key? key, this.userName, this.email, required this.clinicName})
+      {Key? key,
+      this.userName,
+      this.email,
+      this.imageURLs,
+      required this.clinicName})
       : super(key: key);
 
   @override
@@ -84,7 +88,7 @@ class _BookingPageState extends State<BookingPage> {
     }
   }
 
-    Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
+  Future<void> _showLogoutConfirmationDialog(BuildContext context) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -154,8 +158,10 @@ class _BookingPageState extends State<BookingPage> {
               children: [
                 CircleAvatar(
                   backgroundImage: selectedPet.isNotEmpty
-                      ? AssetImage('assets/Image/${selectedPet['img']}')
-                      : AssetImage('assets/Image/default_pet.png'),
+                      ? NetworkImage(selectedPet['img'].toString())
+                      : AssetImage('assets/Image/default_pet.png')
+                          as ImageProvider<
+                              Object>, // Cast to ImageProvider<Object>
                   radius: 20,
                 ),
                 SizedBox(width: 8),
@@ -393,7 +399,10 @@ class _BookingPageState extends State<BookingPage> {
                                     Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) => HomePage(userName: widget.userName,email: widget.email,)),
+                                          builder: (context) => HomePage(
+                                                userName: widget.userName,
+                                                email: widget.email,
+                                              )),
                                     );
                                     ;
                                   },
@@ -426,6 +435,7 @@ class _BookingPageState extends State<BookingPage> {
       drawer: CustomDrawer(
         userName: widget.userName,
         email: widget.email,
+        imageURLs: widget.imageURLs,
       ),
     );
   }

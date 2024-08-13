@@ -83,7 +83,7 @@ class _GoogleAuthenticationState extends State<GoogleAuthentication> {
             email: user.email,
             name: user.displayName ?? "",
             phoneNumber: user.phoneNumber ?? "",
-            type: "google", // Set type to "google"
+            type: "google", 
           ),
         ),
       );

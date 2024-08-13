@@ -39,7 +39,8 @@ class Breed {
 class ChooseBreedTypePage extends StatefulWidget {
   final String? userName;
   final String? email;
-  const ChooseBreedTypePage({super.key, this.userName, this.email});
+  final String? imageURLs;
+  const ChooseBreedTypePage({super.key, this.userName, this.email, this.imageURLs});
 
   @override
   State<ChooseBreedTypePage> createState() => _ChooseBreedTypePageState();
@@ -150,7 +151,7 @@ class _ChooseBreedTypePageState extends State<ChooseBreedTypePage> {
           ),
         ],
       ),
-      drawer: CustomDrawer(userName: widget.userName, email: widget.email,),
+      drawer: CustomDrawer(userName: widget.userName, email: widget.email, imageURLs: widget.imageURLs,),
       body: Stack(
         children: [
           Positioned(
@@ -300,7 +301,7 @@ class _ChooseBreedTypePageState extends State<ChooseBreedTypePage> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => AddPetPage(email: widget.email,userName: widget.userName, breedId: selectedBreedType!.id, breedType: selectedBreedName,)),
+                      MaterialPageRoute(builder: (context) => AddPetPage(email: widget.email,userName: widget.userName, imageURLs: widget.imageURLs, breedId: selectedBreedType!.id, breedType: selectedBreedName,)),
                     );
                   },
                   child: Text('Continue'),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_petcare_app/core/theme/app_pallete.dart';
+import 'package:flutter_petcare_app/features/auth/presentation/pages/googleAuth/google_auth.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/pages/loginSignup/login_page.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/pages/pet/detailPet_page.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/widgets/custom_drawer.dart';
@@ -11,8 +12,9 @@ import 'dart:convert';
 class HomePage extends StatefulWidget {
   final String? userName;
   final String? email;
+  final String? imageURLs;
 
-  const HomePage({Key? key, this.userName, this.email}) : super(key: key);
+  const HomePage({Key? key, this.userName, this.email, this.imageURLs}) : super(key: key);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -113,7 +115,7 @@ class _HomePageState extends State<HomePage> {
                     ),
         ],
       ),
-      drawer: CustomDrawer(userName: widget.userName, email: widget.email),
+      drawer: CustomDrawer(userName: widget.userName, email: widget.email, imageURLs: widget.imageURLs,),
     );
   }
 
@@ -143,7 +145,8 @@ class _HomePageState extends State<HomePage> {
               onPressed: () async {
                 // Sign out from Firebase
                 await FirebaseAuth.instance.signOut();
-
+                // Sign out from Firebase
+                await FirebaseServices().googleSignOut();
                 // Navigate to LoginPage
                 Navigator.pushReplacement(
                   context,
@@ -185,8 +188,8 @@ class _HomePageState extends State<HomePage> {
                 height: 100,
                 padding: EdgeInsets.only(bottom: 10),
                 child: ClipOval(
-                  child: Image.asset(
-                    'assets/Image/${pet['img'].toString()}',
+                  child: Image.network(
+                    '${pet['img'].toString()}',
                     fit: BoxFit.cover,
                   ),
                 ),

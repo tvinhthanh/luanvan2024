@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/pages/account/info_page.dart';
-import 'package:flutter_petcare_app/features/auth/presentation/pages/phoneAuth/otp_screen.dart';
 import 'package:flutter_petcare_app/features/auth/presentation/pages/phoneAuth/otp_screen_register.dart';
 
 class PhoneRegister extends StatefulWidget {

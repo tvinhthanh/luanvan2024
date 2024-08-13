@@ -11,8 +11,8 @@ import 'package:table_calendar/table_calendar.dart';
 class CalendarPage extends StatefulWidget {
   final String? userName;
   final String? email;
-
-  const CalendarPage({Key? key, this.userName, this.email}) : super(key: key);
+  final String? imageURLs;
+  const CalendarPage({Key? key, this.userName, this.email, this.imageURLs}) : super(key: key);
 
   @override
   State<CalendarPage> createState() => _CalendarPageState();
@@ -418,6 +418,7 @@ class _CalendarPageState extends State<CalendarPage> {
       drawer: CustomDrawer(
         userName: widget.userName,
         email: widget.email,
+        imageURLs: widget.imageURLs
       ),
       body: Column(
         children: [

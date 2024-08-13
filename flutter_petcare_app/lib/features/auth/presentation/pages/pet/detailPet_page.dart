@@ -340,8 +340,8 @@ class _DetailPetPageState extends State<DetailPetPage> {
                           )
                         : DecorationImage(
                             fit: BoxFit.cover,
-                            image: AssetImage(
-                                'assets/Image/${widget.pet['img'].toString()}'),
+                            image: NetworkImage(
+                                '${widget.pet['img'].toString()}'),
                           ),
                   ),
                 ),

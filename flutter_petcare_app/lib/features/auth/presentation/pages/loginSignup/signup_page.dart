@@ -54,6 +54,7 @@ class _SignupPageState extends State<SignupPage> {
           builder: (context) => BasicInfoPage(
             email: emailController.text,
             name: nameController.text,
+            type: "user",
           ),
         ),
       );

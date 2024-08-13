@@ -9,6 +9,7 @@ import 'dart:convert';
 class OTPScreen extends StatefulWidget {
   final String verificationId;
   final String? phone;
+
   const OTPScreen({super.key, this.phone, required this.verificationId});
 
   @override
@@ -17,7 +18,16 @@ class OTPScreen extends StatefulWidget {
 
 class _OTPScreenState extends State<OTPScreen> {
   TextEditingController otpController = TextEditingController();
-  bool isLoadin = false;
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Tắt reCAPTCHA cho thử nghiệm
+    FirebaseAuth.instance.setSettings(
+      appVerificationDisabledForTesting: true,
+    );
+  }
 
   // Hàm lấy thông tin người dùng từ MongoDB
   Future<Map<String, dynamic>?> getUserInfo(String phoneNumber) async {
@@ -55,7 +65,7 @@ class _OTPScreenState extends State<OTPScreen> {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20),
               child: Text(
-                "We need to register your phone number by using a one-time OTP code verfification.",
+                "We need to register your phone number by using a one-time OTP code verification.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 18,
@@ -76,14 +86,14 @@ class _OTPScreenState extends State<OTPScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            isLoadin
+            isLoading
                 ? const CircularProgressIndicator()
                 : ElevatedButton(
                     style:
                         ElevatedButton.styleFrom(backgroundColor: Colors.green),
                     onPressed: () async {
                       setState(() {
-                        isLoadin = true;
+                        isLoading = true;
                       });
                       try {
                         final credential = PhoneAuthProvider.credential(
@@ -107,7 +117,7 @@ class _OTPScreenState extends State<OTPScreen> {
                           Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                               builder: (context) => HomePage(
+                              builder: (context) => HomePage(
                                 userName: existingUser?['name'],
                                 email: existingUser?['email'],
                               ),
@@ -118,7 +128,7 @@ class _OTPScreenState extends State<OTPScreen> {
                         print(e);
                       }
                       setState(() {
-                        isLoadin = false;
+                        isLoading = false;
                       });
                     },
                     child: const Text(
@@ -128,7 +138,8 @@ class _OTPScreenState extends State<OTPScreen> {
                         fontSize: 16,
                         color: Colors.white,
                       ),
-                    ))
+                    ),
+                  ),
           ],
         ),
       ),

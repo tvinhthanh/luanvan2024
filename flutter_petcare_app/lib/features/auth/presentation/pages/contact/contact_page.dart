@@ -11,9 +11,9 @@ import 'dart:convert';
 class ContactPage extends StatefulWidget {
   final String? userName;
   final String? email;
-  
+  final String? imageURLs;
 
-  const ContactPage({Key? key, this.userName, this.email,})
+  const ContactPage({Key? key, this.userName, this.email,this.imageURLs})
       : super(key: key);
 
   @override
@@ -225,7 +225,7 @@ class _ContactPageState extends State<ContactPage> {
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => ContactDetailPage(
-                                      clinicName: clinic, email: widget.email,userName: widget.userName,),
+                                      clinicName: clinic, email: widget.email,userName: widget.userName,imageURLs: widget.imageURLs),
                                 ),
                               );
                             },
@@ -237,7 +237,7 @@ class _ContactPageState extends State<ContactPage> {
                 ),
               ),
             ),
-      drawer: CustomDrawer(userName: widget.userName, email: widget.email),
+      drawer: CustomDrawer(userName: widget.userName, email: widget.email, imageURLs: widget.imageURLs,),
     );
   }
 }

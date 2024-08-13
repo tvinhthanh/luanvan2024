@@ -11,10 +11,11 @@ import 'dart:convert';
 class ContactDetailPage extends StatefulWidget {
   final String? userName;
   final String? email;
+  final String? imageURLs;
   final Map<String, dynamic> clinicName;
 
   const ContactDetailPage(
-      {Key? key, this.userName, this.email, required this.clinicName})
+      {Key? key, this.userName, this.email, required this.clinicName, this.imageURLs})
       : super(key: key);
 
   @override
@@ -199,7 +200,7 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
                     onPressed: () {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (context) => BookingPage(userName: widget.userName,email: widget.email,clinicName: widget.clinicName,)),
+                        MaterialPageRoute(builder: (context) => BookingPage(userName: widget.userName,email: widget.email,imageURLs:widget.imageURLs,clinicName: widget.clinicName,)),
                       );
                     },
                     child: Text('Book a date'),
@@ -214,7 +215,7 @@ class _ContactDetailPageState extends State<ContactDetailPage> {
           },
         ),
       ),
-      drawer: CustomDrawer(userName: widget.userName, email: widget.email),
+      drawer: CustomDrawer(userName: widget.userName, email: widget.email, imageURLs: widget.imageURLs,),
     );
   }
 }
