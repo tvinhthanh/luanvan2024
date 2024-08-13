@@ -8,6 +8,7 @@ import 'package:flutter_petcare_app/main.dart';
 import 'package:intl/intl.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
 
 class BookingPage extends StatefulWidget {
   final String? userName;
@@ -36,16 +37,27 @@ class _BookingPageState extends State<BookingPage> {
   List<Map<String, dynamic>> pets = [];
   Map<String, dynamic> selectedPet = {};
   final TextEditingController noteController = TextEditingController();
+  late IO.Socket socket; // Socket variable
 
   @override
   void initState() {
     super.initState();
     fetchPets(widget.email);
     fetchServices(widget.clinicName['_id']);
+
+    // Initialize socket connection
+    socket = IO.io('http://${Ip.serverIP}:3000', <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': false,
+    });
+
+    // Connect to the socket
+    socket.connect();
   }
 
   @override
   void dispose() {
+    socket.dispose();
     noteController.dispose();
     super.dispose();
   }
