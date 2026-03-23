@@ -13,6 +13,10 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
+  "overrides": {
+    "flatted": "^3.4.2",
+    "socket.io-parser": "^4.2.6"
+  },
   "dependencies": {
     "@fortawesome/free-solid-svg-icons": "^6.6.0",
     "@fortawesome/react-fontawesome": "^0.2.2",
@@ -25,7 +29,7 @@
     "date-fns": "^2.0.0-alpha.34",
     "firebase": "^10.12.3",
     "mongoose": "^8.9.5",
-    "next": "^15.5.10",
+    "next": "^16.1.7",
     "node-fetch": "^3.3.2",
     "react": "^18.2.0",
     "react-apexcharts": "^1.4.1",
@@ -39,7 +43,7 @@
     "react-query": "^3.39.3",
     "react-router-dom": "^6.23.1",
     "react-toastify": "^10.0.5",
-    "socket.io-client": "^4.7.5"
+    "socket.io-client": "^4.8.3"
   },
   "devDependencies": {
     "@types/react": "^18.2.66",
